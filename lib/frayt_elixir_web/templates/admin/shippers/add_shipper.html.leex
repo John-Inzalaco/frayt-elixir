@@ -1,0 +1,70 @@
+<%= form_for @changeset, "#", [phx_submit: :save_shipper], fn f -> %>
+  <section>
+    <div>
+      <%= label f, :first_name, "First Name" %>
+      <%= text_input f, :first_name %>
+      <span class="error"><%= error_tag f, :first_name %></span>
+    </div>
+    <div>
+      <%= label f, :last_name, "Last Name" %>
+      <%= text_input f, :last_name %>
+      <span class="error"><%= error_tag f, :last_name %></span>
+    </div>
+    <%= inputs_for f, :user, fn u -> %>
+      <div>
+        <%= label u, :email, "Email" %>
+        <%= text_input u, :email %>
+        <span class="error"><%= error_tag u, :email %></span>
+      </div>
+    <% end %>
+    <div>
+      <%= label f, :phone, "Phone" %>
+      <%= text_input f, :phone %>
+      <span class="error"><%= error_tag f, :phone %></span>
+    </div>
+    <%= inputs_for f, :address, fn a -> %>
+      <div class="width--full">
+        <%= label a, :address, "Address" %>
+        <%= text_input a, :address %>
+        <span class="error"><%= error_tag a, :address %></span>
+      </div>
+      <div>
+        <%= label a, :city, "City" %>
+        <%= text_input a, :city %>
+        <span class="error"><%= error_tag a, :city %></span>
+      </div>
+      <div class="width--half">
+        <div>
+          <%= label a, :state, "State" %>
+          <%= text_input a, :state %>
+          <span class="error"><%= error_tag a, :state %></span>
+        </div>
+        <div>
+          <%= label a, :zip, "Zip" %>
+          <%= text_input a, :zip %>
+          <span class="error"><%= error_tag a, :zip %></span>
+        </div>
+      </div>
+    <% end %>
+    <div class="width--full">
+      <%= label f, :company, "Company" %>
+      <div class="caption u-push__bottom--xxs"> Note: This does not assign a shipper to a coporate account </div>
+      <%= text_input f, :company %>
+      <span class="error"><%= error_tag f, :company %></span>
+    </div>
+    <div>
+      <%= label f, :referrer, "Referrer" %>
+      <%= text_input f, :referrer %>
+      <span class="error"><%= error_tag f, :referrer %></span>
+    </div>
+    <div>
+      <%= label f, :sales_rep_id, "Sales Rep" %>
+      <%= select f, :sales_rep_id, sales_rep_options() %>
+      <span class="error"><%= error_tag f, :sales_rep_id %></span>
+    </div>
+    <div class="u-pad__top u-text--center width--full">
+      <button class="button button--primary">Invite Shipper</button>
+      <a onclick="" class="button" tabindex=0 phx-keyup="close_modal" phx-key="Enter" phx-click="close_modal">Cancel</a>
+    </div>
+  </section>
+<% end %>

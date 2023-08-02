@@ -1,0 +1,2 @@
+origin_address,destination_address,vehicle_class,pieces,weight,dimensions_length,dimensions_width,dimensions_height,load_fee,pallet_jack,contract,job_number,pickup_notes,dropoff_notes,description,recipient_name,recipient_phone,recipient_email,scheduled_pickup,scheduled_dropoff,identifier,webhook
+"123 Happy Trail, Synecdoche, NY","123 Happy Trail, Synecdoche, NY",1,1,25,10,10,10,false,false,oberers,,,Spec Inst. In Note Pad,TWO DOZEN ASSORTED ROSES,jessie graham,+15134020000,recipient@email.com,2020-10-01 19:14:55,2020-10-01 23:14:55,,

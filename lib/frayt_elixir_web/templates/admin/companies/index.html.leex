@@ -1,0 +1,119 @@
+<section class="header">
+  <div class="header">
+    <div class="header__title">
+      <h1>Companies</h1>
+      <div>
+        <a onclick="" tabindex=0 phx-keyup="add_company" phx-key="Enter" phx-click="add_company"><i class="material-icons icon">add_circle_outline</i></a>
+        <%= Table.refresh_button(@data_table) %>
+      </div>
+    </div>
+    <div class="header__actions">
+      <%= f = form_for @data_table, "#", [class: "header__select"] %>
+        <%= record_select f, :sales_rep_id, AdminUser, filters: %{role: :sales_rep}, schema_name: "Sales Rep" %>
+      </form>
+      <%= form_for @data_table, "#", [class: "header__search", filter_on: :phx_submit], fn f -> %>
+        <div class="search">
+          <%= text_input f, :query, [class: "input", type: "search", placeholder: "Search"] %>
+          <button class="search__submit"><i class="material-icons">search</i></button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<section>
+  <%= Table.pagination_nav(@data_table, id: "top") %>
+  <%# desktop view %>
+  <table class="u-hide--mobile">
+    <thead>
+      <tr class="u-border--none">
+        <%= Table.sort_header(@data_table, "Company Name", :name) %>
+        <%= Table.sort_header(@data_table, "Locations", :location_count) %>
+        <%= Table.sort_header(@data_table, "Shippers", :shipper_count) %>
+        <%= Table.sort_header(@data_table, "Matches", :match_count) %>
+        <%= Table.sort_header(@data_table, "Net Terms", :invoice_period) %>
+        <th>Company Email</th>
+        <th>Sales Rep</th>
+        <%= Table.sort_header(@data_table, "Revenue", :revenue) %>
+        <th></th>
+      </tr>
+    </thead>
+    <%= for company <- @companies do %>
+      <tbody>
+        <tr>
+          <td data-test-id="company-name"><%= company.name %></td>
+          <td data-test-id="location-count"><%= company.location_count |> display_large_numbers %></td>
+          <td data-test-id="shipper-count"><%= company.shipper_count |> display_large_numbers %></td>
+          <td data-test-id="match-count"><%= company.match_count |> display_large_numbers %></td>
+          <td data-test-id="invoice-period"><%= company.invoice_period || "-" %></td>
+          <td><%= if company.email do %><a href="<%= email_link(company.email) %>"><%= company.email %></a><% else %> - <% end %></td>
+          <td><%= display_sales_rep(company.sales_rep) %></td>
+          <td class="u-text--right">$</td>
+          <td class="u-text--right"><%= display_revenue(company.revenue || nil) %></td>
+          <td><a class="button" href="<%= Table.details_path(@data_table, company.id) %>" phx-value-item_id="<%= company.id %>">View Details</a></td>
+        </tr>
+      </tbody>
+    <% end %>
+  </table>
+</section>
+
+<%# mobile view %>
+<section>
+  <table class="u-hide--desktop">
+    <thead>
+      <tr class="u-border--none">
+        <th>Company</th>
+        <th>Locations</th>
+        <th colspan="2" class="u-text--right">Revenue</th>
+      </tr>
+    </thead>
+    <%= for company <- @companies do %>
+      <tbody>
+        <%= Table.show_more_button(@data_table, company.id, :tr, fn -> %>
+          <td><%= company.name %></td>
+          <td><%= company.location_count %></td>
+          <td class="u-text--right">$</td>
+          <td colspan="2" class="u-text--right"><%= display_revenue(company.revenue) %></td>
+        <% end) %>
+        <%# extra information %>
+        <%= if Table.show_more?(@data_table, company.id) do %>
+          <tr class="u-border--none">
+            <td class="header--inline">Shippers</td>
+            <td colspan="3"><%= company.shipper_count |> display_large_numbers %></td>
+          </tr>
+          <tr class="u-border--none">
+            <td class="header--inline">Matches</td>
+            <td colspan="3"><%= company.match_count |> display_large_numbers %></td>
+          </tr>
+          <tr class="u-border--none">
+            <td class="header--inline">Net Terms</td>
+            <td colspan="3"><%= company.invoice_period || "-" %></td>
+          </tr>
+          <tr class="u-border--none">
+            <td class="header--inline">Sales Rep</td>
+            <td colspan="3"><%= display_sales_rep(company.sales_rep) %></td>
+          </tr>
+          <tr class="u-border--none">
+            <td class="header--inline">Company Email</td>
+            <td colspan="3"><%= if company.email do %><a href="<%= email_link(company.email) %>"><%= company.email %></a><% else %> - <% end %></td>
+          </tr>
+          <tr class="u-border--none">
+            <td><a class="button" href="<%= Table.details_path(@data_table, company.id) %>" phx-value-item_id="<%= company.id %>">View Details</a></td>
+          </tr>
+        <% end %>
+      </tbody>
+    <% end %>
+  </table>
+  <%= Table.pagination_nav(@data_table, id: "bottom") %>
+</section>
+
+<%= if @show_modal, do: live_component @socket, FraytElixirWeb.LiveComponent.ModalLive,
+  live_view: set_live_view(@default_form),
+  child_id: @default_form,
+  title: @title,
+  wide: "false",
+  default_form: @default_form,
+  chosen_company: @chosen_company,
+  chosen_company_name: @chosen_company_name,
+  chosen_location: @chosen_location,
+  attrs: @attrs %>

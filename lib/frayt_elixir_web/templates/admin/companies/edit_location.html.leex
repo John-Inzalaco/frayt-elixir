@@ -1,0 +1,63 @@
+<form phx-submit="save_edit_location" phx-change="change_edit_location">
+  <div class="inline-edit inline-edit--location inline-edit__details-page">
+    <div>
+      <%= label :edit_location_form, :location, "Location Name" %>
+      <%= text_input :edit_location_form, :location, [type: "text", value: @fields.location, class: input_error(@errors, :location)] %>
+      <%= display_error(@errors, :location) %>
+    </div>
+    <div>
+      <%= label :edit_location_form, :store_number, "Store ID" %>
+      <%= text_input :edit_location_form, :store_number, [type: "text", value: @fields.store_number, class: input_error(@errors, :store_number)] %>
+      <%= display_error(@errors, :store_number) %>
+    </div>
+    <div class="address span--2">
+      <div class="address__street">
+        <%= label :edit_location_form, :address, "Address 1" %>
+        <%= text_input :edit_location_form, :address, [type: "text", value: @fields.address.address, class: input_error(@errors, :address)] %>
+        <%= display_error(@errors, :address) %>
+      </div>
+      <div class="address__street-2">
+        <%= label :edit_location_form, :address2, "Address 2" %>
+        <%= text_input :edit_location_form, :address2, [type: "text", value: @fields.address.address2, class: input_error(@errors, :address2)] %>
+        <%= display_error(@errors, :address2) %>
+      </div>
+      <div class="address__city">
+        <%= label :edit_location_form, :city, "City" %>
+        <%= text_input :edit_location_form, :city, [type: "text", value: @fields.address.city, class: input_error(@errors, :city)] %>
+        <%= display_error(@errors, :city) %>
+      </div>
+      <div class="address__state">
+        <%= label :edit_location_form, :state, "State" %>
+        <%= text_input :edit_location_form, :state, [type: "text", value: @fields.address.state, class: input_error(@errors, :state)] %>
+        <%= display_error(@errors, :state) %>
+      </div>
+      <div class="address__zip">
+        <%= label :edit_location_form, :zip, "Zip" %>
+        <%= text_input :edit_location_form, :zip, [type: "text", value: @fields.address.zip, class: input_error(@errors, :zip)] %>
+        <%= display_error(@errors, :zip) %>
+      </div>
+    </div>
+    <div>
+      <%= label :edit_location_form, :location_email, "Email" %>
+      <%= text_input :edit_location_form, :email, [type: "text", value: @fields.email, class: input_error(@errors, :email)] %>
+      <%= display_error(@errors, :email) %>
+    </div>
+    <div>
+      <%= label :edit_location_form, :sales_rep_id, "Sales Rep" %>
+      <%= select :edit_location_form, :sales_rep_id, sales_rep_options(), value: @fields.sales_rep_id %>
+    </div>
+      <div>
+        <%= if @account_billing do %>
+          <%= label :edit_location_form, :invoice_period, "Net Terms" %>
+          <%= text_input :edit_location_form, :invoice_period, [type: "number", value: @fields.invoice_period, class: input_error(@errors, :invoice_period)] %>
+          <%= display_error(@errors, :invoice_period) %>
+        <% else %>
+          <%= hidden_input :edit_location_form, :invoice_period, value: "" %>
+        <% end %>
+      </div>
+    <div class="u-pad__top--xs u-pad__bottom--xs inline-edit__buttons">
+      <button class="button button--primary">Save Edits</button>
+      <a onclick="" tabindex="0" tabindex=0 phx-keyup="cancel_edit_location" phx-key="Enter" phx-click="cancel_edit_location" class="button">Cancel</a>
+    </div>
+  </div>
+</form>

@@ -1,0 +1,14 @@
+<table>
+  <thead>
+    <tr class="u-border--none">
+      <th>Date</th>
+      <th>Action</th>
+      <th colspan="2">Relevant Information</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for action <- @actions do %>
+      <%= Phoenix.View.render FraytElixirWeb.Admin.MatchesView, display_template(action), action: action, time_zone: @time_zone %>
+    <% end %>
+  </tbody>
+</table>

@@ -1,0 +1,12 @@
+<form phx-submit="assign_match">
+  <section>
+    <div class="width--full">
+      <%= label :assign_match, :assignment, "Admin" %>
+      <%= record_select(:assign_match, :assignment, FraytElixir.Accounts.AdminUser, initial_record: @match.network_operator, placeholder: "Unassigned") %>
+    </div>
+    <div class="width--full u-text--center u-push__top--sm">
+      <button class="button button--primary" type="submit">Assign</button>
+      <a onclick="" tabindex=0 phx-keyup="close_modal" phx-key="Enter" phx-click="close_modal" class="button">Cancel</a>
+    </div>
+  </section>
+</form>

@@ -1,0 +1,6 @@
+<link rel="stylesheet" href="<%= Routes.static_path(@conn, theme_style(@conn)) %>"/>
+<main role="main" class="container">
+    <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
+    <p class="alert alert-danger error" role="alert"><%= get_flash(@conn, :error) %></p>
+    <%= @inner_content %>
+</main>

@@ -1,0 +1,10 @@
+{
+  "[elixir]": {
+      "editor.defaultFormatter": "JakeBecker.elixir-ls"
+    },
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "JakeBecker.elixir-ls",
+    "emmet.includeLanguages": {
+      "html-eex": "html"
+    }
+}

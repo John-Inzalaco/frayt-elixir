@@ -1,0 +1,27 @@
+<lit-google-map
+  styles="<%= get_map_styles(@current_user) %>"
+  api-key="<%= @api_key %>"
+  fit-to-markers="true"
+>
+  <%= if @search_radius not in ["", nil] do %>
+    <%= with {lng, lat} <- get_coords(@pickup_point) do %>
+      <lit-google-map-circle slot="shapes" center-latitude="<%= lat %>" center-longitude="<%= lng %>" radius="<%= miles_to_meters(@search_radius) %>" fill-color="#478ffc" fill-opacity="0.2" stroke-color="#478ffc" stroke-weight="2" z-index="2">
+      </lit-google-map-circle>
+    <% end %>
+  <% end %>
+
+  <%= for {driver, i} <- Enum.with_index(@capacity, 1) do %>
+    <%= with {lng, lat} <- get_driver_location(driver, @driver_location) |> get_coords() do %>
+      <lit-google-map-marker slot="markers" latitude="<%= lat %>" longitude="<%= lng %>" label="<%= @page * 10 + i %>" icon="/images/blue-location-marker.svg">
+        <h3><%= full_name(driver) %></h3>
+        <%= driver_address(driver, @driver_location) %>
+      </lit-google-map-marker>
+    <% end %>
+  <% end %>
+  <%= with {lng, lat} <- get_coords(@pickup_point) do %>
+    <lit-google-map-marker slot="markers" latitude="<%= lat %>" longitude="<%= lng %>" label="P" icon="/images/location-marker.svg">
+      <h3>Pickup Address</h3>
+      <%= @pickup_address %>
+    </lit-google-map-marker>
+  <% end %>
+</lit-google-map>

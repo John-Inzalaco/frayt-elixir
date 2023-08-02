@@ -1,0 +1,24 @@
+name: "Setup Elixir"
+description: "Builds and compiles the elixir project in preparation for additional actions"
+
+runs: 
+  using: "composite"
+  steps:
+    - uses: erlef/setup-elixir@v1
+      with:
+        elixir-version: 1.13.4 # Define the elixir version [required]
+        otp-version: 24.3.4.2 # Define the OTP version [required]
+    - uses: actions/cache@v1
+      id: deps-cache
+      with:
+        path: deps
+        key: mix-${{ runner.os }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        restore-keys: mix-${{ runner.os }}-
+    - run: mix deps.get
+      shell: bash
+    - uses: actions/cache@v1
+      id: build-cache
+      with:
+        path: _build
+        key: build-${{ runner.os }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        restore-keys: build-${{ runner.os }}-

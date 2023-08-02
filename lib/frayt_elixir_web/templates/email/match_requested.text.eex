@@ -1,0 +1,13 @@
+A Match has been requested
+
+<%= @shipper %> (<%= @affiliation %>) has a live match from <%= @origin_address.city %>, <%= @origin_address.state %> with <%= Enum.count(@match_stops) %> stop(s)
+Pickup: <%= @origin_address.formatted_address %>
+Mileage: <%= @match.total_distance %> mi
+Vehicle Type: <%= @vehicle_type %>
+Service Level: <%= @service_level %>
+Price: $<%= @price %>
+
+Match Stop(s)
+<%= for match_stop <- @match_stops do %>
+Dropoff: <%= match_stop.destination_address.formatted_address %>
+<% end %>

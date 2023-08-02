@@ -1,0 +1,43 @@
+
+<%= f = form_for @changeset, "#", [phx_change: :change_contract, phx_submit: :update_contract] %>
+    <%= hidden_input f, :market_configs, name: input_name(f, :market_configs) <> "[]", value: "" %>
+    <h4>Market Config</h4>
+    <br/>
+    <button class="button button--primary" type="button" phx-click="form_repeater.add" phx-target="#contract_market_configs_repeater">Add New</button>
+    <br/><br/>
+    <%= repeater_for f, :market_configs, [default: %MarketConfig{}, item_class: "form-repeater__item--numbered", draggable: true], fn r -> %>
+        <div class="form-repeater__item--actions">
+            <button
+                type="button"
+                class="icon-button icon-button--danger u-flex__align-self--end"
+                phx-click="form_repeater.remove"
+                phx-value-index="<%= r.index %>"
+                phx-target="#contract_market_configs_repeater"
+                data-confirm="Are you sure you want to remove this multiplier?"
+            >
+                <span class="material-icons">delete_outline</span>
+            </button>
+        </div>
+
+        <div class="u-flex u-flex--wrap u-flex__pad--column u-flex__columns--2">
+            <div>
+                <%= label r, :market_id, "Market" %>
+                <%= text_input r, :market_id %>
+                <%# TODO: Change text input to record select after phoenix upgrade %>
+                <%# <%= record_select(r, :market_id, Market, allow_empty: false) %>
+                <span class="error"><%= error_tag r, :contract_id %></span>
+            </div>
+            <div>
+                <%= label r, :multiplier, "Multiplier" %>
+                <%= text_input r, :multiplier %>
+                <span class="error"><%= error_tag r, :multiplier %></span>
+            </div>
+        </div>
+
+        <%= hidden_input f, :contract_id, value: @contract.id %>
+    <% end %>
+    <button class="button button--primary" type="submit">Update Rules</button>
+    <%= if @contract.id do %>
+      <a onclick="" tabindex=0 phx-click="edit_contract" class="button">Cancel</a>
+    <% end %>
+</form>

@@ -1,0 +1,582 @@
+<% first_vehicle = List.first(@driver.vehicles) %>
+<div class="show-layout show-layout--driver">
+  <section class="show-layout__header">
+    <%= go_back_link("All Drivers", Routes.drivers_path(@socket, :index)) %>
+    <div class="driver-info-container">
+      <div class="thumb">
+        <% driver_profile_photo = find_driver_photo(@driver, :profile) %>
+        <% license_photo = find_driver_photo(@driver, :license) %>
+        <%= if is_nil(driver_profile_photo) do %>
+          <i class="fas fa-image profile-image-icon"></i>
+        <% else %>
+          <div
+            class="round-image-medium"
+            style="
+              margin-left:0 !important;
+              background-image: url(<%= '#{fetch_photo_url(@driver.id, driver_profile_photo)}' %>);"
+          > </div>
+        <% end %>
+        <span><i class="material-icons u-align__vertical--middle u-pointer" phx-click="show_modal_named" phx-value-liveview="UploadDriverPhotos" phx-value-title="Upload Profile Photo">add_circle_outline</i>
+      </div>
+      <div class="content">
+        <h3><%= full_name(@driver) %><%= if @driver.state == :disabled, do: " (Disabled)" %></h3>
+        <span data-test-id="driver-status-label" class="label"><%= title_case(@driver.state) %></span>
+      </div>
+    </div>
+  </section>
+  <section class="show-layout__links">
+    <div class="u-push__bottom">
+      <h4 class="u-push__bottom--sm">Driver Status</h4>
+      <%= if @driver.state == :rejected do %>
+        <p>Driver has been rejected</p>
+      <button
+              onclick=""
+              class="button button--sm"
+              phx-keyup="show_modal_named"
+              phx-key="Enter"
+              phx-click="show_modal_named"
+              tabindex=0
+              phx-value-liveview="AdminUnrejectDriver"
+              phx-value-title="Unreject Driver"
+      >
+        Unreject Driver
+      </button>
+      <% end %>
+      <%= if (@driver.state in [:applying, :pending_approval] || (@driver.state == :rejected && @driver.background_check && is_nil(@driver.background_check.turn_id))) && first_vehicle && first_vehicle.vehicle_class != 4 do %>
+        <div class="u-push__bottom--sm">
+          <%= case DriverDocuments.validate_driver_documents(@driver) do %>
+            <% {:error, _} -> %>
+              <button class="button button--sm tooltil" disabled>
+                Start Background Check
+              </button>
+              <div data-test-id="driver-approval-error-msg" class="u-push__bottom--sm error">
+                One or more documents are missing, expired, pending approval or rejected
+              </div>
+            <% :ok -> %>
+            <button phx-click="start_background_check" class="button" <%= if LiveAction.active?(@start_background_check), do: "disabled=disabled" %>>
+              <%= if @driver.state == :applying do %>
+                Skip Payment + Start Background Check
+              <% else %>
+                Start Background Check
+              <% end %>
+            </button>
+          <% end %>
+          <%= if LiveAction.active?(@start_background_check) do %><span>Loading...</span><% end %>
+          <%= if LiveAction.error?(@start_background_check) do %>
+            <p><%= LiveAction.render_result(@start_background_check) %></p>
+          <% end %>
+        </div>
+      <% end %>
+      <%= if @driver.state in [:applying, :pending_approval, :screening] || (@driver.state == :rejected && @driver.background_check && not is_nil(@driver.background_check.turn_id)) do %>
+        <%= case DriverDocuments.validate_driver_documents(@driver) do %>
+            <% {:error, _} -> %>
+              <button class="button button--sm tooltil" disabled>
+                Approve Driver
+              </button>
+              <div data-test-id="driver-approval-error-msg" class="u-push__bottom--sm error">
+                One or more documents are missing, expired, pending approval or rejected
+              </div>
+            <% :ok -> %>
+            <div class="u-push__bottom--sm">
+                <button
+                  onclick=""
+                  class="button button--sm"
+                  phx-keyup="show_modal_named"
+                  phx-key="Enter"
+                  phx-click="show_modal_named"
+                  tabindex=0
+                  phx-value-liveview="AdminApproveDriver"
+                  phx-value-title="Approve Driver"
+                >
+                <%= if @driver.state in [:applying, :pending_approval] && first_vehicle && first_vehicle.vehicle_class != 4 do %>
+                  Skip Background Check + Approve Driver
+                <% else %>
+                  Approve Driver
+                <% end %>
+              </button>
+            </div>
+          <% end %>
+      <% end %>
+      <%= if @driver.state in [:applying, :screening, :pending_approval] do %>
+        <div class="u-push__bottom--sm">
+          <button
+              onclick=""
+              class="button button--sm"
+              phx-keyup="show_modal_named"
+              phx-key="Enter"
+              phx-click="show_modal_named"
+              tabindex=0
+              phx-value-liveview="AdminRejectDriver"
+              phx-value-title="Reject Driver"
+            >
+            Reject Driver
+          </button>
+        </div>
+      <% end %>
+      <%= if @driver.state == :disabled do %>
+        <div class="u-push__bottom--sm">
+          <a onclick="" class="button button--sm" phx-keyup="show_modal_named" phx-key="Enter" phx-click="show_modal_named" tabindex=0 phx-value-liveview="AdminReactivateDriver" phx-value-title="Reactivate Driver">Reactivate Driver</a>
+        </div>
+      <% end %>
+      <%= if @driver.state in [:approved, :registered] do %>
+        <div class="u-push__bottom--sm">
+          <a onclick="" class="button button--sm" phx-keyup="show_modal_named" phx-key="Enter" phx-click="show_modal_named" tabindex=0 phx-value-liveview="AdminDisableDriver" phx-value-title="Disable Driver">Disable Driver</a>
+        </div>
+      <% end %>
+    </div>
+    <div class="u-push__bottom">
+      <h4 class="u-push__bottom--sm">Actions</h4>
+      <%= if @driver.state in [:approved, :registered] do %>
+        <div class="u-push__bottom--sm">
+          <a onclick="" class="button button--sm" phx-keyup="show_modal_named" phx-key="Enter" phx-click="show_modal_named" tabindex=0 phx-value-liveview="AdminPayDriver" phx-value-title="Pay Driver Bonus">Pay Driver Bonus</a>
+        </div>
+      <% end %>
+      <%= unless @driver.state == :disabled do %>
+        <div class="u-push__bottom--sm">
+          <a onclick="" class="button button--sm" phx-keyup="show_modal_named" phx-key="Enter" phx-click="show_modal_named" tabindex=0 phx-value-liveview="AdminResetUserPassword" phx-value-driver_id="<%= @driver.id %>" phx-value-title="Reset Password">Reset Password</a>
+        </div>
+      <% end %>
+      <div class="u-push__bottom--sm">
+        <a onclick="" class="button button--sm" phx-keyup="show_modal_named" phx-key="Enter" phx-click="show_modal_named" tabindex=0 phx-value-liveview="AdminDriverNotificationLog" phx-value-title="View Sent Notifications">View Sent Notifications</a>
+      </div>
+      <%= if user_has_role(@current_user, [:admin, :network_operator]) do %>
+        <div class="u-push__bottom--sm">
+          <a onclick="" class="button button--sm" phx-keyup="show_modal_named" phx-key="Enter" phx-click="show_modal_named" tabindex=0 phx-value-liveview="AdminSendCustomNotification" phx-value-title="Send Custom Notification">Send Custom Notification</a>
+        </div>
+      <% end %>
+    </div>
+    <div class="u-push__top">
+      <h4 class="u-push__bottom--sm">Document Review</h4>
+      <div class="u-push__bottom--sm">
+        <a phx-click="show_modal_named" tabindex=0 phx-value-liveview="ReviewDriverDocuments" phx-value-title="Review Documents">Review Driver Documents</a>
+      </div>
+      <%= case DriverDocuments.validate_driver_documents(@driver) do %>
+        <% :ok -> %>
+          <label class="label label--success">Documents - Approved</label>
+        <% {:error, states} -> %>
+          <label class="label label--critical">Documents - <%= render_documents_approval_states(states) %></label>
+      <% end %>
+    </div>
+  </section>
+  <section class="show-layout__details">
+    <div>
+      <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+        <h4 class="u-push__bottom--sm u-push__top--sm">Personal Information</h4>
+        <%= unless @editing == "personal" do %>
+          <button class="button button--sm" phx-click="edit_personal_information">Edit Personal Information</button>
+        <% end %>
+      </div>
+      <%= if @editing == "personal" do %>
+        <%= live_render(@socket, FraytElixirWeb.AdminEditDriver, id: @driver.id, session: %{"driver" => @driver}) %>
+      <% else %>
+        <div class="u-grid__4-column">
+          <p class="header--inline">Email</p>
+          <p class="u-grid__span--3"><a href="<%= email_link(@driver.user.email) %>"><%= @driver.user.email %></a></p>
+        </div>
+        <div class="u-grid__4-column">
+          <p class="header--inline">Phone</p>
+          <p class="u-grid__span--3"><a href="<%= phone_link(@driver.phone_number) %>"><%= display_phone(@driver.phone_number) %></a></p>
+        </div>
+        <div class="u-grid__4-column">
+          <p class="header--inline">Address</p>
+          <div class="u-grid__span--3">
+            <div data-test-id="address"><%= @driver.address.address %></div>
+            <%= if @driver.address.address2 do %>
+            <div data-test-id="address2"><%= @driver.address.address2 %></div>
+            <% end %>
+            <p><%= "#{@driver.address.city}, #{display_state(@driver.address.state)} #{@driver.address.zip}" %></p>
+          </div>
+        </div>
+
+        <div class="u-grid__4-column">
+          <p class="header--inline">Market</p>
+          <div class="u-grid__span--3">
+            <%= if @driver.market do %>
+              <p><%= @driver.market.name %> <%= @driver.market.region %></p>
+            <% end %>
+          </div>
+        </div>
+        <div class="u-grid__4-column">
+          <p class="header--inline">SSN</p>
+          <p class="u-push--none u-grid__span--3"><%= display_ssn(@driver.ssn) %></p>
+        </div>
+        <div class="u-grid__4-column">
+          <p class="header--inline">Birthday</p>
+          <p class="u-grid__span--3"><%= display_date(@driver.birthdate) %></p>
+        </div>
+        <div class="u-grid__4-column">
+          <p class="header--inline">English Proficiency</p>
+          <p class="u-grid__span--3"><%= Proficience.name(@driver.english_proficiency) || "-" %></p>
+        </div>
+        <div class="u-grid__4-column">
+          <p class="header--inline">Active Match Limit</p>
+          <p class="u-grid__span--3"><%= @driver.active_match_limit || "Default" %></p>
+        </div>
+        <div class="u-grid__4-column">
+          <div>
+            <p class="header--inline">
+              Driver's License Number <span><i class="material-icons u-align__vertical--middle u-pointer" phx-click="show_modal_named" phx-value-liveview="UploadDriverPhotos" phx-value-title="Upload Driver's License Photo">add_circle_outline</i>
+              </span>
+            </p>
+          </div>
+          <div class="u-grid__span--3">
+            <p class="u-push--none">
+            <%= @driver.license_number %>
+                <div>
+                  <%= if license_photo do %>
+                    <div class="u-grid__1-column">
+                      <a class="u__link--orange u-pointer" phx-click="show_modal_named" phx-value-liveview="ViewDriverPhoto" phx-value-title="License Photo" phx-value-images="license" phx-value-vehicle_id="">View Driver's License</a>
+                    </div>
+                  <% else %>
+                    <a class="disabled">View Driver's License</a>
+                  <% end %>
+                </div>
+            </p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <div class="u-grid__2-column u-grid--wrap-mobile">
+      <div>
+        <h4 class="u-push__bottom--sm u-push__top--sm">Match History</h4>
+        <div class="u-grid__2-column">
+          <p class="header--inline">Active</p>
+          <p data-test-id="active-matches"><%= @active_matches || 0 %></p>
+        </div>
+        <div class="u-grid__2-column">
+          <p class="header--inline">All Time</p>
+          <p data-test-id="all-matches"><%= "#{display_driver_metric(@driver, :completed_matches, 0)} ($#{display_driver_metric(@driver, :total_earned)})" %></p>
+        </div>
+        <div class="u-grid__2-column">
+          <p class="header--inline">Canceled</p>
+          <p data-test-id="canceled-matches"><%= display_driver_metric(@driver, :canceled_matches, 0) %></p>
+        </div>
+      </div>
+      <div>
+        <h4 class="u-push__bottom--sm u-push__top--sm">Driver Performance</h4>
+        <div class="u-grid__2-column">
+          <div>
+            <p class="header--inline u-push--none">Penalties</p>
+          </div>
+          <div>
+            <%= for penalty <- 1..5 do %>
+              <a onclick="" phx-keyup="change_penalties" phx-key="Enter" tabindex=0 phx-click="change_penalties" phx-value-penaltynumber="<%= penalty %>" ><i class="material-icons icon <%= if @driver.penalties >= penalty, do: "u-warning", else: "u-light-gray" %>"><%= if @driver.penalties >= penalty, do: "cancel", else: "highlight_off" %></i></a>
+            <% end %>
+          </div>
+        </div>
+        <div class="u-grid__2-column">
+          <div>
+            <p class="header--inline u-push--none">Shipper Rating</p>
+          </div>
+          <%= render FraytElixirWeb.Admin.DriversView, "_driver_rating.html", driver: @driver %>
+        </div>
+        <div class="u-grid__2-column">
+          <a phx-click="show_modal_named" phx-keyup="show_modal_named" phx-value-liveview="AdminDriverReviews" phx-value-title="Show Reviews" phx-key="Enter" tabindex="0" onclick="">Show Poor Reviews</a>
+        </div>
+        <div class="u-grid__2-column">
+          <div>
+            <p class="header--inline u-push--none">Internal Rating</p>
+          </div>
+          <%= render FraytElixirWeb.Admin.DriversView, "_internal_rating.html", driver: @driver %>
+        </div>
+        <div>
+          <div>
+            <p class="header--inline u-push--none">Blocked Customers <span><i class="material-icons u-align__vertical--middle u-pointer" phx-click="show_modal_named" phx-value-liveview="AddHiddenCustomer" phx-value-title="Add Blocked Customer" tabindex=0 onclick="">add_circle_outline</i></span></p>
+          </div>
+          <div>
+            <%= if @driver.hidden_customers |> Enum.count() > 0 do %>
+              <%= for %{ id: hidden_customer_id, shipper: shipper, company: company, reason: reason } <- @driver.hidden_customers do %>
+                <div class="u-push__bottom--xs u-flex">
+                  <div class="u-flex__flex-grow">
+                    <%= if shipper do %>
+                      <p class="caption">shipper</p>
+                      <%= display_user_info(shipper, :name) %> (<%= display_user_info(shipper, :email) %>)
+                    <% else %>
+                      <p class="caption">company</p>
+                      <%= company.name %> (<%= company.email || "–" %>)
+                    <% end %>
+                    <p class="caption"><%= reason %></p>
+                  </div>
+                  <div class="u-flex__flex-shrink"><a onclick="" phx-click="delete_hidden_customer:<%= hidden_customer_id %>" class="icon-button u-pointer"><i class="material-icons">delete</i></a></div>
+                </div>
+              <% end %>
+            <% else %>
+              <div>
+                No blocked customers
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h4 class="u-push__bottom--sm u-push__top--sm">Payment Information</h4>
+        <div class="u-grid__2-column">
+          <p class="header--inline">Branch Wallet</p>
+          <div>
+            <%= if @driver.wallet_state in [:PENDING, :UNCLAIMED, :ACTIVE] do %>
+              <p class="u-push__bottom--xxs"><%= @driver.wallet_state %> (<%= @driver.id %>)</p>
+            <% end %>
+            <button onclick="" phx-click="create_branch_wallet" class="button" <%= if LiveAction.active?(@create_wallet), do: "disabled=disabled" %>>
+              <%= if @driver.wallet_state in [:PENDING, :UNCLAIMED, :ACTIVE] do %>
+                Refresh Status
+              <% else %>
+                Create Wallet
+              <% end %>
+            </button>
+            <%= if LiveAction.active?(@create_wallet) do %><span>Loading...</span><% end %>
+            <%= if LiveAction.error?(@create_wallet) do %>
+              <p><%= LiveAction.render_result(@create_wallet) %></p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h4 class="u-push__bottom--sm u-push__top--sm">Background Check</h4>
+        <%= if @driver.background_check do %>
+          <div class="u-grid__2-column">
+            <p class="header--inline">Payment Status</p>
+            <p><%= title_case(@driver.background_check.state) %></p>
+            <p class="header--inline">Stripe Transaction ID</p>
+            <p><code><%= @driver.background_check.transaction_id || "-" %></code></p>
+            <p class="header--inline">Stripe Customer ID</p>
+            <p><code><%= @driver.background_check.customer_id || "-" %></code></p>
+            <p class="header--inline">Turn Status</p>
+            <div>
+              <%= if @driver.background_check.turn_id do %>
+                <%= title_case(@driver.background_check.turn_state) %>
+                <button onclick="" phx-click="refresh_turn_status" class="button" <%= if LiveAction.active?(@refresh_turn_status), do: "disabled=disabled" %>>
+                  Refresh Status
+                </button>
+                <%= if LiveAction.active?(@refresh_turn_status) do %><span>Loading...</span><% end %>
+                <%= if LiveAction.error?(@refresh_turn_status) do %>
+                  <p><%= LiveAction.render_result(@refresh_turn_status) %></p>
+                <% end %>
+              <% else %>
+                N/A
+              <% end %>
+            </div>
+            <%= if @driver.background_check.turn_state == "emailed" do %>
+              <p class="header--inline">Turn Consent URL</p>
+              <pre><%= @driver.background_check.turn_consent_url || "-" %></pre>
+            <% end %>
+            <p class="header--inline">Turn Dashboard</p>
+            <p>
+              <%= if @driver.background_check.turn_url do %>
+                <a href="<%= @driver.background_check.turn_url %>" target="_blank">View in Turn</a>
+              <% else %>
+                N/A
+              <% end %>
+            </p>
+          </div>
+        <% else %>
+          N/A
+        <% end %>
+      </div>
+    </div>
+    <%= for vehicle <- @driver.vehicles do %>
+      <div class="u-pad__top u-pad__bottom u-border__bottom">
+        <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+          <h4 class="u-push__bottom--sm u-push__top--sm">Vehicle Information</h4>
+          <%= unless @editing == vehicle.id do %>
+            <button class="button" phx-click="edit_vehicle" phx-value-vehicleid="<%= vehicle.id %>">Edit Vehicle</button>
+          <% end %>
+        </div>
+        <%= if @editing == vehicle.id do %>
+          <%= live_render(@socket, FraytElixirWeb.AdminEditDriverVehicleLive, id: vehicle.id, session: %{"vehicle" => vehicle, "driver" => @driver}) %>
+        <% else %>
+          <div class="u-grid__2-column u-grid--wrap-mobile">
+            <div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Type</p>
+                <p data-test-id="vehicle_type"><%= vehicle_class(vehicle.vehicle_class) %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Make</p>
+                <p data-test-id="make"><%= vehicle.make %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Model</p>
+                <p data-test-id="model"><%= vehicle.model %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Year</p>
+                <p data-test-id="year"><%= vehicle.year %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Max Cargo Weight</p>
+                <p data-test-id="max_cargo_weight"><%= display_lbs(vehicle.max_cargo_weight) %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Cargo Area Length</p>
+                <p data-test-id="cargo_area_length"><%= display_inches(vehicle.cargo_area_length) %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Cargo Area Width</p>
+                <p data-test-id="cargo_area_width"><%= display_inches(vehicle.cargo_area_width) %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Cargo Area Height</p>
+                <p data-test-id="cargo_area_height"><%= display_inches(vehicle.cargo_area_height) %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Door Width</p>
+                <p data-test-id="door_width"><%= display_inches(vehicle.door_width) %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Height</p>
+                <p data-test-id="cargo_height"><%= display_inches(vehicle.cargo_area_height) %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Door Height</p>
+                <p data-test-id="door_height"><%= display_inches(vehicle.door_height) %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Wheel Well Width</p>
+                <p data-test-id="wheel_well_width"><%= display_inches(vehicle.wheel_well_width) %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">
+                  Vehicle Photos <span><i class="material-icons u-align__vertical--middle u-pointer" phx-click="show_modal_named" phx-value-liveview="UploadVehiclePhotos" phx-value-vehicle_id="<%= vehicle.id %>" phx-value-title="Upload Vehicle Photos">add_circle_outline</i></span>
+                </p>
+                <%= if vehicle_has_photos(vehicle) do %>
+                  <div class="u-grid__1-column">
+                    <a class="u__link--orange u-pointer" phx-click="show_modal_named" phx-value-liveview="ViewDriverPhoto" phx-value-vehicle_id="<%= vehicle.id %>" phx-value-title="Vehicle Photos" phx-value-images="passengers_side,drivers_side,cargo_area,front,back,vehicle_type">View Photos</a>
+                  </div>
+                <% else %>
+                  <a class="disabled">View Photos</a>
+                <% end %>
+              </div>
+            </div>
+            <div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">License Plate</p>
+                <p data-test-id="license_plate"><%= vehicle.license_plate %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">VIN #</p>
+                <p data-test-id="vin"><%= vehicle.vin %></p>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">
+                  Registration <span><i class="material-icons u-align__vertical--middle u-pointer" phx-click="show_modal_named" phx-value-liveview="UploadVehiclePhotos" phx-value-vehicle_id="<%= vehicle.id %>" phx-value-title="Upload Registration Photo" tabindex=0 onclick="">add_circle_outline</i></span>
+                </p>
+                <div>
+                  <%= if vehicle_has_photo(vehicle, :registration) do %>
+                    <a class="u__link--orange u-pointer" phx-click="show_modal_named" phx-value-liveview="ViewDriverPhoto" phx-value-vehicle_id="<%= vehicle.id %>" phx-value-title="Registration Photo" phx-value-images="registration">View Registration</a>
+                  <% else %>
+                    <div class="u-grid__1-column">
+                      <a class="disabled">View Registration</a>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Insurance <span><i class="material-icons u-align__vertical--middle u-pointer" phx-click="show_modal_named" phx-keyup="show_modal_named" phx-key="Enter" phx-value-liveview="UploadVehiclePhotos" phx-value-vehicle_id="<%= vehicle.id %>" phx-value-title="Upload Insurance Photo">add_circle_outline</i></span></p>
+                <div>
+                  <%= if vehicle_has_photo(vehicle, :insurance) do %>
+                    <div class="u-grid__1-column">
+                      <a class="u__link--orange u-pointer" phx-click="show_modal_named" phx-value-liveview="ViewDriverPhoto" phx-value-vehicle_id="<%= vehicle.id %>" phx-value-title="Insurance Photo" phx-value-images="insurance">View Insurance</a>
+                    </div>
+                  <% else %>
+                    <a class="disabled">View Insurance</a>
+                  <% end %>
+                </div>
+              </div>
+              <%= if vehicle.vehicle_class == 4 do %>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Carrier Agreement <span><i class="material-icons u-align__vertical--middle u-pointer" phx-click="show_modal_named" phx-keyup="show_modal_named" phx-key="Enter" phx-value-liveview="UploadVehiclePhotos" phx-value-vehicle_id="<%= vehicle.id %>" phx-value-title="Upload Carrier Agreement" tabindex=0 onclick="">add_circle_outline</i></span></p>
+                <div>
+                  <%= if vehicle_has_photo(vehicle, :carrier_agreement) do %>
+                    <a onclick="" class="u__link--orange u-pointer" phx-keyup="show_modal_named" phx-key="Enter" tabindex=0 phx-click="show_modal_named" phx-value-liveview="ViewDriverPhoto" phx-value-vehicle_id="<%= vehicle.id %>" phx-value-title="Carrier Agreement" phx-value-images="carrier_agreement">Carrier Agreement</a>
+                  <% else %>
+                    <a class="disabled">View Carrier Agreement</a>
+                  <% end %>
+                </div>
+              </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+    <%= if Enum.count(@driver.vehicles) == 0 do %>
+      <h4>Vehicle Information</h4>
+    <% end %>
+  </section>
+  <section class="notes show-layout__notes">
+    <form phx-submit="save_notes">
+      <label for="driver-notes"><h4 class="u-push__bottom--xs">Notes:</h4></label>
+      <textarea phx-focus="open_notes" id="driver-notes" tabindex=0 name="driver-notes" rows="12"><%= @driver.notes %></textarea>
+      <%= if @errors do %>
+        <p class="error"><%= @errors %></p>
+      <% end %>
+      <%= if @show_buttons == true do %>
+        <div class="u-push__top--xs">
+          <button class="button button--primary">Save</button>
+          <a onclick="" class="button" phx-keyup="close_notes" phx-key="Enter" tabindex=0 phx-click="close_notes">Cancel</a>
+        </div>
+      <% end %>
+    </form>
+    <%= if user_has_role(@current_user, [:admin, :developer]) do %>
+      <div>
+        <h4 class="u-push__bottom--sm u-push__top--sm">Driver Device</h4>
+          <div class="u-grid__2-column u-grid--wrap-mobile">
+            <%= if @driver.default_device do %>
+              <% device = @driver.default_device %>
+              <div>
+                <div class="u-grid__2-column">
+                  <p class="header--inline">Uniq ID</p>
+                  <p data-test-id="device_uuid"><%= device.device_uuid %></p>
+                </div>
+                <div class="u-grid__2-column">
+                  <p class="header--inline">Model</p>
+                  <p data-test-id="device_model"><%= device.device_model %></p>
+                </div>
+                <div class="u-grid__2-column">
+                  <p class="header--inline">Os</p>
+                  <p data-test-id="device_os"><%= device.os %></p>
+                </div>
+                <div class="u-grid__2-column">
+                  <p class="header--inline">Os Version</p>
+                  <p data-test-id="device_os_version"><%= device.os_version || "N/A"%></p>
+                </div>
+                <div class="u-grid__2-column">
+                  <p class="header--inline">Is a tablet</p>
+                  <p data-test-id="device_is_tablet"><%= device.is_tablet || false%></p>
+                </div>
+                <div class="u-grid__2-column">
+                  <p class="header--inline">Location Enabled</p>
+                  <p data-test-id="device_is_location_enabled"><%= device.is_location_enabled || false%></p>
+                </div>
+                <div class="u-grid__2-column">
+                  <p class="header--inline">App Version</p>
+                  <p data-test-id="device_app_version"><%= device.app_version || "N/A"%></p>
+                </div>
+                <div class="u-grid__2-column">
+                  <p class="header--inline">App Revision</p>
+                  <p data-test-id="device_app_revision"><%= device.app_revision || "N/A"%></p>
+                </div>
+                <div class="u-grid__2-column">
+                  <p class="header--inline">App Build Number</p>
+                  <p data-test-id="device_app_build_number"><%= device.app_build_number || "N/A"%></p>
+                </div>
+              </div>
+            <% else %>
+              <p> N/A </p>
+            <% end %>
+          </div>
+      </div>
+    <% end %>
+  </section>
+</div>
+
+<%= if @show_modal, do: live_component @socket, FraytElixirWeb.LiveComponent.ModalLive,
+  live_view: @live_view,
+  child_id: "modal",
+  title: @title,
+  wide: "false",
+  driver: @driver,
+  vehicle_id: @vehicle_id,
+  images: @images,
+  current_user: @current_user,
+  email: @driver.user.email %>

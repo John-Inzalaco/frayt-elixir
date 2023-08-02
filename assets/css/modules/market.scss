@@ -1,0 +1,88 @@
+.market {
+  &__zips {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  &__zip {
+    &--errors {
+      position: absolute;
+      top: calc(100% + 8px);
+      display: none;
+      z-index: 100;
+
+      .help-block {
+        display: block;
+        padding: 0 $pad-xxs;
+        white-space: nowrap;
+        width: 100%;
+        background-color: $red;
+        font-size: .75rem;
+
+        &:first-child {
+          border-top-right-radius: 5px;
+          border-top-left-radius: 5px;
+          padding-top: $pad-xxs;
+
+          &::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: -8px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid $red;
+          }
+        }
+
+        &:last-child {
+          border-bottom-right-radius: 5px;
+          border-bottom-left-radius: 5px;
+          padding-bottom: $pad-xxs;
+        }
+      }
+    }
+
+    &--delete {
+      position: absolute;
+      right: .25rem;
+      top: 10px;
+      opacity: .5;
+
+      .material-icons {
+        font-size: 1rem;
+      }
+    }
+
+    &--input-group {
+      position: relative;
+      padding: 0;
+      border: none;
+      margin: 0 .25rem .25rem 0;
+
+      input {
+        border: none;
+        outline: none;
+        width: 100px;
+        
+        &.error--input {
+          background-color: rgba($red, .75);
+        }
+
+        &:focus {
+          background-color: darken($light-gray, 5%);
+          ~ .market__zip--errors {
+            display: block;
+          }
+        }
+      }
+    }
+  }
+}
+
+.modal__wrapper .market__zip--input-group input:not(.error--input) {
+  background-color: $gray-bg;
+}

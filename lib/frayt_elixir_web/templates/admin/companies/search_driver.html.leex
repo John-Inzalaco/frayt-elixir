@@ -1,0 +1,26 @@
+<form phx-submit="save_drivers" phx-change="change_drivers">
+  <section>
+    <div class="width--full">
+        <label class="u-push__bottom--none">Email</label>
+        <div class="caption"> Note: Drivers must exist to be added to a schedule </div>
+
+        <%= for i <- 1..@users_count do %>
+          <div>
+            <div class="u-push__top--xxs u-push__bottom--xxs"><%= text_input :search_driver, "email_#{i}", [value: @fields["email_#{i}"].email, class: input_error(@errors, String.to_atom("email_#{i}"))] %></div>
+            <div class="u-flex">
+              <%= if show_error(@errors, String.to_atom("email_#{i}")) do %>
+                <p class="error u-push--none"><%= show_error(@errors, String.to_atom("email_#{i}")) %></p>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="u-push__top--sm"><a onclick="" tabindex=0 phx-keyup="add_another_driver" phx-key="Enter" phx-click="add_another_driver">+ Add Another</a></div>
+    </div>
+
+    <div class="u-pad__top u-text--center width--full">
+      <button class="button button--primary">Add Drivers</button>
+      <a onclick="" class="button" tabindex=0 phx-keyup="close_modal" phx-key="Enter" phx-click="close_modal">Cancel</a>
+    </div>
+  </section>
+</form>

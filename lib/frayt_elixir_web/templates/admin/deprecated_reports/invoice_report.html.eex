@@ -1,0 +1,24 @@
+<section class="header">
+  <div class="header__title">
+    <h2 class="u-push__bottom--none">Invoice Report</h2>
+  </div>
+</section>
+
+<%= form_for @conn, Routes.deprecated_reports_path(@conn, :download_invoice), [as: :invoice], fn f -> %>
+  <div class="report-filters">
+    <div>
+      <label for="start_date">Start Date</label>
+      <input type="date" id="start_date" name="start_date" value="<%= @today %>">
+      <%= error_tag f, :start_date %>
+    </div>
+
+    <div>
+      <label for="end_date">End Date</label>
+      <input type="date" id="end_date" name="end_date" value="<%= @today %>">
+      <%= error_tag f, :end_date %>
+    </div>
+
+    <button class="button button--primary" type="submit">Download CSV</button>
+  </div>
+
+<% end %>

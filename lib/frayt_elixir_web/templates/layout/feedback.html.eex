@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%= render(FraytElixirWeb.LayoutView, "_head.html") %>
+    <title><%= assigns[:page_title] || "Frayt" %></title>
+    <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/light.css") %>"/>
+  </head>
+  <body class="u-background--orange">
+    <main role="main" class="u-pad__top u-flex u-flex__align--center u-flex__direction--vertical">
+      <div class="u-width--half">
+        <img src="/images/logo-white.png" class="u-push__bottom u-center" alt="Frayt Logo"/>
+        <%= unless get_flash(@conn, :info) == nil do %>
+          <p class="u-warning inverse u-push__bottom--sm" role="alert"><%= get_flash(@conn, :info) %></p>
+        <% end %>
+        <%= unless get_flash(@conn, :error) == nil do %>
+          <p class="u-warning inverse u-push__bottom--sm" role="alert"><%= get_flash(@conn, :error) %></p>
+        <% end %>
+        <%= unless get_flash(@conn, :success) == nil do %>
+          <p class="u-success inverse u-push__bottom--sm" role="alert"><%= get_flash(@conn, :success) %></p>
+        <% end %>
+        <%= @inner_content %>
+      </div>
+    </main>
+    <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
+  </body>
+</html>

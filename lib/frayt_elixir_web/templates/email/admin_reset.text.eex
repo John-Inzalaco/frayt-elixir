@@ -1,0 +1,7 @@
+Reset Frayt Password
+You have requested to reset your Frayt admin password.
+Visit <%= @url %> to reset your password.
+
+
+Thanks!
+- The Frayt Team

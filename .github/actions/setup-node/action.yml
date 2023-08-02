@@ -1,0 +1,17 @@
+name: "Setup Node"
+description: "Builds the node files in preparation for additional actions"
+
+runs: 
+  using: "composite"
+  steps:
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: '.tool-versions'
+        cache: 'npm'
+        cache-dependency-path: 'assets/package-lock.json'
+    - run: npm ci
+      shell: bash
+      working-directory: ./assets
+    - run: npm run deploy --prefix ./assets
+      shell: bash

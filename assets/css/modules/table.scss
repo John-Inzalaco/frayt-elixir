@@ -1,0 +1,134 @@
+table,
+.table {
+  border-collapse: collapse;
+  text-align: left;
+  padding-top: $pad-sm;
+  width: 100%;
+
+  @media screen and (max-width: $screen-tablet) {
+    margin-top: 1rem;
+  }
+
+  thead {
+    border-top: 0;
+
+    tr {
+      border-top: 0;
+    }
+  }
+
+  tr {
+    border-top: 1px solid $light-gray;
+    table-layout: fixed;
+  }
+
+  tr,
+  tbody {
+    &.hover {
+      cursor: pointer;
+
+      &:hover {
+        background-color: $gray-bg;
+      }
+    }
+  }
+
+  th {
+    vertical-align: bottom;
+  }
+
+  td {
+    vertical-align: top;
+  }
+
+  td,
+  th {
+    padding: $pad-xs $pad-xs/2;
+  }
+
+  &__show-more {
+    background-color: $gray-bg;
+
+    tr {
+      border-top: 0;
+    }
+  }
+
+  .sort {
+    cursor: pointer;
+
+    &__arrow {
+      color: $dark-gray;
+      padding-left: $pad-xxs;
+      min-width: calc(24px + #{$pad-xxs});
+      display: inline-block;
+    }
+  }
+
+  .add-link {
+    background-color: white;
+    padding: 0 $pad-xxs;
+    position: relative;
+    top: -10px;
+  }
+
+  &__warning {
+    background-color: $red;
+    color: $white;
+    padding: $pad-xxs;
+  }
+
+  .width {
+    &--remove {
+      width:3%;
+    }
+
+    &--edit {
+      width: 5%;
+    }
+
+    &--revenue {
+      width: 12%;
+    }
+
+    &--raiting {
+      width: 17%;
+    }
+
+    &--failure {
+      width: 30%;
+    }
+  }
+}
+
+.header--inline {
+  font-weight: 800;
+}
+
+.pagination {
+  display: grid;
+  grid-template-columns:repeat(5, auto);
+  justify-content: center;
+  margin-top: 3rem;
+
+  &__page{
+    cursor: pointer;
+    height: 2rem;
+    margin: 0 $pad-xxs;
+    padding-top: 5px;
+    text-align: center;
+    width: 2rem;
+
+    &:hover {
+      background-color: lighten($light-gray, 15%);
+      border-radius: 60px;
+    }
+  }
+}
+
+table.admin-table { 
+  td, th {
+    max-width: 18em;
+    word-wrap: break-word;
+  }
+}

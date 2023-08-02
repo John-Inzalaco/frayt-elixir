@@ -1,0 +1,56 @@
+<form phx-submit="save_edit_schedule">
+  <div class="u-push__top-sm">
+    <label>Weekly Schedule</label>
+    <label class="caption">All times in <%= @time_zone %> (<%= timezone_abbr_from_full(nil, @time_zone) %>)</label>
+    <div class="u-grid__7-column u-grid--wrap-mobile">
+      <%= for day <- days() do %>
+        <div>
+          <%= label :schedule_form, day, title_case(day) %>
+          <%= time_input :schedule_form, day, value: Map.get(@schedule, day, nil) |> time_to_timeinput(@time_zone) %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="width--half u-push__top">
+    <div class="width--half">
+      <div>
+        <%= label :schedule_form, :min_drivers, "Minimum Drivers Required" %>
+        <span class="caption">(estimate)</span>
+        <%= number_input :schedule_form, :min_drivers, value: Map.get(@schedule, :min_drivers, nil), min: 1 %>
+        <%= display_error(@errors, :min_drivers) %>
+      </div>
+      <div>
+        <%= label :schedule_form, :max_drivers, "Maximum Drivers Allowed" %>
+        <span class="caption">(estimate)</span>
+        <%= number_input :schedule_form, :max_drivers, value: Map.get(@schedule, :max_drivers, nil), min: 1 %>
+        <%= display_error(@errors, :max_drivers) %>
+      </div>
+    </div>
+    <div class="width--half">
+      <div>
+        <%= label :schedule_form, :sla, "SLA", class: "optional" %>
+        <span class="caption">(minutes)</span>
+        <%= number_input :schedule_form, :sla, value: Map.get(@schedule, :sla, nil), min: 0 %>
+      </div>
+    </div>
+  </div>
+
+  <div class="u-push__top">
+    <div class="checkbox">
+      <%= checkbox :schedule_form, :send_notifications, checked: true %>
+      <%= label :schedule_form, :send_notifications, "Send Notifications", class: "caption" %>
+    </div>
+  </div>
+  <div class="u-push__top">
+    <div class="checkbox">
+      <%= checkbox :schedule_form, :exclude_notified, checked: true %>
+      <%= label :schedule_form, :exclude_notified, "Exclude Notified Drivers (Applicable when sending notifications)", class: "caption" %>
+    </div>
+  </div>
+
+  <div class="u-pad__top--xs u-pad__bottom--xs inline-edit__buttons">
+    <button class="button button--primary">Save <%= if is_schedule(@schedule), do: "Edits", else: "Schedule" %></button>
+    <a onclick="" tabindex="0" tabindex=0 phx-keyup="cancel_edit_schedule" phx-key="Enter" phx-click="cancel_edit_schedule" class="button">Cancel</a>
+  </div>
+</form>

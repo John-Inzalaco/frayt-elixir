@@ -1,0 +1,114 @@
+<section class="header">
+  <div class="header">
+    <div class="header__title">
+      <h1>Applicants</h1>
+      <div>
+        <%= Table.refresh_button(@data_table) %>
+      </div>
+    </div>
+    <%= f = form_for @data_table, "#", class: "header__actions", phx_submit: "handle_submit" %>
+      <%= if @data_table.filters.state == :pending_approval do %>
+        <div class="header__select">
+          <div class="filter-states">
+            <label>Documents Status</label>
+            <%= select f, :document_state, [{"All Document Statuses", ""}, {"Pending Review", "pending_approval"}, {"Rejected", "rejected"}, {"Approved", "approved"},], [class: "states-select", data: [test_id: "filter-states"]] %>
+          </div>
+        </div>
+      <% end %>
+      <%= if @data_table.filters.state == :screening do %>
+        <div class="header__select">
+          <div class="filter-states">
+            <label>Background Check</label>
+            <%= select f, :background_check_state, [{"All Statuses", ""}, {"Rejected", "rejected"}, {"Withdrawn", "withdrawn"}, {"Pending Approval", "pending"}, {"Emailed", "emailed"},], [class: "states-select", data: [test_id: "filter-states"]] %>
+          </div>
+        </div>
+      <% end %>
+      <div class="u-push__bottom--sm">
+        <%= label f, :market_id, "Market" %>
+        <%= record_select(f, :market_id, Market) %>
+        <span class="error"><%= error_tag f, :market_id %></span>
+      </div>
+      <div class="header__select">
+        <label>Application Status</label>
+        <%= select f, :state, [{"All Statuses", ""}, {"All Applicant Statuses", "all_applicants"}, {"Applying", "applying"}, {"Pending Approval", "pending_approval"}, {"Screening", "screening"}, {"Rejected", "rejected"}] %>
+      </div>
+      <div class="header__select">
+        <label>Vehicle Class</label>
+        <%= select f, :vehicle_class, [{"All", nil}] ++ VehicleClass.select_options() %>
+      </div>
+    </form>
+    <%= form_for @data_table, "#", [class: "header__search u-push__left--sm", filter_on: :phx_submit], fn f -> %>
+      <div class="header__search">
+        <div class="search">
+          <%= text_input f, :query, [class: "input", type: "search", placeholder: "Search"] %>
+          <button class="search__submit"><i class="material-icons">search</i></button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</section>
+
+<section>
+  <%= Table.pagination_nav(@data_table, id: "top") %>
+  <table>
+    <thead>
+      <tr class="u-border--none">
+        <%= Table.sort_header(@data_table, "Name", :driver_name) %>
+        <th>Vehicle Type</th>
+        <%= Table.sort_header(@data_table, "Market", :market) %>
+        <%= Table.sort_header(@data_table, "Last Active", :updated_at) %>
+        <%= Table.sort_header(@data_table, "Applied At", :driver_applied_at) %>
+        <%= Table.sort_header(@data_table, "Status", :state) %>
+        <th></th>
+      </tr>
+    </thead>
+    <%= for driver <- @drivers do %>
+      <tbody class="hover">
+        <tr>
+          <td class="u-pad__top--sm u-pad__bottom--sm" style="display: flex;" data-test-id="driver-name">
+            <div style="margin: 0px 0px 0px 0px;">
+              <%= full_name(driver) %>
+            </div>
+          </td>
+          <td class="u-pad__top--sm u-pad__bottom--sm"><%= display_vehicles(driver.vehicles) %></td>
+          <td class="u-pad__top--sm u-pad__bottom--sm" data-test-id="driver-home">
+            <%= if driver.market, do: "#{driver.market.name}, #{driver.market.region}", else: "Not Selected" %>
+          </td>
+          <td class="u-pad__top--sm u-pad__bottom--sm" data-test-id="driver-updated"><%= display_date(driver.updated_at, @time_zone) %></td>
+          <td class="u-pad__top--sm u-pad__bottom--sm" data-test-id="driver-applied">
+            <%= if driver.applied_at do%>
+              Started at
+              <p class="caption"> <%= display_date_time(driver.applied_at, @time_zone) %> </p>
+            <% else %>
+              -
+            <% end %>
+          </td>
+          <td class="u-pad__top--sm u-pad__bottom--sm" data-test-id="driver-state">
+            <strong><%= title_case(driver.state) %></strong>
+            <%= if driver.state == :screening && driver.background_check do %>
+              <div>
+                <span class='label <%= background_check_state_class(driver.background_check.turn_state) %>'>
+                  Screening - <%= title_case(driver.background_check.turn_state) %>
+                </span>
+              </div>
+            <% end %>
+            <% vehicle = List.first(driver.vehicles) %>
+            <%= if driver.state == :pending_approval && vehicle do %>
+              <div>
+                <%= case DriverDocuments.validate_driver_documents(driver) do %>
+                  <% :ok -> %>
+                    <label class="label label--success">Documents - Approved</label>
+                  <% {:error, states} -> %>
+                    <label class="label label--critical">Documents - <%= render_documents_approval_states(states) %></label>
+                <% end %>
+              </div>
+            <% end %>
+          </td>
+          <td class="u-pad__top--sm u-pad__bottom--sm"><a class="button" href="/admin/drivers/<%= driver.id %>">View Details</a></td>
+        </tr>
+      </tbody>
+    <% end %>
+  </table>
+
+  <%= Table.pagination_nav(@data_table, id: "bottom") %>
+</section>

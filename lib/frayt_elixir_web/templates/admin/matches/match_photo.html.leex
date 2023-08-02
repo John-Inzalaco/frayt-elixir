@@ -1,0 +1,44 @@
+<section phx-drop-target="<%= @uploads.match_photo.ref %>" id="match-photo">
+    <div class="">
+        <%= if Enum.count(@uploads.match_photo.entries) > 0 do %>
+            <%= for entry <- @uploads.match_photo.entries do %>
+                <article>
+                    <figure>
+                        <%= live_img_preview entry %>
+                        <figcaption class="caption"><%= entry.client_name %></figcaption>
+                    </figure>
+                    <div class="upload-actions">
+                        <progress value="<%= entry.progress %>" max="100"> <%= entry.progress %>% </progress>
+                        <button phx-click="cancel_upload" phx-value-ref="<%= entry.ref %>" aria-label="cancel"><i class="material-icons">delete</i></button>
+                    </div>
+
+                    <%= for err <- upload_errors(@uploads.match_photo, entry) do %>
+                        <p class="error"><%= inspect(err) %></p>
+                    <% end %>
+                </article>
+            <% end %>
+        <% else %>
+            <article>
+                <figure>
+                    <%= if @photo_url do %>
+                        <img src="<%= @photo_url %>" alt="<%= @title %>"/>
+                    <% else %>
+                        <div class="no-photo"></div>
+                    <% end %>
+                    <figcaption class="caption"><%= @photo_caption %></figcaption>
+                </figure>
+            </article>
+        <% end %>
+    </div>
+    <form phx-submit="save" phx-change="validate">
+        <%= live_file_input @uploads.match_photo %>
+        <label class="button" for="<%= @uploads.match_photo.ref %>">Select Image</label>
+        <%= if Enum.count(@uploads.match_photo.entries) > 0 do %>
+            <button type="submit" class="button button--primary">Upload</button>
+        <% else %>
+            <%= if @photo_url do %>
+                <a href="<%= @photo_url %>" target="_blank" class="button button--primary">View <i class="material-icons">open_in_new</i></a>
+            <% end %>
+        <% end %>
+    </form>
+</section>

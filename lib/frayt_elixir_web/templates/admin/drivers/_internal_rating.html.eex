@@ -1,0 +1,17 @@
+<%= with %DriverMetrics{
+        rating: shipper_rating,
+        activity_rating: activity_rating,
+        fulfillment_rating: fulfillment_rating,
+        sla_rating: sla_rating,
+        internal_rating: internal_rating
+    } <- Drivers.get_driver_metrics(@driver) do %>
+    <div>
+        <span class="label__stars">
+            <%= render FraytElixirWeb.Admin.DriversView, "_star_rating.html", rating: internal_rating || 0.0 %>
+            <span class="caption">
+                <%= if internal_rating && internal_rating != 0, do: displayable_float(internal_rating, 1), else: 0 %> stars.
+            </span>
+        </span>
+        <p class="caption">(SLA: <%= displayable_float(sla_rating, 1) %>, Fulfillment: <%= displayable_float(fulfillment_rating, 1) %>, Activity: <%= displayable_float(activity_rating, 1) %>, Shipper: <%= displayable_float(shipper_rating, 1) %>)</p>
+    </div>
+<% end %>

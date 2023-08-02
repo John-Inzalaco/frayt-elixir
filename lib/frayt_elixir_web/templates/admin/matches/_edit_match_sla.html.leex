@@ -1,0 +1,61 @@
+<%= if @sla do %>
+  <div>
+    <%= f = form_for @changeset, "#", [phx_change: :change_time, phx_submit: :update_time, phx_target: @myself] %>
+      <% open_class = if @show?, do: "drop-down--open" %>
+      <%= if @sla.driver_id, do: "Driver", else: "Frayt" %>
+      <div class="input__group">
+        <button
+          class="drop-down <%= open_class %> input__group--addon button button--blue"
+          phx-target="<%= @myself %>"
+          data-test-id="sla-<%= @sla.id %>-type-<%= @type %>"
+          phx-click="toggle_dropdown"
+          type="button"
+        >
+          <div class="drop-down__label">
+            <%= @time_types[@type] %>
+            <i class="fa fa-angle-down"></i>
+          </div>
+          <div class="drop-down__menu" style="z-index: 10000">
+            <span class="drop-down__menu-item-header">Choose</span>
+            <%= for {key, label} <- @time_types do %>
+              <a
+                phx-target="<%= @myself %>"
+                phx-click="change_time_type"
+                phx-value-type="<%= key %>"
+                class="drop-down__menu-item"
+              >
+                <%= label %>
+              </a>
+            <% end %>
+          </div>
+        </button>
+        <div>
+          <%= text_input f, @type,
+              readonly: "readonly",
+              id: "#{@sla.id}-#{@type}",
+              data_test_id: "#{@sla.id}-#{@type}",
+              data_min_date: "",
+              phx_target: @myself,
+              phx_hook: "DateTimePicker",
+              placeholder: "- - -"
+          %>
+        </div>
+        <%= label f, @type, "", class: "input", for: "#{@sla.id}-#{@type}" %>
+        <button
+          class="input__group--addon button button--primary"
+          data-test-id="update-sla-<%= @sla.id %>-<%= @type %>"
+          type="submit"
+          phx-target="<%= @myself %>"
+          <%= unless Map.has_key?(@changeset.changes, @type), do: "disabled=disabled" %>
+        >
+          <i class="fa fa-check"></i>
+        </button>
+        </div>
+      <%= unless @changeset.valid? do %>
+        <p class="error">
+          <%= humanize_errors(@changeset) %>
+        </p>
+      <% end %>
+    </form>
+  </div>
+<% end %>

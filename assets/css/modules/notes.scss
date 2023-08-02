@@ -1,0 +1,13 @@
+.notes {
+  label {
+    color: $dark-gray;
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+
+  textarea {
+    border: 1px solid $light-gray;
+    margin-top: $pad-xxs;
+    width: 100%;
+  }
+}

@@ -1,0 +1,7 @@
+<div>
+  <%= if @score < 5 do %>
+    <h1 class="u-white u-push__bottom">Let us make it up to you! You will be hearing from the FRAYT team soon to make things right.</h1>
+  <% else %>
+    <h1 class="u-white u-push__bottom">We value your feedback, and are looking forward to delivering terrific experience to you!</h1>
+  <% end %>
+</div>

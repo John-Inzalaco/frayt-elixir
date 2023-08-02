@@ -1,0 +1,351 @@
+<% %{ origin_address: origin_address, state: state, state_transitions: state_transitions, match_stop: first_stop } = deconstruct_match(@match) %>
+<% is_canceled = @match.state in MatchState.canceled_range() %>
+<% is_unable_to_pickup = @match.state == :unable_to_pickup %>
+<% delivered_or_canceled = MatchState.canceled_range() ++ MatchState.completed_range() %>
+<% charged_or_canceled = MatchState.canceled_range() ++ [:charged] %>
+<% delivered_canceled_or_driverless = delivered_or_canceled ++ MatchState.assignable_range() %>
+<% notes = find_transition(state_transitions, state, %{}) |> Map.get(:notes, nil) %>
+<div class="show-layout show-layout--match">
+  <%= AdminAlerts.render(@alerts) %>
+  <section class="show-layout__header">
+    <%= go_back_link("All Matches", Routes.matches_path(@socket, :index)) %>
+    <div>
+      <h3>Match #<%= @match.shortcode %> <%= if is_canceled, do: "Canceled" %> <%= if is_unable_to_pickup, do: "Unable to Pickup" %></h3>
+      <%= if @match.delivery_batch_id do %>
+        <p>This Match is part of a Batch of deliveries. <a href="<%= Routes.batches_path(@socket, :index, state: nil, query: @match.delivery_batch_id) %>">View Batch</a></p>
+      <% end %>
+      <%= if is_canceled and notes do %>
+        <p class="u-text--lg u-flex u-flex--wrap u-flex__align--baseline">
+          <b>Reason Canceled: </b><%= notes %>
+        </p>
+      <% end %>
+      <%= if is_unable_to_pickup and notes do %>
+        <p class="u-text--lg u-flex u-flex--wrap u-flex__align--baseline">
+          <b>Reason couldn't be picked up: </b><%= notes %>
+        </p>
+      <% end %>
+      <p class="u-text--lg u-flex u-flex--wrap u-flex__align--baseline">
+        <b>Network Operator: </b>
+        <%= unless @match.network_operator do %>
+          <b class="u-push__right--sm">N/A</b>
+          <a onclick="" tabindex=0 phx-keyup="show_modal_named" phx-key="Enter" phx-click="show_modal_named" phx-value-liveview="AdminAssignMatch" phx-value-title="Assign Match to Admin" phx-value-wide=false>Assign</a>
+        <% else %>
+          <b class="u-text--lg u-push__right--sm"><span data-test-id="admin-name"><%= @match.network_operator.name || @match.network_operator.user.email %></span></b>
+          <a onclick="" data-test-id="reassign-admin" tabindex=0 phx-keyup="show_modal_named" phx-key="Enter" phx-click="show_modal_named" phx-value-liveview="AdminAssignMatch" phx-value-title="Reassign Match to Admin" phx-value-wide=false>Reassign</a>
+        <% end %>
+      </p>
+      <a onclick="" phx-click="show_modal_named" phx-keyup="show_modal_named" phx-key="Enter" tabindex=0 phx-value-liveview="AdminMatchLog" phx-value-title="Match #<%= @match.shortcode %> Log" phx-value-wide="false">View Match Log</a>
+    </div>
+  </section>
+
+  <section class="show-layout__links">
+    <a onclick="" class="button button--sm" tabindex=0 phx-click="duplicate_match" data-confirm="Are you sure you want to duplicate this Match?">Duplicate</a>
+    <%= unless state in charged_or_canceled do %>
+      <a onclick="" class="button button--danger inverse button--sm" tabindex=0 phx-click="show_modal_named" phx-value-liveview="AdminCancelMatch" phx-value-title="Cancel Match" phx-value-wide="false">Cancel Match</a>
+    <% end %>
+    <%= if is_canceled do %>
+      <a onclick="" class="button button--sm" tabindex=0 phx-click="show_modal_named" phx-value-liveview="AdminRenewMatch" phx-value-title="Renew Match" phx-value-wide="false">Renew Match</a>
+    <% end %>
+  </section>
+
+  <section class="show-layout__timeline">
+    <div class="timeline">
+      <div class="timeline__timestamp">
+        <div class="caption" data-test-id="time-to-authorize"><%= show_time_between(@match, :pending, :scheduled) %></div>
+        <%= if @match.scheduled do %>
+          <div class="caption" data-test-id="time-to-activate"><%= show_time_between(@match, :scheduled, :assigning_driver) %></div>
+        <% end %>
+        <div class="caption" data-test-id="time-to-accept"><%= show_time_between(@match, :assigning_driver, :accepted) %></div>
+        <div class="caption">
+          <p data-test-id="time-to-pickup"><%= show_time_between(@match, :accepted, :en_route_to_pickup, "Inactive -") %></p>
+          <p data-test-id="time-to-start-pickup"><%= show_time_between(@match, :en_route_to_pickup, :arrived_at_pickup, "En route -") %></p>
+        </div>
+        <div class="caption" data-test-id="time-to-start-pickup"><%= show_time_between(@match, :arrived_at_pickup, :picked_up) %></div>
+        <div class="caption"></div>
+        <%= if any_stops_returned?(@match) do %>
+          <div class="caption">
+            <p><%= show_time_between(@match, :en_route_to_return, :arrived_at_return, "En route -") %></p>
+          </div>
+        <% end %>
+        <div class="caption" data-test-id="time-to-deliver">
+          <%= show_time_between(@match, if(any_stops_returned?(@match), do: :arrived_at_return, else: :picked_up), :completed) %>
+        </div>
+      </div>
+      <div class="timeline__stage">
+        <div>
+          <span data-test-id="started-check" class="<%= check_circle(@match, :pending) %>"></span>
+          <div>
+            <h6>Started</h6>
+            <span class="caption" data-test-id="started-time"><%= timestamp(state, @match, :pending, @match.timezone) %></span>
+          </div>
+        </div>
+        <div>
+          <span class="<%= check_circle(@match, :scheduled) %>"></span>
+          <div>
+            <h6>Authorized</h6>
+            <span class="caption" data-test-id="authorized-time"><%= timestamp(state, state_transitions, @match.scheduled, :scheduled, @match.timezone) %></span>
+             <%= if state == :inactive do %>
+              <div>
+                <a phx-click="authorize_match">Authorize Match</a>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        <%= if @match.scheduled do %>
+          <div>
+            <span class="<%= check_circle(@match, :assigning_driver) %>"></span>
+            <div>
+              <h6>Activated</h6>
+              <span class="caption" data-test-id="activated-time"><%= timestamp(state, state_transitions, :assigning_driver, @match.timezone) %></span>
+              <%= if state == :scheduled do %>
+                <%= content_tag(:a, "Activate Match", phx_click: "mark_as_assigning_driver", tabindex: "0", phx_keyup: "mark_as_assigning_driver", phx_key: "Enter", onclick: "", data_test_id: "activate-match") %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        <div>
+          <span class="<%= check_circle(@match, :accepted) %>"></span>
+          <div>
+            <h6>Assigning Driver</h6>
+            <%= unless state in delivered_or_canceled do %>
+              <div>
+                <%= if is_nil(@match.driver) and (stage_as_number(state) > 0) do %>
+                  <%= content_tag(:a, "Assign Driver", href: "#assign-driver", data_test_id: "assign-driver") %>
+                <% end %>
+                <%= if not is_nil(@match.driver) and stage_as_number(state) <= 7 do %>
+                  <%= content_tag(:a, "Remove Driver", phx_click: "remove_driver", tabindex: "0", phx_keyup: "remove_driver", phx_key: "Enter", onclick: "", data_test_id: "remove-driver") %>
+                <% end %>
+              </div>
+            <% end %>
+            <span class="caption" data-test-id="assigned-driver-time"><%= timestamp(state, state_transitions, :accepted, @match.timezone) %></span>
+          </div>
+        </div>
+        <div>
+          <span class="<%= check_circle(@match, :arrived_at_pickup, [:en_route_to_pickup]) %>"></span>
+          <div>
+            <h6>Arrived At Pickup</h6>
+            <%= unless state in delivered_canceled_or_driverless ++ [:arrived_at_pickup] do %>
+              <div><%= content_tag(:a, "Mark as Arrived", phx_click: "mark_as_arrived_at_pickup") %></div>
+            <% end %>
+            <span class="caption"><%= timestamp(state, state_transitions, :arrived_at_pickup, @match.timezone) %></span>
+          </div>
+        </div>
+        <div>
+          <span class="<%= check_circle(@match, :picked_up) %>"></span>
+          <div>
+            <h6>Picked Up</h6>
+            <%= unless state in delivered_canceled_or_driverless ++ [:picked_up] do %>
+              <div><%= content_tag(:a, "Mark as Picked Up", phx_click: "mark_as_picked_up", tabindex: "0", phx_keyup: "mark_as_picked_up", phx_key: "Enter", onclick: "", data_test_id: "pickup-link") %></div>
+            <% end %>
+            <span class="caption" data-test-id="picked-up-time"><%= timestamp(state, state_transitions, :picked_up, @match.timezone) %></span>
+          </div>
+        </div>
+        <div>
+          <%= if length(@match.match_stops) > 1 do %>
+            <span class="circle--open">
+              <%= for stop <- @match.match_stops do %>
+                <span class="progress-slice progress-slice__<%= stop.state %>" style="<%= "--n: #{stop.index}; --c: #{length(@match.match_stops)};" %>"></span>
+              <% end %>
+            </span>
+          <% else %>
+            <span class="<%= check_circle(List.first(@match.match_stops), :delivered, [:en_route, :arrived]) %>"></span>
+          <% end %>
+          <div>
+            <h6>Delivery</h6>
+          </div>
+        </div>
+        <%= if any_stops_returned?(@match) do %>
+          <div>
+            <span class="<%= check_circle(@match, :arrived_at_return, [:en_route_to_return]) %>"></span>
+            <div>
+              <h6>Arrived At Return</h6>
+              <%= unless state in delivered_canceled_or_driverless ++ [:arrived_at_return] do %>
+                <div><%= content_tag(:a, "Mark as Arrived", phx_click: "mark_as_arrived_at_return", data_test_id: "delivery-link-mark-as-returned") %></div>
+              <% end %>
+              <span class="caption"><%= timestamp(state, state_transitions, :arrived_at_return, @match.timezone) %></span>
+            </div>
+          </div>
+        <% end %>
+        <div>
+          <span data-test-id="delivery-check" class="<%= check_circle(@match, :completed) %>"></span>
+          <div>
+            <h6>Completed</h6>
+            <%= unless state in delivered_canceled_or_driverless do %>
+              <div><%= content_tag(:a, "Mark as Completed", phx_click: "mark_as_completed", tabindex: "0", phx_keyup: "mark_as_completed", phx_key: "Enter", onclick: "", data_test_id: "delivery-link") %></div>
+            <% end %>
+            <span class="caption" data-test-id="delivered-time"><%= timestamp(state, state_transitions, :completed, @match.timezone) %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="show-layout__details">
+    <div class="u-push__bottom">
+      <div class="u-flex u-flex__justify--space-between">
+          <h4 class="u-push__bottom--sm">Logistics</h4>
+          <div>
+            <%= if is_editable(@match) and not @edit_logistics do %>
+                <a onclick="" class="button button--sm" tabindex=0 phx-click="edit_logistics" data-test-id="edit-logistics">Edit Logistics</a>
+            <% end %>
+          </div>
+      </div>
+      <%= live_component(FraytElixirWeb.LiveComponent.MatchLogistics, id: "match_logistics_#{@match.id}", match: @match, time_zone: @match.timezone, edit: @edit_logistics, match_changeset: @match_changeset) %>
+    </div>
+    <div class="u-push__bottom">
+      <div class="u-flex u-flex__justify--space-between">
+          <h4 class="u-push__bottom--sm">Pickup</h4>
+          <div>
+            <%= if is_editable(@match) and not @edit_pickup do %>
+                <a onclick="" class="button button--sm" tabindex=0 phx-click="edit_pickup" data-test-id="edit-pickup">Edit Pickup</a>
+            <% end %>
+          </div>
+      </div>
+      <%= live_component(FraytElixirWeb.LiveComponent.MatchPickup, id: "match_pickup_#{@match.id}", match: @match, time_zone: @match.timezone, edit: @edit_pickup, match_changeset: @match_changeset) %>
+    </div>
+      <div class="u-push__bottom">
+        <%= if is_multistop(@match) or @edit_stop == "new" do %>
+            <%= live_component(FraytElixirWeb.LiveComponent.MatchStops, id: "match_stops_#{@match.id}", match: @match, time_zone: @match.timezone, edit_stop: @edit_stop, edit_stop_order: @edit_stop_order, match_changeset: @match_changeset) %>
+        <% else %>
+          <div class="u-flex u-flex__justify--space-between">
+              <h4 class="u-push__bottom--sm">Dropoff</h4>
+              <div>
+                <%= if is_editable(@match) and @edit_stop != "new" do %>
+                    <a onclick="" class="button button--sm" tabindex=0 phx-click="add_stop" data-test-id="add-stop">Add Stop</a>
+                <% end %>
+                <%= if is_editable(@match) and !is_multistop(@match) and @edit_stop != first_stop.id do %>
+                    <a onclick="" class="button button--sm" tabindex=0 phx-click="edit_stop:<%= first_stop.id %>" data-test-id="edit-stop-<%= first_stop.id %>">Edit Dropoff</a>
+                <% end %>
+              </div>
+          </div>
+          <%= live_component(FraytElixirWeb.LiveComponent.MatchStop, id: "match_stop_#{first_stop.id}", match: @match, stop: first_stop, time_zone: @match.timezone, edit: @edit_stop, match_changeset: @match_changeset) %>
+        <% end %>
+    </div>
+    <div class="u-push__bottom--lg">
+      <div class="u-flex u-flex__justify--space-between">
+        <h4 class="u-push__bottom">Payment</h4>
+        <div>
+          <%= if @edit_payment == false and not is_canceled do %>
+            <a onclick="" class="button button--sm" tabindex=0 phx-keyup="edit_payment" phx-key="Enter" phx-click="edit_payment" data-test-id="edit-payment">Edit Payment</a>
+          <% end %>
+        </div>
+      </div>
+      <%= render(FraytElixirWeb.Admin.MatchesView, "_match_pricing.html", match: @match, edit: @edit_payment, match_changeset: @match_changeset, is_canceled: is_canceled) %>
+      <div class="u-push__top">
+        <h4>Captured Charges</h4>
+        <p class=" u-push__top--xs">
+          Captured charges are amounts that have already been charged to the shipper and paid to the driver for this match.
+          You may have to correct charges and payments through Stripe if these amounts differ from expectations or amounts above after match has been delivered.
+        </p>
+        <div class="u-grid u-grid__2-column  u-push__top--sm">
+          <div>
+            <h6>Total Charged</h6>
+            <p class="u-text--lg u-push__top--xxs" data-test-id="total-charged">
+              $<%= display_price((@total_payments.total_charged || 0) - (@total_payments.total_refunded || 0)) %>
+            </p>
+          </div>
+
+          <div>
+            <div class="u-flex u-flex--wrap">
+              <h6 class="u-push__right--xxs">Driver Paid</h6>
+              <p class="caption">(Includes Bonuses)</p>
+            </div>
+            <p class="u-text--lg u-push__top--xxs" data-test-id="driver-paid">
+              $<%= display_price(@total_payments.driver_paid) %>
+            </p>
+          </div>
+        </div>
+        <a onclick="" tabindex=0 phx-keyup="show_modal_named" phx-key="Enter" phx-click="show_modal_named" phx-value-liveview="AdminMatchTransactions" phx-value-title="Match #<%= @match.shortcode %> Transactions" phx-value-wide=true>View Payment Transactions</a>
+        <%= if is_canceled and @match.cancel_charge == 0 and not is_nil(@match.driver_id) do %>
+          <div>
+            <button type="button" class="u-push__top--sm button" phx-click="show_modal_named" phx-value-liveview="AdminAddCancelCharge" phx-value-title="Add Cancel Charge" phx-value-wide=false>Add Cancel Charge</button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <section class="show-layout__map">
+    <div class="u-push__bottom">
+      <%= live_component(FraytElixirWeb.LiveComponent.SLAStatus, id: :sla_status, match: @match, time_zone: @match.timezone) %>
+    </div>
+    <div class="map">
+      <lit-google-map api-key="<%= @api_key %>" fit-to-markers="true" styles="<%= get_map_styles(@current_user) %>">
+        <lit-google-map-polygon slot="shapes" paths='<%= location_coordinates(@driver_locations) %>' fill-opacity="0" stroke-color="#0066ff" stroke-opacity="1" stroke-weight="3">
+        </lit-google-map-polygon>
+        <%= if @match.driver && @match.driver.current_location do  %>
+          <lit-google-map-marker slot="markers" latitude="<%= elem(@match.driver.current_location.geo_location.coordinates, 1) %>" longitude="<%= elem(@match.driver.current_location.geo_location.coordinates, 0) %>" icon="/images/current-location-marker.svg" z-index="7">
+            <h3><%= full_name(@match.driver) %></h3>
+            <p><b>Current Location:</b> <%= format_coordinates(@match.driver.current_location.geo_location.coordinates) %></p>
+            <p>as of <%= display_date_time(@match.driver.current_location.inserted_at, @time_zone) %></p>
+          </lit-google-map-marker>
+        <% end %>
+        <%= for location <- @driver_locations  do %>
+           <%= if state_transition = Enum.find(@state_transitions, &(&1.driver_location_id == location.id)) do %>
+              <lit-google-map-marker slot="markers" latitude="<%= elem(state_transition.driver_location.geo_location.coordinates,1) %>" longitude="<%= elem(state_transition.driver_location.geo_location.coordinates,0) %>" icon="/images/status-location-marker.svg" z-index="5">
+                <h3><%= full_name(@match.driver) %></h3>
+                <h3><%= display_stage(state_transition.to) %></h3>
+                <p><b>Location:</b> <%= format_coordinates(state_transition.driver_location.geo_location.coordinates) %></p>
+                <p>as of <%= display_date_time(state_transition.driver_location.inserted_at, @time_zone) %></p>
+              </lit-google-map-marker>
+            <% else %>
+              <lit-google-map-marker slot="markers" latitude="<%= location.coordinates.latitude %>" longitude="<%= location.coordinates.longitude %>" icon="/images/driver-location-marker.svg" z-index="6">
+                <h3><%= full_name(@match.driver) %></h3>
+                <p><b>Location:</b> <%= format_coordinates(location.coordinates) %></p>
+                <p>as of <%= display_date_time(location.inserted_at, @time_zone) %></p>
+              </lit-google-map-marker>
+           <% end %>
+        <% end %>
+        <%= with {lng, lat} <- get_coords(origin_address) do %>
+          <lit-google-map-marker slot="markers" latitude="<%= lat %>" longitude="<%= lng %>" label="P" z-index="4" icon="/images/location-marker.svg">
+            <%= origin_address.formatted_address %>
+          </lit-google-map-marker>
+          <lit-google-map-circle slot="shapes" center-latitude="<%= lat %>" center-longitude="<%= lng %>" radius="500" fill-color="#478ffc" fill-opacity="0.2" stroke-color="#478ffc" stroke-weight="2" z-index="3">
+          </lit-google-map-circle>
+        <% end %>
+        <%= for %{destination_address: destination_address, index: index} <- @match.match_stops do %>
+          <%= with {lng, lat} <- get_coords(destination_address) do %>
+            <lit-google-map-marker slot="markers" latitude="<%= lat %>" longitude="<%= lng %>" label="<%= index + 1 %>" z-index="4" icon="/images/location-marker.svg">
+              <%= destination_address.formatted_address %>
+            </lit-google-map-marker>
+            <lit-google-map-circle slot="shapes" center-latitude="<%= lat %>" center-longitude="<%= lng %>" radius="500" fill-color="#478ffc" fill-opacity="0.2" stroke-color="#478ffc" stroke-weight="2" z-index="3">
+            </lit-google-map-circle>
+          <% end %>
+        <% end %>
+      </lit-google-map>
+    </div>
+  </section>
+
+  <section class="show-layout__notes">
+    <div class="notes">
+      <form phx-submit="save_notes">
+        <label for="driver-notes"><h4>Admin Notes</h4></label>
+        <textarea phx-focus="open_notes" id="match-notes" name="match-notes" rows="12"><%= @match.admin_notes %></textarea>
+        <div class="u-push__top--xs">
+          <%= if @show_buttons == true do %>
+            <button class="button button--primary" data-test-id="save_notes">Save</button>
+            <a onclick="" class="button" tabindex=0 phx-keyup="close_notes" phx-key="Enter" phx-click="close_notes" data-test-id="cancel_notes">Cancel</a>
+          <% end %>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <%= if (stage_as_number(state) > 0 and stage_as_number(state) <= 7) do %>
+    <section class="show-layout__full-width">
+      <div id="assign-driver" class="u-push__top--lg">
+        <%= live_render(@socket, FraytElixirWeb.Admin.CapacityLive, id: Atom.to_string(@match.state) <> @match.id, session: %{"match_id" => @match.id, "current_user" => @current_user}) %>
+      </div>
+    </section>
+  <% end %>
+</div>
+
+<%= if @show_modal, do: live_component @socket, FraytElixirWeb.LiveComponent.ModalLive,
+  live_view: @live_view,
+  child_id: "test-modal",
+  title: @title,
+  match: @match,
+  stop_id: @stop_id,
+  field: @field,
+  wide: @wide,
+  time_zone: @match.timezone %>

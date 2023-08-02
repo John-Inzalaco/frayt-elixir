@@ -1,0 +1,99 @@
+.show-layout {
+  display: grid;
+    gap: $pad;
+    grid-template-columns: 1fr 1fr;
+
+  &--driver {
+    grid-template-columns: 2fr 1fr;
+    grid-template-areas:
+      "header header"
+      "details links"
+      "details notes"
+      "details nothing";
+
+    @media screen and (max-width: $screen-tablet) {
+      grid-template-areas:
+        "header header"
+        "links links"
+        "details details"
+        "notes notes";
+    }
+  }
+
+  &--location {
+    grid-template-columns: 2fr 1fr;
+    grid-template-areas:
+      "header header"
+      "details shippers"
+      "schedule shippers";
+
+    @media screen and (max-width: $screen-tablet) {
+      grid-template-areas:
+        "header header"
+        "details details"
+        "schedule schedule"
+        "shippers shippers";
+    }
+  }
+
+  &--match {
+    grid-template-areas:
+      "header links"
+      "timeline timeline"
+      "details map"
+      "details notes";
+
+    @media screen and (max-width: $screen-tablet) {
+      grid-template-areas:
+        "header header"
+        "links links"
+        "timeline timeline"
+        "map map"
+        "details details"
+        "notes notes";
+    }
+  }
+
+  &__header {
+    grid-area: header;
+  }
+
+  &__details {
+    grid-area: details;
+  }
+
+  &__links {
+    grid-area: links;
+    text-align: right;
+
+    @media screen and (max-width: $screen-tablet) {
+      text-align: left;
+    }
+  }
+
+  &__notes {
+    grid-area: notes;
+  }
+
+  &__timeline {
+    grid-area: timeline;
+  }
+
+  &__shippers {
+    grid-area: shippers;
+  }
+
+  &__schedule {
+    grid-area: schedule;
+  }
+
+  &__map {
+    grid-area: map;
+  }
+
+  &__full-width {
+    grid-column: 1 / -1;
+  }
+
+
+}

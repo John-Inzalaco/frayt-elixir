@@ -1,0 +1,98 @@
+<%= if @changeset do %>
+  <%= f = form_for @changeset, "#", [phx_change: :change_market, phx_submit: :save_market, phx_target: @myself, id: "#{@id}_form"] %>
+    <div class="inline-edit">
+      <div data-test-id="name">
+        <%= label f, :name, "Name" %>
+        <%= text_input f, :name, class: error_class(@changeset, :name) %>
+        <span class="error"><%= error_tag f, :name %></span>
+      </div>
+      <div data-test-id="region">
+        <%= label f, :region, "Region" %>
+        <%= select(f, :region, state_code_options(), class: error_class(@changeset, :region)) %>
+        <span class="error"><%= error_tag f, :region %></span>
+      </div>
+      <%= if user_has_role(@current_user, :admin) do %>
+        <div>
+          <%= label f, :markup, "Markup" %>
+          <%= number_input f, :markup, class: error_class(@changeset, :markup), step: 0.01 %>
+          <span class="error"><%= error_tag f, :markup %></span>
+        </div>
+        <div>
+          <%= label f, :sla_pickup_modifier, "SLA Pickup Time Modifier" %>
+          <div class="input__group">
+            <%= text_input f, :sla_pickup_modifier, class: error_class(@changeset, :sla_pickup_modifier) <> " u-text--right", step: 1, value: input_value(f, :sla_pickup_modifier) |> to_minutes() %>
+            <span class="input__group--addon">minutes</span>
+          </div>
+          <span class="error"><%= error_tag f, :sla_pickup_modifier %></span>
+        </div>
+      <% end %>
+      <%= if user_has_role(@current_user, [:admin, :driver_services]) do %>
+        <div>
+          <div class="slider--vertical">
+            <%= label f, :has_box_trucks, "Has Box Trucks" %>
+            <div class="slide">
+              <%= checkbox f, :has_box_trucks  %>
+              <%= label f, :has_box_trucks, "", class: "caption" %>
+            </div>
+          </div>
+          <span class="error"><%= error_tag f, :has_box_trucks %></span>
+        </div>
+      <% end %>
+      <div>
+        <div class="u-height--full">
+          <legend>Currently Hiring</legend>
+          <div class="header__filter--checkboxes">
+            <%= checkbox_select f, :currently_hiring, VehicleType.options(), selected: input_value(f, :currently_hiring) %>
+          </div>
+          <span class="error"><%= error_tag f, :currently_hiring %></span>
+        </div>
+
+      </div>
+      <%= if user_has_role(@current_user, :admin) do %>
+        <div>
+          <div class="slider--vertical">
+            <%= label f, :calculate_tolls, "Calculate Tolls" %>
+            <div class="slide">
+              <%= checkbox f, :calculate_tolls %>
+              <%= label f, :calculate_tolls, "", class: "caption" %>
+            </div>
+          </div>
+          <span class="error"><%= error_tag f, :calculate_tolls %></span>
+        </div>
+      <% end %>
+      <%= if user_has_role(@current_user, [:admin, :driver_services]) do %>
+        <div class="width--full">
+          <%= label f, :zip_codes, "Zip Codes" %>
+          <span class="error"><%= error_tag f, :zip_codes %></span>
+          <div class="market__zips">
+            <%= for z <- inputs_for(f, :zip_codes) do %>
+              <fieldset class="market__zip--input-group">
+                <%= text_input z, :zip, class: error_class(z, :zip) %>
+                <a onclick="" tabindex=0 phx-click="remove_zip_<%= z.index %>" class="market__zip--delete" phx-target="<%= @myself %>">
+                  <i class="material-icons icon">clear</i>
+                </a>
+                <div class="error"><%= error_tag z, :zip %></div>
+              </fieldset>
+            <% end %>
+            <a onclick="" data-test-id="add-zip-codes" class="button button--input" tabindex=0 phx-click="add_zip" phx-target="<%= @myself %>"><i class="material-icons icon">add</i> Add</a>
+          </div>
+        </div>
+      <% end %>
+      <div class="inline-edit__buttons">
+        <button class="button button--primary"><%= if input_value(f, :id), do: "Update", else: "Save" %></button>
+        <a onclick="" tabindex="0" phx-click="cancel" phx-target="<%= @myself %>" class="button">Cancel</a>
+        <%= if user_has_role(@current_user, :admin) do %>
+          <%= if input_value(f, :id) do %>
+            <a
+              onclick=""
+              phx-click="delete_market"
+              phx-target="<%= @myself %>"
+              class="button button--danger u-float--right"
+              data-confirm="Are you sure you want to delete the <%= input_value(f, :name) %> Market? This will remove all associated settings and zip codes. This cannot be undone."
+            >Delete Market</a>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </form>
+<% end %>

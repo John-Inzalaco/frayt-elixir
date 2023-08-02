@@ -1,0 +1,88 @@
+<section class="header">
+  <div class="header">
+    <div class="header__title">
+      <h1>Batches</h1>
+      <div>
+        <%= Table.refresh_button(@data_table) %>
+      </div>
+    </div>
+    <div class="header__actions">
+      <%= form_for @data_table, "#", [class: "header__select"], fn f -> %>
+        <%= select f, :state, BatchState.select_options(none_label: "All", allow_none: true) %>
+      <% end %>
+      <%= form_for @data_table, "#", [class: "header__search", filter_on: :phx_submit], fn f -> %>
+        <div class="search">
+          <%= text_input f, :query, [class: "input", type: "search", placeholder: "Search"] %>
+          <button class="search__submit"><i class="material-icons">search</i></button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<section>
+  <%= Table.pagination_nav(@data_table, id: "top") %>
+  <table>
+    <thead>
+      <tr class="u-border--none">
+        <th class="u-hide--mobile">ID</th>
+        <%= Table.sort_header(@data_table, "Date", :inserted_at) %>
+        <%= Table.sort_header(@data_table, "Shipper", :match_shipper_name) %>
+        <th>Location</th>
+        <th>Routes</th>
+        <%= Table.sort_header(@data_table, "State", :state) %>
+      </tr>
+    </thead>
+    <%= for batch <- @batches do %>
+      <tbody>
+        <tr>
+          <td class="u-hide--mobile"><%= batch.id %></td>
+          <td>
+            <%= display_date(batch.inserted_at, @time_zone) %>
+            <div class="caption">
+              <%= display_time(batch.inserted_at, @time_zone) %>
+            </div>
+          </td>
+          <td>
+            <%= if batch.shipper do %>
+              <%= display_user_info(batch.shipper, :name) %>
+              <br/>
+              <%= display_shipper_phone(batch.shipper.phone) %>
+              <br/>
+              <%= display_user_info(batch.shipper, :company) %>
+            <% else %>
+              None
+            <% end %>
+          </td>
+          <td>
+            <%= if batch.location do %>
+              <p><%= batch.location.location %></p>
+            <% end %>
+            <%= batch.address && batch.address.formatted_address %>
+          </td>
+          <td>
+            <%= if length(batch.matches) > 0 do  %>
+              <p><%= length(batch.match_stops) %> stops split between <%= length(batch.matches) %> Match(es)</p>
+              <%= for match <- batch.matches do %>
+                <a href="/admin/matches/<%= match.id %>"><%= match.shortcode %></a>,
+              <% end %>
+            <% else %>
+              <%= length(batch.match_stops) %> stops
+            <% end %>
+          </td>
+          <td>
+            <%= BatchState.name(batch.state) %><br/>
+            <% last_transition = find_transition(batch, batch.state) %>
+            <%= if last_transition do %>
+              <p><%= display_date_time(last_transition.inserted_at, @time_zone) %></p>
+              <%= if last_transition.notes do %>
+                <p><%= last_transition.notes %></p>
+              <% end %>
+            <% end %>
+          </td>
+        </tr>
+      </tbody>
+    <% end %>
+  </table>
+  <%= Table.pagination_nav(@data_table, id: "bottom") %>
+</section>

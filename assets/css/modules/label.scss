@@ -1,0 +1,155 @@
+.label {
+  background-color: $light-gray;
+  border-radius: $border-radius;
+  color: $white;
+  font-size: .6rem;
+  margin-left: $pad-xs;
+  padding: calc(#{$pad-xxs} / 2) $pad-xxs;
+  font-weight: bold;
+  display: inline-flex;
+  flex-direction: row;
+
+  & .material-icons {
+    font-size: .875rem;
+  }
+
+  &.large {
+    font-size: .75rem;
+    padding: calc(#{$pad-xxs} / 2) $pad-xxs;
+
+    .material-icons {
+      font-size: 1.125rem;
+    }
+  }
+
+  &--critical {
+    background-color: $red;
+    margin-left: 0px;
+  }
+
+  &--success {
+    background-color: $green;
+    margin-left: 0px;
+  }
+
+  &--warning {
+    background-color: $orange;
+    margin-left: 0px;
+  }
+
+  &--new {
+    background-color: $orange;
+  }
+
+  &--multistop {
+    background-color: $blue;
+  }
+
+  &--box-truck {
+    background-color: $green;
+  }
+
+  &__state {
+    &--en_route, &--arrived, &--signed {
+      background-color: $orange;
+    }
+
+    &--delivered {
+      background-color: $green;
+    }
+
+    &--undeliverable {
+      background-color: $red;
+    }
+  }
+
+  &__stars {
+    display: inline-flex;
+    flex-wrap: nowrap;
+
+    i {
+      font-size: 1rem;
+      display: inline-block;
+      width: 1.125rem;
+    }
+
+    > .caption {
+      margin-left: 5px;
+    }
+  }
+}
+
+.tooltip {
+  $caret_size: 8px;
+
+  position: relative;
+  cursor: pointer;
+
+  &__content {
+    display: none; 
+    position: absolute;
+    left: -$caret_size * 2;
+    bottom: calc(100% + #{$caret_size});
+    width: 10em;
+    background-color: $gray-bg;
+    color: $dark-gray;
+    z-index: 1000;
+    padding: .5rem .75rem;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(black, 0.25);
+    border: 1px solid rgba($dark-gray, 0.15);
+    font-size: .8rem;
+    cursor: default;
+    user-select: contain; 
+
+    h6 {
+      font-size: .8rem;
+      margin-bottom: 6px;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      display: block;
+      border: $caret_size solid transparent;
+      border-top: $caret_size solid $gray-bg;
+      bottom: -$caret_size * 2;
+      position: absolute;
+      left: 10px;
+    }
+
+    &--left {
+      left: auto;
+      right: -$caret_size * 2;
+
+      &::after {
+        left: auto;
+        right: 10px;
+      }
+    }
+
+    &--md {
+      width: 12em;
+    }
+
+    &--lg {
+      width: 18em;
+      padding: 1rem;
+    }
+
+    &--center {
+      left: 50%;
+      right: auto;
+      transform: translate(-50%, 0);
+      &::after {
+        left: calc(50% - #{$caret_size});
+      }
+    }
+  }
+
+  &:focus, &:hover {
+    .tooltip__content {
+      display: block;
+    }
+  }
+}

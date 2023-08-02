@@ -1,0 +1,35 @@
+<%= inputs_for @form, :images, fn i -> %>
+  <% state_options = DocumentState.select_options(excluded_options: if(input_value(i, :state) in [:pending_approval, "pending_approval"], do: [], else: [:pending_approval])) %>
+  <% parent_id = input_value(i, :driver_id) || input_value(i, :vehicle_id) %>
+  <div class="u-pad__bottom--sm width--half">
+    <div>
+      <p class="caption"><%= title_case(input_value(i, :type)) %></p>
+      <% url = get_photo_url(parent_id, input_value(i, :document))  %>
+      <a href="<%= url %>" target="_blank">
+        <img src="<%= get_photo_url(parent_id, input_value(i, :document))  %>" alt="<%= title_case(input_value(i, :type)) %>" style="padding-bottom: 0;" />
+      </a>
+    </div>
+    <div>
+      <div class="u-push__bottom--sm">
+        <%= label i, :state, "State", [class: "required"] %>
+        <%= select i, :state, state_options, value: input_value(i, :state) %>
+        <span class="error"><%= error_tag i, :state %></span>
+      </div>
+      <%= if input_value(i, :expires_at) || i.errors[:expires_at] do %>
+        <div class="u-push__bottom--sm">
+          <%= label i, :expires_at, "Expiration" %>
+          <%= date_input i, :expires_at %>
+          <span class="error"><%= error_tag i, :expires_at %></span>
+        </div>
+      <% end %>
+      <%= if input_value(i, :state) in [:rejected, "rejected"] do %>
+        <div class="u-push__bottom--sm">
+          <%= label i, :notes, "Notes", [class: "required"] %>
+          <%= textarea i, :notes %>
+          <span class="error"><%= error_tag i, :notes %></span>
+          <p class="caption">This message is intended for the driver</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

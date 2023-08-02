@@ -1,0 +1,56 @@
+<%= if @success do %>
+  <p><%= @success %></p>
+  <div class="u-push__bottom--lg u-push__top  u-text--center">
+    <a onclick="" class="button" tabindex=0 phx-keyup="close_modal" phx-key="Enter" phx-click="close_modal">Close</a>
+  </div>
+<% else %>
+  <%= if @driver.wallet_state in [:UNCLAIMED, :ACTIVE] do %>
+    <form phx-submit="pay_bonus">
+      <section>
+        <div>
+          <%= label :pay_driver_bonus, :amount, "Amount", class: "" %>
+          <div class="input__with-icon input__with-icon--left">
+            <i class="material-icons">attach_money</i>
+            <%= text_input :pay_driver_bonus, :amount, [class: "u-text--right #{input_error(@errors, :amount)}", type: "number", step: ".01", min: "0", value: trailing_zeros_on_input(@form["amount"])] %>
+            <%= display_error(@errors, :amount) %>
+          </div>
+        </div>
+
+        <div>
+          <%= label :pay_driver_bonus, :match_id, "Associated Match", class: "optional" %>
+          <div class="input__with-icon input__with-icon--left">
+            <i>#</i>
+            <%= text_input :pay_driver_bonus, :match_id, [value: @form["match_id"], class: input_error(@errors, :match_id)] %>
+            <div class="u-flex">
+              <%= if show_error(@errors, :match_id) do %>
+                <p class="error u-push--none"><%= show_error(@errors, :match_id) %></p>
+                <%= if @found_ids do %>
+                  <ul>
+                    <%= for match <- @found_ids do %>
+                      <li><a onclick="" class="u-pad__left--xxs" tabindex=0 phx-keyup="choose_id_<%= match %>" phx-key="Enter" phx-click="choose_id_<%= match %>">Choose match <%= match %></a></li>
+                    <% end %>
+                  </ul>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="width--full">
+          <%= label :pay_driver_bonus, :notes, "Notes", [class: "optional", value: @form["notes"]] %>
+          <%= textarea :pay_driver_bonus, :notes %>
+        </div>
+
+        <div class="u-push__top--sm u-text--center width--full">
+          <button class="button button--primary" type="submit">Pay Driver</button>
+          <a onclick="" class="button" tabindex=0 phx-keyup="close_modal" phx-key="Enter" phx-click="close_modal">Cancel</a>
+        </div>
+      </section>
+    </form>
+  <% else %>
+    <p data-test-id="account-error">You cannot pay this driver because they don't have a linked Branch wallet.</p>
+    <div class="u-push__bottom--lg u-push__top  u-text--center">
+      <a onclick="" class="button" tabindex=0 phx-keyup="close_modal" phx-key="Enter" phx-click="close_modal">Close</a>
+    </div>
+  <% end %>
+<% end %>

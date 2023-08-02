@@ -1,0 +1,22 @@
+<%= f = form_for @changeset, "#", [phx_submit: :update_documents, phx_change: :change_documents] %>
+  <h5>Driver Documents</h5>
+  <div class="u-grid__4-column">
+    <p class="header--inline">License #</p>
+    <p class="u-grid__span--3"><%= input_value(f, :license_number) %></p>
+  </div>
+  <%= render FraytElixirWeb.Admin.DriversView, "_driver_images_form.html", form: f %>
+  <%= inputs_for f, :vehicles, fn v -> %>
+    <h5>Vehicle Documents</h5>
+    <div class="u-grid__4-column">
+      <p class="header--inline">VIN</p>
+      <p class="u-grid__span--3"><%= input_value(v, :vin) %></p>
+      <p class="header--inline">License Plate</p>
+      <p class="u-grid__span--3"><%= input_value(v, :license_plate) %></p>
+    </div>
+
+    <%= render FraytElixirWeb.Admin.DriversView, "_driver_images_form.html", form: v %>
+  <% end %>
+  <div class="u-pad__bottom--sm width--full">
+      <button class="button button--primary">Save</button>
+  </div>
+</form>

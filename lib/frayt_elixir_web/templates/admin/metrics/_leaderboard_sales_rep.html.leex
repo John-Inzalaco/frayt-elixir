@@ -1,0 +1,30 @@
+<% prev_month_revenue = prev_month_revenue(@month, @prev_rep) %>
+<tbody>
+  <tr>
+    <td>
+      <div class="drop-down">
+        <label class="drop-down__trigger" for="month-comparison-<%= @rep.id %>">
+          <span class="metrics__rank"><%= @rep.rank %></span>&nbsp;<%= @rep.name || @rep.email %>&nbsp;
+          <span class="metrics__compare"><i class="<%= display_monthly_comparison(@month, @rep, @prev_rep) %>"></i></span>
+        </label>
+        <input type="checkbox" id="month-comparison-<%= @rep.id %>">
+        <div class="drop-down__content">
+          <h6 class="u-text--compact-header">Monthly Sales Comparison</h6>
+          <p>Selected: $<%= @rep.sales |> display_revenue() %>
+            <span class="metrics__compare u-float--right">
+              <i class="<%= display_monthly_comparison(@month, @rep, @prev_rep) %>"></i>
+              <%= display_progress(cents_to_dollars(@rep.sales), cents_to_dollars(prev_month_revenue), 1) %>
+            </span>
+          </p>
+          <p>Previous: $<%= prev_month_revenue |> display_revenue() %> *</p>
+          <p class="u-text--xs">* Previous month's comparisons are shown based on an average of revenue at that time.</p>
+        </div>
+      </div>
+    </td>
+    <td>$<%= @rep.goal |> display_revenue(false) %></td>
+    <td class="metrics__hover-data">
+      <div class="primary"><%= if @rep.progress != nil, do: "#{Float.round(@rep.progress, 1)}%", else: "N/A" %></div>
+      <div class="secondary">$<%= @rep.sales |> display_revenue(false) %></div>
+    </td>
+  </tr>
+</tbody>

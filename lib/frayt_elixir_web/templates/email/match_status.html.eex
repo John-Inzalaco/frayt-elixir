@@ -1,0 +1,71 @@
+<% is_multistop = Enum.count(@match.match_stops) > 1 %>
+<h2>Match Details</h2>
+<%= raw maybe_show_field("Match ID", "##{@match.shortcode}") %>
+<%= raw maybe_show_field("PO", @match.po) %>
+<%= raw maybe_show_field("Mileage", "#{@match.total_distance}mi") %>
+
+<h2>Pickup</h2>
+<%= raw maybe_show_field("Address", @match.origin_address.formatted_address) %>
+<%= raw maybe_show_field("Notes", @match.pickup_notes) %>
+<%= if @match.self_sender && @match.sender do %>
+    <h3>Recipient</h3>
+    <%= raw maybe_show_field("Name", @match.sender.name) %>
+    <%= raw maybe_show_field("Email", @match.sender.email) %>
+    <%= raw maybe_show_field("Phone #", display_phone(@match.sender.phone_number)) %>
+<% end %>
+
+<h2><%= if is_multistop do "Dropoffs" else "Dropoff" end %></h2>
+<%= for stop <- @match.match_stops do %>
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <%= if is_multistop do %>
+                    <td align="left" style="vertical-align: top;" class="stop-content"><h4 class="stop-index">#<%= stop.index + 1%></h4></td>
+                <% end %>
+                <td align="left" class="stop-content">
+                    <% signature_url = get_photo_url(stop.id, stop.signature_photo) %>
+                    <%= raw maybe_show_field("Address", stop.destination_address.formatted_address) %>
+                    <%= raw maybe_show_field("Notes", stop.delivery_notes) %>
+                    <h3>Items</h3>
+                    <%= for item <- stop.items do %>
+                        <p><%= display_item(item) %></p>
+                    <% end %>
+
+                    <%= if stop.self_recipient && stop.recipient do %>
+                        <h3>Recipient</h3>
+                        <%= raw maybe_show_field("Name", stop.recipient.name) %>
+                        <%= raw maybe_show_field("Email", stop.recipient.email) %>
+                        <%= raw maybe_show_field("Phone #", display_phone(stop.recipient.phone_number)) %>
+                    <% end %>
+                    <%= if signature_url do  %>
+                        <h3>Signature</h3>
+                        <img width="350" height="134" alt="Signature Image" src="<%= signature_url %>">
+                    <% end %>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+<% end %>
+
+<%= with %{phone_number: phone_number} <- @match.driver do
+        raw "<h2>Driver</h2>"
+        <> maybe_show_field("Name", full_name(@match.driver))
+        <> maybe_show_field("Phone #", format_phone(phone_number))
+    else
+    _ -> nil
+    end %>
+
+<%= if @match.state in [:charged, :completed] do %>
+    <h2>Receipt</h2>
+    <%= for fee <- @match |> match_fees_for(:shipper) do %>
+        <%= raw maybe_show_field(title_case(fee.type), "$" <> display_price(fee.amount)) %>
+    <% end %>
+    <%= raw maybe_show_field("Total", "$" <> display_price(@match.amount_charged)) %>
+
+<% end %>
+<hr/>
+<%= if @close do %>
+    <p><%= raw @close %></p>
+<% end %>
+<p> Thanks!</p>
+<p> - The Frayt Team</p>

@@ -1,0 +1,13 @@
+$contrast: dark;
+//COLORS
+$white: #252525;
+$dark-gray: #fcfcfc;
+$light-gray: #6b6b6b;
+$gray-bg: #1a1a1a;
+$orange: #ff9900;
+$blue: #478ffc;
+$green: #00c751;
+$red: #ff4444;
+
+@import "../node_modules/prismjs/themes/prism-tomorrow.min.css";
+@import "app.scss";

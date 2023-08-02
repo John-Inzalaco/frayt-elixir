@@ -1,0 +1,160 @@
+<section>
+  <div class="driver-search">
+    <div class="driver-search__header">
+      <div class="u-flex u-flex__justify--space-between">
+        <h3>Driver Search</h3>
+      </div>
+      <%= form_for @data_table, "#", [class: "header__filter u-align__items--end u-push__bottom--xxs", filter_on: :phx_submit], fn f -> %>
+        <div>
+          <%= label f, :query, "Driver Search" %>
+          <%= text_input f, :query %>
+        </div>
+        <div>
+          <%= label f, :search_radius, "Search Radius" %>
+          <%= text_input f, :search_radius, [ type: :number, step: 0.01, min: 0] %>
+        </div>
+        <div class="select">
+          <%= label f, :driver_location, "Location" %>
+          <%= select f, :driver_location, [{"Home Address", :address}, {"Last Seen Address", :current_location}], class: "select" %>
+        </div>
+        <div>
+          <button class="button button--primary">Search</button>
+        </div>
+      <% end %>
+      <%= if @capacity_error do %>
+        <p class="error"><%= display_capacity_error(@capacity_error) %></p>
+      <% end %>
+    </div>
+    <div class="driver-search__results">
+      <div class="drivers">
+        <%= if Enum.count(@capacity) == 0 do %>
+          <p>No drivers found</p>
+          <% else %>
+          <div>
+            <%= for {driver, i} <- Enum.with_index(@capacity, 1) do %>
+              <div class="driver__vehicle-details">
+                <div>
+                  <div class="driver__number"><%= i + @data_table.filters.per_page * @data_table.filters.page %></div>
+                </div>
+                <div>
+                  <div style="display: flex; margin-bottom: 0.8rem;">
+                    <p class="header--inline u-push__bottom--xxs" style="margin-left: 0px;margin-top: 15px;">
+                      <a href="/admin/drivers/<%= driver.id %>"><%= "#{driver.first_name} #{driver.last_name}" %></a>
+                      <%= case DriverDocuments.validate_driver_documents(driver) do %>
+                        <% {:error, states} -> %>
+                          <label class="label label--critical">Documents - <%= render_documents_approval_states(states) %></label>
+                        <% :ok -> %>
+                      <% end %>
+                    </p>
+                  </div>
+                  <div class="inline-details u-push__bottom--sm">
+                    <p>Vehicle<%= pluralize(driver.vehicles) %>:</p>
+                    <ul class="u-pad--none">
+                      <%= for vehicle <- driver.vehicles do %>
+                        <li data-test-id="driver-vehicle">
+                          <%= "#{vehicle_class(vehicle.vehicle_class)} (#{vehicle.year} #{vehicle.make} #{vehicle.model})" %>
+                        </li>
+                        <li>
+                          <%= if vehicle.lift_gate do %>
+                            <span class="label label--new" data-test-id="lift-gate" style="margin-left: 0;">Lift Gate</span>
+                          <% end %>
+
+                          <%= if vehicle.pallet_jack do %>
+                            <span class="label label--new" data-test-id="pallet-jack" style="margin-left: 0;">Pallet Jack</span>
+                          <% end %>
+                        </li>
+                      <% end %>
+                    </ul>
+                  </div>
+                  <div class="inline-details">
+                    <p>Last Active:</p>
+                    <p><%= display_date(driver.updated_at, @time_zone) %></p>
+                  </div>
+                  <%= if @data_table.filters.driver_location == :address do %>
+                    <div class="inline-details">
+                      <p>Home Address:</p>
+                      <p data-test-id="driver-address"><%= display_address(driver.address) %></p>
+                    </div>
+                  <% end %>
+                  <div class="inline-details">
+                    <%= render FraytElixirWeb.Admin.DriversView, "_driver_rating.html", driver: driver %>
+                  </div>
+                  <div class="u-hide--desktop">
+                    <p>Phone Number:</p>
+                    <p><%= display_phone(driver.phone_number) %></p>
+                  </div>
+                  <div class="u-push__top--sm">
+                    <%= if is_missing_required_need?(@match, driver.vehicles) do %>
+                      <p class="error u-pad__bottom--xs" data-test-id="assign-driver-warning-msg">
+                        Warning! This driver doesn't meet the required lift gate or pallet jack.
+                      </p>
+                    <% end %>
+                    <button
+                      id="assign-driver-button-<%= driver.id %>"
+                      onclick=""
+                      tabindex=0
+                      phx-keyup="assign_driver"
+                      phx-key="Enter"
+                      phx-click="assign_driver"
+                      phx-value-driverid="<%= driver.id %>"
+                      data-test-id="assign-driver-<%= driver.id %>"
+                      <%= if (is_assignable(@match)) do %>
+                        class="button button--primary"
+                      <% else %>
+                        <%= if (is_assigned_driver?(@match, driver)) do %>
+                          disabled
+                          class="button button-disabled"
+                        <% else %>
+                          class="button button--primary"
+                        <% end %>
+                      <% end %>
+                    >
+                      <%= if (is_assignable(@match)) do %>
+                          Assign Driver
+                      <% else %>
+                        <%= if (is_assigned_driver?(@match, driver)) do %>
+                          Already assigned
+                        <% else %>
+                          Reassign this Driver
+                        <% end %>
+                      <% end %>
+                    </button>
+                  </div>
+                </div>
+                <div class="u-hide--mobile" style="margin-top: 15px;">
+                  <p><%= display_phone(driver.phone_number) %></p>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+      <%= if user_has_role(@current_user, [:admin, :network_operator]) do %>
+        <div class="u-flex">
+          <div class="u-push__top--sm">
+            <button class="button" tabindex=0 phx-keyup="send_notifications" phx-key="Enter" phx-click="send_notifications">Send Push Notifications</button>
+            <p class="u-success u-push__top--xxs"><%= @flash["info"] %></p>
+          </div>
+          <div class="u-push__top--sm">
+            <button class="button u-push__left--sm" tabindex=0 phx-click="show_modal_named" phx-value-liveview="AdminSendTexts" phx-value-title="Send Texts">Send Texts</button>
+          </div>
+        </div>
+        <%= if length(@match.notification_batches) > 0 do %>
+          <p class="error u-pad__bottom--xs">Warning! This Match has already had <%= length(@match.notification_batches) %> mass text(s) sent</p>
+        <% end %>
+      <% end %>
+      <%= live_component @socket, FraytElixirWeb.LiveComponent.Pagination, id: "bottom", data_table: @data_table, container_classes: "u-push__top--sm" %>
+  </div>
+  <div class="driver-search__map">
+    <%= Phoenix.View.render(FraytElixirWeb.Admin.CapacityView, "_capacity_map.html", [capacity: @capacity, api_key: @api_key, current_user: @current_user] ++ Enum.into(@data_table.filters, [])) %>
+  </div>
+</section>
+<%= if @show_modal, do: live_component @socket, FraytElixirWeb.LiveComponent.ModalLive,
+  live_view: @live_view,
+  child_id: "assign-driver-modal",
+  title: @title,
+  wide: "false",
+  match: @match,
+  filters: @data_table.filters,
+  admin: @current_user.admin,
+  time_zone: @time_zone %>

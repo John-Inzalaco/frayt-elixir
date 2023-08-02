@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  pg-master:
+    image: kartoza/postgis:12.4
+    restart: 'always'
+    ports:
+      - '5560:5432'
+    environment:
+      ALLOW_IP_RANGE: '0.0.0.0/0'
+      REPLICATION_USER: 'replicator'
+      REPLICATION_PASS: 'replicator'
+      REPLICATION: 'true'
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASS: 'postgres'
+      POSTGRES_MULTIPLE_EXTENSIONS: postgis
+    volumes:
+      - pg-master:/var/lib/postgresql
+    healthcheck:
+      test: "exit 0"
+  pg-replica1:
+    image: kartoza/postgis:12.4
+    restart: 'always'
+    ports:
+      - '5561:5432'
+    environment:
+      ALLOW_IP_RANGE: '0.0.0.0/0'
+      REPLICATION_USER: 'replicator'
+      REPLICATION_PASS: 'replicator'
+      REPLICATION: 'true'
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASS: 'postgres'
+      POSTGRES_MULTIPLE_EXTENSIONS: postgis
+      REPLICATE_FROM: pg-master
+      DESTROY_DATABASE_ON_RESTART: 'True'
+    volumes:
+      - pg-replica1:/var/lib/postgresql
+    depends_on:
+      pg-master:
+        condition: service_healthy
+volumes:
+  pg-master:
+  pg-replica1:

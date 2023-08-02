@@ -1,0 +1,156 @@
+<article>
+  <%= AdminAlerts.render(@alerts) %>
+  <header class="u-push__bottom">
+    <%= go_back_link("All Contracts", Routes.settings_path(@socket, :index, "contracts")) %>
+    <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+      <div>
+        <h1>
+          <%= @contract.name || "Create" %> Contract
+          <%= if @contract.disabled do %>
+            <span class="error u-text--lg">(Disabled)</span>
+          <% end %>
+        </h1>
+        <%= if @contract.company do %>
+          <p class="u-text--md">For <%= live_patch @contract.company.name, to: Routes.company_details_path(@socket, :details, @contract.company.id), class: "u-text--md" %></p>
+        <% end %>
+        <%= unless @editing do %>
+          <p>To use this contract over the API enter <code><%= @contract.contract_key %></code> in the contract field</p>
+        <% end %>
+      </div>
+      <%= if user_has_role(@current_user, [:admin, :sales_rep]) and !@editing do %>
+        <a class="button u-text--right" tabindex="0" phx-click="edit_contract" phx-value-edit="contract">Edit Contract</a>
+      <% end %>
+    </div>
+  </header>
+  <section>
+    <%= case @editing do %>
+      <% "contract" -> %>
+        <%= render(FraytElixirWeb.Admin.ContractsView, "_contract_form.html", changeset: @changeset, contract: @contract) %>
+      <% "cancellation" -> %>
+        <%= render(FraytElixirWeb.Admin.ContractsView, "_contract_cancellation_rules_form.html", changeset: @changeset, contract: @contract) %>
+      <% "contract_sla" -> %>
+        <%= render(FraytElixirWeb.Admin.ContractsView, "_contract_slas_form.html", changeset: @changeset, contract: @contract) %>
+      <% "delivery_rules" -> %>
+        <%= render(FraytElixirWeb.Admin.ContractsView, "_contract_delivery_rules_form.html", changeset: @changeset, contract: @contract) %>
+      <% "edit_market_configs" -> %>
+        <%= render(FraytElixirWeb.Admin.ContractsView, "_contract_market_configs_form.html", changeset: @changeset, contract: @contract) %>
+      <% nil -> %>
+        <div class="u-grid__2-column u-grid--wrap-mobile">
+          <div style="float: left">
+            <div class="u-grid--wrap-mobile u-push__bottom--xs">
+              <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+                <h4 class="u-push__bottom--xs">SLA</h4>
+             <a  class="button u-text--right mr-1"
+                    tabindex="0"
+                    phx-click="edit_slas"
+                    phx-value-edit="contract_sla"
+                    data-test-id="edit-contract-sla"
+                >
+                  Edit SLAs
+                </a>
+              </div>
+              <div>
+                <%= for {type, sla} <- list_slas(@contract) do %>
+                  <div class="u-pad__bottom--xs">
+                    <p class="header--inline" data-test-id="<%= type %>-sla-type-label">
+                      <b><%= humanize(type) %></b>
+                    </p>
+                    <%= case sla do %>
+                      <% %{duration_type: :end_time} -> %>
+                        <p>End at <%= if sla.time, do: Timex.format!(sla.time, "%H:%M%P", :strftime) %></p>
+                        <p>Min Duration: <code phx-hook="FormulaContent" id="<%= sla.id %>_min_duration"><%= sla.min_duration %></code> minutes</p>
+                      <% %{duration_type: :duration_before_time} -> %>
+                        <p>
+                          Ends <code phx-hook="FormulaContent" id="<%= sla.id %>_duration"><%= sla.duration %></code> minutes before <%= if sla.time, do: Timex.format!(sla.time, "%H:%M%P", :strftime) %>
+                        </p>
+                        <p>Min Duration: <code phx-hook="FormulaContent" id="<%= sla.id %>_min_duration"><%= sla.min_duration %></code> minutes</p>
+                      <% %{duration_type: nil} -> %>
+                        <p data-test-id="<%= type %>-sla-duration-label">
+                          Ends <code phx-hook="FormulaContent" id="<%= sla.id %>_duration"><%= sla.duration %></code> minutes from the
+                          <%= if sla.type == :acceptance do %>
+                            authorized time
+                          <% else %>
+                            end of the previous SLA
+                          <% end %>
+                        </p>
+                      <% nil -> %>
+                        <p data-test-id="<%= type %>-sla-duration-label">
+                          Default
+                        </p>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            <div>
+              <h4 class="u-push__bottom--xs">Pricing</h4>
+              <div class="u-grid__2-column">
+                <p class="header--inline">Pricing Contract</p>
+                <p><%= CustomContracts.name(@contract.pricing_contract) %></p>
+              </div>
+            </div>
+            <div class="u-push__bottom--xs">
+              <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+                <h4 class="u-push__bottom--xs">Market Config</h4>
+                  <a class="button u-text--right" tabindex="0" phx-click="edit_contract" phx-value-edit="edit_market_configs">Edit</a>
+              </div>
+            </div>
+          </div>
+          <div style="float: right">
+            <div class="u-push__bottom--xs">
+              <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+                <h4 class="u-push__bottom--xs">Delivery Rules</h4>
+                <%= if user_has_role(@current_user, :admin) do %>
+                  <a class="button u-text--right" tabindex="0" phx-click="edit_contract" phx-value-edit="delivery_rules">Edit Rules</a>
+                <% end %>
+              </div>
+              <div class="u-push__bottom--xs">
+                <h6>Active Matches per Driver</h6>
+                <p><%= @contract.active_matches || "Default" %></p>
+              </div>
+              <%= if  @contract.active_matches do %>
+                <div class="u-push__bottom--xs">
+                  <h6>Active Match Factor</h6>
+                  <p><%= humanize(@contract.active_match_factor) %></p>
+                </div>
+              <% end %>
+              <%= if  @contract.active_match_factor == :fixed_duration do %>
+                <div class="u-push__bottom--xs">
+                  <h6>Active Match Duration from Pickup (min)</h6>
+                  <p><%= @contract.active_match_duration %></p>
+                </div>
+              <% end %>
+            </div>
+            <div>
+              <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+                <h4 class="u-push__bottom--xs">Cancellation Rules</h4>
+                <%= if user_has_role(@current_user, :admin) do %>
+                  <a class="button u-text--right" tabindex="0" phx-click="edit_contract" phx-value-edit="cancellation">Edit Rules</a>
+                <% end %>
+              </div>
+              <div class="u-push__bottom--xs">
+                <h6>Allowed Cancellation States</h6>
+                <p><%= @contract.allowed_cancellation_states |> Enum.map(&MatchState.name(&1)) |> Enum.join(", ") %></p>
+              </div>
+              <div class="u-push__bottom--xs">
+                <h6>Cancel Payout Rules</h6>
+                <%= if length(@contract.cancellation_pay_rules) > 0 do %>
+                  <p>Rules will be evaluated in the order listed.</p>
+                  <ol>
+                    <%= for rule <- @contract.cancellation_pay_rules do %>
+                      <li>
+                        <p><%= display_rules(rule) %>:</p>
+                        <p>The Shipper will be charged <%= number_to_percent(rule.cancellation_percent) %> of the total Match amount. The assigned driver will receive <%= number_to_percent(rule.driver_percent) %> of that.</p>
+                      </li>
+                    <% end %>
+                  </ol>
+                <% else %>
+                  <p>There are no cancellation pay rules for this contract. This means there will be no automatic cancellation pay.</p>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+    <% end %>
+  </section>
+</article>

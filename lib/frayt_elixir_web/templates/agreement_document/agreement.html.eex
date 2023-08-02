@@ -1,0 +1,19 @@
+<article>
+  <header>
+    <h1><%= @agreement_document.title %></h1>
+    <p class="u-text--sm u-pad__bottom--sm">Last updated <%= display_date_time(@agreement_document.updated_at, "UTC") %></p>
+  </header>
+  <section>
+  <%= Phoenix.HTML.raw @agreement_document.content %>
+  </section>
+  <footer>
+    <%= if length(@agreement_document.support_documents) > 0 do %>
+      <h4>Referenced Documents</h4>
+      <ol>
+        <%= for document <- @agreement_document.support_documents do %>
+          <li><a href="<%= agreement_document_url(document.id) %>" target="_blank"><%= document.title %></a></li>
+        <% end %>
+      </ol>
+    <% end %>
+  </footer>
+</article>

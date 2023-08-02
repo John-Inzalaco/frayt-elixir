@@ -1,0 +1,17 @@
+a.card {
+  color: inherit;
+  cursor: pointer;
+
+  &:hover {
+    border-width: 3px;
+    border-color: $orange;
+    padding: calc(#{$pad-sm} - 2px);
+  }
+}
+
+.card {
+  border: 1px solid $light-gray;
+  border-radius: $border-radius;
+  padding: $pad-sm;
+  margin-bottom: 1rem;
+}

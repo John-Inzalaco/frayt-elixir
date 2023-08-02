@@ -1,0 +1,111 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Server",
+      "type": "shell",
+      "command": "mix",
+      "args": [
+        "phx.server"
+      ],
+      "options": {
+        "cwd": "${workspaceRoot}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run DB",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": [
+        "up"
+      ],
+      "options": {
+        "cwd": "${workspaceRoot}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "mix test",
+      "type": "shell",
+      "command": "mix",
+      "args": [
+        "test",
+        "--exclude",
+        "integration",
+        "--exclude",
+        "feature",
+        "--color"
+      ],
+      "options": {
+        "cwd": "${workspaceRoot}",
+        "requireFiles": [
+          "test/**/test_helper.exs",
+          "test/**/*_test.exs"
+        ]
+      },
+      "problemMatcher": "$mixTestFailure"
+    },
+    {
+      "label": "mix test file",
+      "type": "shell",
+      "command": "mix",
+      "args": [
+        "test",
+        "${relativeFile}",
+        "--color",
+        "--trace"
+      ],
+      "options": {
+        "cwd": "${workspaceRoot}",
+        "requireFiles": [
+          "test/**/test_helper.exs",
+          "test/**/*_test.exs"
+        ]
+      },
+      "problemMatcher": "$mixTestFailure"
+    },
+    {
+      "label": "mix test focused",
+      "type": "shell",
+      "command": "mix",
+      "args": [
+        "test",
+        "${relativeFile}:${lineNumber}",
+        "--color",
+        "--trace"
+      ],
+      "options": {
+        "cwd": "${workspaceRoot}",
+        "requireFiles": [
+          "test/**/test_helper.exs",
+          "test/**/*_test.exs"
+        ]
+      },
+      "problemMatcher": "$mixTestFailure",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "open all screenshots",
+      "type": "shell",
+      "command": "open",
+      "args": [
+        "./screenshots"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "open last screenshot",
+      "type": "shell",
+      "command": "open `ls -t | head -n1`",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceRoot}/screenshots"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

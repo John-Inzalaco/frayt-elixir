@@ -1,0 +1,42 @@
+<section class="show-layout__header">
+  <%= go_back_link("All Matches", Routes.matches_path(@socket, :index)) %>
+  <div>
+    <h3>New Match Batch</h3>
+  </div>
+</section>
+<section>
+  <%= f = form_for :deliveries, "/admin/delivery_batches", [multipart: true, phx_change: "change_options"] %>
+    <div class="width--half">
+      <div>
+        <div class="width--third mobile--wrap">
+          <div>
+            <%= label f, :company_id, "Company" %>
+            <%= select f, :company_id, @company_options, value: @company, required: true %>
+          </div>
+          <%= if @company do %>
+            <div>
+              <%= label f, :location_id, "Location" %>
+              <%= select f, :location_id, @location_options, value: @location, required: true %>
+            </div>
+          <% end %>
+          <%= if @location do %>
+            <div>
+              <%= label f, :pickup_at, "Pickup Time" %>
+              <%= select f, :pickup_at, @pickup_options, required: true %>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="u-push__top--sm">
+          <%= label f, :csv, "Deliveries" %>
+          <span class="caption">Must be a .csv file</span>
+          <%= file_input f, :csv, accept: ".csv, text/csv", required: true %>
+        </div>
+
+        <div class="u-push__top">
+          <button class="button button--primary">Create Match Batch</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>

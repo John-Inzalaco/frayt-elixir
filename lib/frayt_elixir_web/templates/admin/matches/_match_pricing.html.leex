@@ -1,0 +1,114 @@
+<%= if @match.manual_price do %>
+  <p><b>Default pricing has been overridden by an admin and will no longer be recalculated.</b></p><br/>
+<% end %>
+<%= if @edit do %>
+  <%= f = form_for @match_changeset, "#", [phx_change: :change_payment, phx_submit: :update_payment, class: "match-layout__details"] %>
+    <div>
+      <label>Override Default Pricing</label>
+      <div class="slide u-push__bottom--xs">
+          <%= checkbox f, :manual_price %>
+          <%= label f, :manual_price, "", data_test_id: "manual_price_input" %>
+      </div>
+    </div>
+    <div class="u-push__bottom--xs">
+      <%= label f, :coupon_code, "Coupon" %>
+      <div class="input__with-icon input__with-icon--left">
+        <i class="material-icons">local_offer</i>
+        <%= text_input f, :coupon_code, type: "text", value: coupon_value(f, @match), class: "u-text--right", "data-test-id": "coupon-input" %>
+      </div>
+    </div>
+    <%= if bool_input_value(f, :manual_price) do %>
+      <div class="match-repeater__items">
+        <h6>
+            Fees
+            <a onclick="" class="match-repeater__add-item-button" tabindex=0 phx-click="repeater_add_fees" data-test-id="add-fee">
+                <span class="material-icons">add_circle_outline</span>
+            </a>
+        </h6>
+        <%= inputs_for f, :fees, fn fee_form -> %>
+          <fieldset class="match-repeater__item">
+            <a onclick="" class="match-repeater__remove-item-button" tabindex=0 phx-click="repeater_remove_fees" phx-value-index="<%= fee_form.index %>" data-test-id="delete-fee-<%= fee_form.index %>">
+                <span class="material-icons">delete</span>
+            </a>
+            <div class="width--half">
+              <div class="u-push__bottom--sm">
+                <%= label fee_form, :type, "Fee Type" %>
+                <%= select fee_form, :type, MatchFeeType.select_options(exclude: [:priority_fee]), value: input_value(fee_form, :type) %>
+                <span class="error"><%= error_tag f, :type %></span>
+              </div>
+              <div class="u-push__bottom--sm">
+                <%= label fee_form, :description, "Description" %>
+                <%= text_input fee_form, :description %>
+                <span class="error"><%= error_tag fee_form, :description %></span>
+              </div>
+            </div>
+            <div class="width--half">
+              <div class="u-push__bottom--sm">
+                <%= label fee_form, :driver_amount, "Driver Amount" %>
+                <div class="input__with-icon input__with-icon--left">
+                  <i class="material-icons">attach_money</i>
+                  <%= text_input fee_form, :driver_amount, type: "number", step: ".01", value: dollar_input_value(fee_form, :driver_amount), class: "u-text--right", data_test_id: "#{input_value(fee_form, :type)}_driver_amount_input" %>
+                </div>
+                <span class="error"><%= error_tag fee_form, :driver_amount %></span>
+              </div>
+              <div class="u-push__bottom--sm">
+                <%= label fee_form, :amount, "Shipper Amount" %>
+                <div class="input__with-icon input__with-icon--left">
+                  <i class="material-icons">attach_money</i>
+                  <%= text_input fee_form, :amount, type: "number", step: ".01", value: dollar_input_value(fee_form, :amount), class: "u-text--right", data_test_id: "#{input_value(fee_form, :type)}_amount_input" %>
+                </div>
+                <span class="error"><%= error_tag fee_form, :amount %></span>
+              </div>
+            </div>
+          </fieldset>
+        <% end %>
+      </div>
+    <% end %>
+    <div class="u-push__bottom u-push__top--sm">
+      <button type="submit" class="button button--primary" data-test-id="save-payment">Update Payment</button>
+      <a onclick="" tabindex=0 phx-keyup="cancel_edit" phx-key="Enter" phx-click="cancel_edit" class="button">Cancel</a>
+    </div>
+  </form>
+<% end %>
+<table class="match__pricing-table <%= if @edit, do: "editing" %>">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Driver</th>
+      <th>Frayt</th>
+      <th>Shipper</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= if @is_canceled do %>
+      <%= render("_price_line_item.html", fee: %MatchFee{type: :cancel_charge, amount: @match.cancel_charge, driver_amount: @match.cancel_charge_driver_pay}) %>
+    <% else %>
+      <%= for fee <- @match.fees do %>
+        <%= render("_price_line_item.html", fee: fee) %>
+      <% end %>
+      <%= render("_price_line_item.html", fee: %MatchFee{type: :coupon, amount: -@match.price_discount, driver_amount: 0, description: "Code: " <> ((@match.coupon || %{}) |> Map.get(:code, ""))}) %>
+    <% end %>
+  </tbody>
+  <tfoot>
+    <%= if @is_canceled do %>
+    <tr class="match__pricing-table--voided">
+      <td><strong>Original Total</strong></td>
+    <% else %>
+    <tr>
+      <td><span class="fee-type">Stripe Fees</span></td>
+      <td><%= render_price(0) %></td>
+      <td><%= render_price(-(@match.driver_fees || 0), test_id: "driver_fees") %> <span class="caption">(<%= display_progress(@match.driver_fees, @match.amount_charged) %>)</span></td>
+      <td><%= render_price(0) %></td>
+    </tr>
+    <tr>
+      <td><strong>Total</strong></td>
+    <% end %>
+      <% frayt_amount = (@match.amount_charged || 0) - (@match.driver_total_pay || 0) - (@match.driver_fees || 0) %>
+      <% driver_amount = @match.driver_total_pay %>
+      <td><%= render_price(driver_amount, test_id: "driver_total_pay") %> <span class="caption">(<%= display_progress(driver_amount, @match.amount_charged) %>)</span></td>
+      <td><%= render_price(frayt_amount, test_id: "frayt_total_pay") %> <span class="caption">(<%= display_progress(frayt_amount, @match.amount_charged) %>)</span></td>
+      <td><%= render_price(@match.amount_charged, test_id: "amount_charged") %></td>
+    </tr>
+  </tfoot>
+</table>
+<span class="caption">NOTE: Stripe fees are subtracted from the driver's base fee.</span>

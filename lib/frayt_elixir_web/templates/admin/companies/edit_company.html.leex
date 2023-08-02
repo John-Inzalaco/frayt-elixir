@@ -1,0 +1,140 @@
+<form phx-submit="save_edit_company" phx-change="change_edit_company">
+  <div class="inline-edit inline-edit__details-page">
+    <div class="width--full">
+      <%= if @errors != %{} do %>
+        <h5 class="error">There is one or more errors in your form</h5>
+        <p class="error"><%= humanize_errors(@errors) %></p>
+      <% end %>
+    </div>
+    <div class="width--full">
+      <div class="span--2">
+        <div>
+          <%= label :edit_company_form, :name, "Company Name" %>
+          <%= text_input :edit_company_form, :name, [type: "text", value: @edit_form.name, class: input_error(@errors, :name)] %>
+          <%= display_error(@errors, :name) %>
+        </div>
+        <div>
+          <%= label :edit_company_form, :email, "Company Email" %>
+          <%= text_input :edit_company_form, :email, [type: "text", value: @edit_form.email, class: input_error(@errors, :email)] %>
+          <%= display_error(@errors, :email) %>
+        </div>
+      </div>
+    </div>
+    <div class="width--full">
+      <div class="span--2">
+        <div>
+          <div>
+            <%= label :edit_company_form, :sales_rep_id, "Sales Rep" %>
+            <%= select :edit_company_form, :sales_rep_id, sales_rep_options(), value: @edit_form.sales_rep_id %>
+          </div>
+          <div class="checkbox u-push__top--xxs">
+            <%= checkbox :edit_company_form, :replace_sales_rep, [id: "replace-locations", checked: @edit_form.replace_sales_rep] %>
+            <label for="replace-locations">Update all Locations and users in company with selected Sales Rep</label>
+          </div>
+        </div>
+        <div class="width--half">
+          <div class="slider--vertical" data-test-id="account-billing-<%= if @edit_form.account_billing_enabled, do: "checked", else: "unchecked" %>">
+            <%= label :edit_company_form, :account_billing_enabled, "Account Billing" %>
+            <div class="slide">
+              <%= checkbox :edit_company_form, :account_billing_enabled, [id: "account_billing_enabled", checked: @edit_form.account_billing_enabled]  %>
+              <label class="caption" for="account_billing_enabled"></label>
+            </div>
+          </div>
+          <div>
+            <%= if @edit_form.account_billing_enabled == true do %>
+              <%= label :edit_company_form, "invoice_period", "Net Terms" %>
+              <%= text_input :edit_company_form, "invoice_period", [type: "number", value: @edit_form.invoice_period, class: input_error(@errors, :invoice_period)] %>
+              <%= display_error(@errors, :invoice_period) %>
+            <% else %>
+              <%= hidden_input :edit_company_form, "invoice_period_hidden", value: "" %>
+            <% end %>
+          </div>
+          <div class="checkbox width--full">
+            <%= checkbox :edit_company_form, :replace_invoice_period, [id: "replace-locations-invoicing", checked: @edit_form.replace_invoice_period] %>
+            <label for="replace-locations-invoicing">Update all Locations with new Net Terms</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="width--full">
+      <div class="width--third">
+        <div>
+          <div>
+            <%= label :edit_company_form, :default_contract_id, "Default contract" %>
+            <%= record_select :edit_company_form, :default_contract_id, Contract, placeholder: "No Contract", filters: %{company_id: @company.id}, default_options: @company.contracts, value: @edit_form.default_contract_id %>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="width--full">
+      <div class="width--third">
+        <div>
+          <div class="slider" data-test-id="is-enterprise-<%= if @edit_form.is_enterprise, do: "checked", else: "unchecked" %>">
+            <%= label :edit_company_form, :is_enterprise, "Enterprise Customer" %>
+            <div class="slide">
+              <%= checkbox :edit_company_form, :is_enterprise, [id: "is_enterprise", checked: @edit_form.is_enterprise]  %>
+              <label class="caption" for="is_enterprise"></label>
+            </div>
+          </div>
+          <p class="caption u-pad__bottom--sm">Enterprise companies will be displayed more prominently throughout the Admin, with more filtering capabilities.</p>
+          <div class="slider">
+            <%= label :edit_company_form, :autoselect_vehicle_class, "Vehicle Class Auto-Select" %>
+            <div class="slide">
+              <%= checkbox :edit_company_form, :autoselect_vehicle_class, [id: "autoselect_vehicle_class", checked: @edit_form.autoselect_vehicle_class]  %>
+              <label class="caption" for="autoselect_vehicle_class"></label>
+            </div>
+          </div>
+          <p class="caption u-pad__bottom--sm">Enables auto-selction of vehicles via the API when no vehicle class is provided.</p>
+        </div>
+        <div>
+          <div class="slider" data-test-id="auto-cancel-<%= if @edit_form.auto_cancel, do: "checked", else: "unchecked" %>">
+            <%= label :edit_company_form, :auto_cancel, "Auto Cancel Late Matches" %>
+            <div class="slide">
+              <%= checkbox :edit_company_form, :auto_cancel, [id: "auto_cancel", checked: @edit_form.auto_cancel]  %>
+              <label class="caption" for="auto_cancel"></label>
+            </div>
+          </div>
+          <p class="caption u-pad__bottom--sm">Matches will be canceled automatically when unaccepted by Drivers. This will trigger 20 minutes before pickup time for scheduled Matches and 20 minutes after a Dash Match has been placed.</p>
+          <div class="slider">
+            <%= label :edit_company_form, :auto_cancel_on_driver_cancel, "Cancel Match After Driver Cancels" %>
+            <div class="slide">
+              <%= checkbox :edit_company_form, :auto_cancel_on_driver_cancel, [id: "auto_cancel_on_driver_cancel", checked: @edit_form.auto_cancel_on_driver_cancel]  %>
+              <label class="caption" for="auto_cancel_on_driver_cancel"></label>
+            </div>
+          </div>
+          <p class="caption u-pad__bottom--sm">When a Driver removes themselves from a Match, it will be canceled.</p>
+        </div>
+        <div>
+          <div class="slider">
+            <%= label :edit_company_form, :origin_photo_required, "Require Origin Photo" %>
+            <div class="slide">
+              <%= checkbox :edit_company_form, :origin_photo_required, [id: "origin_photo_required", checked: @edit_form.origin_photo_required]  %>
+              <label class="caption" for="origin_photo_required"></label>
+            </div>
+          </div>
+          <p class="caption u-pad__bottom--sm">Drivers will be required to upload a photo of the cargo at the pickup location by default.</p>
+          <div class="slider">
+            <%= label :edit_company_form, :destination_photo_required, "Require Proof of Delivery" %>
+            <div class="slide">
+              <%= checkbox :edit_company_form, :destination_photo_required, [id: "destination_photo_required", checked: @edit_form.destination_photo_required]  %>
+              <label class="caption" for="destination_photo_required"></label>
+            </div>
+          </div>
+          <p class="caption u-pad__bottom--sm">Drivers will be required to upload a photo of the delieverd cargo by default.</p>
+          <div class="slider">
+            <%= label :edit_company_form, :signature_required, "Require Signature" %>
+            <div class="slide">
+              <%= checkbox :edit_company_form, :signature_required, [id: "signature_required", checked: @edit_form.signature_required]  %>
+              <label class="caption" for="signature_required"></label>
+            </div>
+          </div>
+          <p class="caption u-pad__bottom--sm">Drivers will require requesting the customer's signature at delivery time.</p>
+        </div>
+      </div>
+    </div>
+    <div class="inline-edit__buttons">
+      <button class="button button--primary" type="submit" tabindex="0">Update</button>
+      <a onclick="" class="button" tabindex="0" phx-click="cancel_edit">Cancel</a>
+    </div>
+  </div>
+</form>

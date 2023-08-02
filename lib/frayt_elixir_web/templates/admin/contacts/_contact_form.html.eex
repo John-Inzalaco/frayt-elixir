@@ -1,0 +1,31 @@
+<h6><%= @name %></h6>
+<fieldset>
+    <div class="width--half">
+        <div class="u-push__bottom--sm">
+            <%= label @form, :name, "#{@name}'s Name" %>
+            <%= text_input @form, :name %>
+            <span class="error"><%= error_tag @form, :name %></span>
+        </div>
+        <div>
+            <label>Notify <%= @name %></label>
+            <div class="slide u-push__bottom--xs">
+                <%= checkbox @form, :notify %>
+                <%= label @form, :notify, "" %>
+            </div>
+            <span class="error"><%= error_tag @form, :notify %></span>
+        </div>
+    </div>
+    <div class="width--half">
+        <div class="u-push__bottom--sm">
+            <%= label @form, :email, "#{@name}'s Email" %>
+            <%= text_input @form, :email %>
+            <span class="error"><%= error_tag @form, :email %></span>
+        </div>
+        <div class="u-push__bottom--sm">
+            <%= label @form, :phone_number, "#{@name}'s Phone" %>
+            <%= phone_number_input @form, :phone_number %>
+            <p class="u-text--sm">Must be in the E.164 format (e.g. +11234567890)</p>
+            <span class="error"><%= error_tag @form, :phone_number %></span>
+        </div>
+    </div>
+</fieldset>

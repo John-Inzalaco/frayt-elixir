@@ -1,0 +1,36 @@
+<div class="u-contain--wide">
+    <div>
+      <h1 class="u-push__bottom u-white">Reset Password</h1>
+      <%= unless (@password_reset_code && @email) do %>
+        <%= form_for @conn, Routes.session_path(@conn, :reset), [as: :session], fn f -> %>
+          <%= label f, :email, class: "u-white" %>
+          <%= email_input f, :email, class: "session__email", autofocus: true %>
+
+          <div class="u-push__top">
+            <%= submit "Send Email", class: "button button--primary inverse session__submit" %>
+            <a href="/" class="u-white">Cancel</a>
+          </div>
+        <% end %>
+      <% else %>
+        <%= form_for @conn, Routes.session_path(@conn, :create, password_reset_code: @password_reset_code, email: @email), [as: :session], fn f -> %>
+          <%= hidden_input f, :password_reset_code, value: @password_reset_code %>
+          <%= hidden_input f, :email, value: @email %>
+          <section>
+            <div class="width--full">
+              <%= label f, :password, class: "inverse" %>
+              <%= password_input f, :password, class: "session__password" %>
+            </div>
+
+            <div class="width--full">
+              <%= label f, :password_confirmation, class: "inverse" %>
+              <%= password_input f, :password_confirmation, class: "session__password" %>
+            </div>
+            <div class="u-push__top width--full">
+              <%= submit "Reset Password", class: "button button--primary inverse session__submit" %>
+              <a href="/reset-password" class="u-white">Cancel</a>
+            </div>
+          </section>
+        <% end %>
+      <% end %>
+    </div>
+</div>

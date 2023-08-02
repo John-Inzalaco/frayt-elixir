@@ -1,0 +1,113 @@
+<section class="header">
+  <div class="header--capacity">
+    <div>
+      <h1>Capacity</h1>
+    </div>
+  </div>
+  <%= if @capacity_error do %>
+    <p class="error"><%= display_capacity_error(@capacity_error) %></p>
+  <% end %>
+  <%= form_for @data_table, "#", [class: "header__filter u-align__items--end u-push__bottom--xxs", filter_on: :phx_submit], fn f -> %>
+    <div id="pickup-address-div">
+      <%= label f, :pickup_address, "Pickup Address" %>
+      <%= text_input f, :pickup_address %>
+    </div>
+    <div>
+      <%= label f, :search_radius, "Search Radius" %>
+      <%= text_input f, :search_radius, [type: :number, step: 0.01, min: 0] %>
+    </div>
+    <div class="select">
+      <%= label f, :driver_location, "Location" %>
+      <%= select f, :driver_location, [{"Home Address", :address}, {"Last Seen Address", :current_location}] %>
+    </div>
+    <div class="u-height--full">
+      <legend>Vehicle Type</legend>
+      <div class="header__filter--checkboxes">
+        <%= multiselect_checkboxes f, :vehicle_types, ["Car": 1, "Midsize": 2, "Cargo Van": 3, "Box Truck": 4], class: "checkbox", label_class: "caption" %>
+      </div>
+    </div>
+    <div>
+      <button class="button button--primary">Search</button>
+    <div>
+  <% end %>
+</section>
+
+<section>
+  <div class="driver-search">
+    <div class="driver-search__header">
+      <h3>Drivers</h3>
+    </div>
+    <div class="driver-search__results">
+      <div class="drivers">
+        <%= cond do %>
+          <% @data_table.updating -> %>
+            <p class="u-text--center">
+              Loading Drivers<br/>
+              <i class="u-animate--spinning material-icons">sync</i>
+            </p>
+          <% Enum.count(@capacity) == 0 -> %>
+            <p class="u-text--center">No drivers found</p>
+          <% true -> %>
+        <% end %>
+        <%= for {driver, i} <- Enum.with_index(@capacity, 1) do %>
+          <div class="driver__vehicle-details">
+            <div>
+              <div class="driver__number"><%= i + @data_table.filters.per_page * @data_table.filters.page %></div>
+            </div>
+            <div>
+              <div class="driver-info-container">
+                <div class="content" style="margin-left: 0px; margin-top: 15px;">
+                  <h3><%= full_name(driver) %><%= if driver.state == :disabled, do: " (Disabled)" %></h3>
+                </div>
+              </div>
+              <div class="inline-details u-push__bottom--sm">
+                <p>Vehicle<%= pluralize(driver.vehicles) %>:</p>
+                <ul class="u-pad--none">
+                  <%= for vehicle <- driver.vehicles do %>
+                    <li data-test-id="driver-vehicle">
+                      <%= "#{vehicle_class(vehicle.vehicle_class)} (#{vehicle.year} #{vehicle.make} #{vehicle.model})" %>
+                    </li>
+                    <li>
+                      <%= if vehicle.lift_gate do %>
+                        <span class="label label--new" data-test-id="lift-gate" style="margin-left: 0;">Lift Gate</span>
+                      <% end %>
+
+                      <%= if vehicle.pallet_jack do %>
+                        <span class="label label--new" data-test-id="pallet-jack" style="margin-left: 0;">Pallet Jack</span>
+                      <% end %>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+              <div class="inline-details">
+                <p>Last Active:</p>
+                <p><%= display_date(driver.updated_at, @time_zone) %></p>
+              </div>
+              <%= if @data_table.filters.driver_location == :address do %>
+                <div class="inline-details">
+                  <p>Home Address:</p>
+                  <p data-test-id="driver-address"><%= display_address(driver.address) %></p>
+                </div>
+              <% end %>
+              <div class="inline-details">
+                <p>Rating:</p>
+                <%= render FraytElixirWeb.Admin.DriversView, "_driver_rating.html", driver: driver %>
+              </div>
+              <div class="u-hide--desktop">
+                <p>Phone Number:</p>
+                <p><%= display_phone(driver.phone_number) %></p>
+              </div>
+            </div>
+            <div class="u-hide--mobile" style="margin-top: 40px;">
+              <p><%= display_phone(driver.phone_number) %></p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <%= Table.pagination_nav(@data_table, id: "pagination", class: "u-push__top--sm") %>
+    </div>
+    <div class="driver-search__map">
+      <%= Phoenix.View.render(FraytElixirWeb.Admin.CapacityView, "_capacity_map.html", [current_user: @current_user, api_key: @api_key, capacity: @capacity] ++ Enum.into(@data_table.filters, [])) %>
+    </div>
+  </div>
+</section>

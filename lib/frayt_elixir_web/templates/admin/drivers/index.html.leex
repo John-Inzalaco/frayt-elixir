@@ -1,0 +1,117 @@
+<section class="header">
+  <div class="header">
+    <div class="header__title">
+      <h1>Drivers</h1>
+      <div>
+        <%= Table.refresh_button(@data_table) %>
+      </div>
+      <a class="button" href="/admin/drivers/applicants/">View Applicants</a>
+    </div>
+    <%= form_for @data_table, "#", [class: "header__actions"], fn f -> %>
+      <div class="header__select">
+        <div class="filter-states">
+          <%= select f, :vehicle_class, [{"All Vehicle Types", nil}] ++ VehicleClass.select_options(), [class: "vehicle-select", data: [test_id: "filter-vehicle"]] %>
+        </div>
+      </div>
+      <div class="header__select">
+        <div class="filter-states">
+          <%= select f, :document_state, [{"All Document Statuses", ""}, {"Expired", "expired"}, {"Pending Review", "pending_approval"},], [class: "states-select", data: [test_id: "filter-states"]] %>
+        </div>
+      </div>
+      <div class="header__select">
+        <div class="filter-states">
+          <%= select f, :state, [{"All Drivers", "active"}, {"Approved Drivers", "approved"}, {"Registered Drivers", "registered"}, {"Disabled Drivers", "disabled"}] %>
+        </div>
+      </div>
+    <% end %>
+    <%= form_for @data_table, "#", [class: "header__search u-push__left--sm", filter_on: :phx_submit], fn f -> %>
+      <div class="header__search">
+        <div class="search">
+          <%= text_input f, :query, [class: "input", type: "search", placeholder: "Search"] %>
+          <button class="search__submit"><i class="material-icons">search</i></button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</section>
+
+<section>
+  <%= Table.pagination_nav(@data_table, id: "top") %>
+  <%# desktop view %>
+  <table class="u-hide--mobile">
+    <thead>
+      <tr class="u-border--none">
+        <%= Table.sort_header(@data_table, "Name", :driver_name) %>
+        <th>Vehicle Type</th>
+        <%= Table.sort_header(@data_table, "Home", :driver_home) %>
+        <%= Table.sort_header(@data_table, "Last Active", :updated_at) %>
+        <%= Table.sort_header(@data_table, "Matches", :driver_matches) %>
+        <%= Table.sort_header(@data_table, "Status", :state) %>
+        <th></th>
+      </tr>
+    </thead>
+    <%= for driver <- @drivers do %>
+      <tbody class="hover">
+        <tr>
+          <td class="u-pad__top--sm u-pad__bottom--sm" style="display: flex;" data-test-id="driver-name">
+            <div style="margin: 0px 0px 0px 0px;">
+              <%= full_name(driver) %>
+            </div>
+          </td>
+          <td class="u-pad__top--sm u-pad__bottom--sm"><%= display_vehicles(driver.vehicles) %></td>
+          <td class="u-pad__top--sm u-pad__bottom--sm" data-test-id="driver-home"><%= driver_city_state(driver) %></td>
+          <td class="u-pad__top--sm u-pad__bottom--sm" data-test-id="driver-updated"><%= display_date(driver.updated_at, @time_zone) %></td>
+          <td class="u-pad__top--sm u-pad__bottom--sm"><%= "#{display_driver_metric(driver, :completed_matches, 0)} ($#{display_driver_metric(driver, :total_earned)})" %></td>
+          <td class="u-pad__top--sm u-pad__bottom--sm<%= if driver.state == :disabled, do: " u-warning" %>" data-test-id="driver-state"><%= title_case(driver.state) %></td>
+          <td class="u-pad__top--sm u-pad__bottom--sm"><a class="button" href="<%= Table.details_path(@data_table, driver.id) %>">View Details</a></td>
+        </tr>
+      </tbody>
+    <% end %>
+  </table>
+
+  <%# mobile view %>
+  <table class="u-hide--desktop">
+    <thead>
+      <tr class="u-border--none">
+        <th>Name</th>
+        <th>Vehicle</th>
+        <th>Home</th>
+      </tr>
+    </thead>
+    <%= for driver <- @drivers do %>
+    <tbody>
+      <%= Table.show_more_button(@data_table, driver.id, :tr, [active_class: "u-background--gray"], fn -> %>
+        <td class="u-pad__top--xs u-pad__bottom--xs"><%= full_name(driver) %></td>
+        <td class="u-pad__top--xs u-pad__bottom--xs">
+          <ul class="u-pad--none u-push--none"><%= display_vehicles(driver.vehicles, :mobile) %></ul>
+        </td>
+        <td class="u-pad__top--xs u-pad__bottom--xs">Cincinnati, OH</td>
+      <% end) %>
+      <%= if Table.show_more?(@data_table, driver.id) do %>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Last Active</td>
+          <td colspan="2"><%= display_date(driver.updated_at, @time_zone) %></td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Matches</td>
+          <td colspan="2"><%= "#{display_driver_metric(driver, :completed_matches, 0)} ($#{display_driver_metric(driver, :total_earned)})" %></td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Status</td>
+          <td colspan="2" class="<%= if driver.state == :disabled, do: "u-warning" %>"><%= title_case(driver.state) %></td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td colspan=3><a class="button" href="<%= Table.details_path(@data_table, driver.id) %>">View Details</a></td>
+        </tr>
+      <% end %>
+      </tbody>
+    <% end %>
+  </table>
+  <%= Table.pagination_nav(@data_table, id: "bottom") %>
+</section>
+
+<%= if @show_modal, do: live_component @socket, FraytElixirWeb.LiveComponent.ModalLive,
+  live_view: @live_view,
+  child_id: "test-modal",
+  title: @title,
+  wide: "false" %>

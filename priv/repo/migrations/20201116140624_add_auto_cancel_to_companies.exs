@@ -1,0 +1,9 @@
+defmodule FraytElixir.Repo.Migrations.AddAutoCancelToCompanies do
+  use Ecto.Migration
+
+  def change do
+    alter table(:companies) do
+      add :auto_cancel, :boolean
+    end
+  end
+end

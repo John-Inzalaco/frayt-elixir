@@ -1,0 +1,92 @@
+<div>
+    <button class="u-push__bottom--sm button <%= if @use_custom?, do: "button--primary" %>"
+        type="button"
+        phx-click="toggle_custom_sla"
+        phx-target="<%= @myself %>"
+        data-test-id="<%= @type %>-contract-sla"
+    >
+        Use custom SLA
+    </button>
+    <div class="push__bottom--sm">
+        <p class="control-label u-text--bold" data-test-id="<%= "#{@type}-sla-form-label" %>">
+            <%= humanize(@type) %>
+        </p>
+        <%= if @form do %>
+            <% duration_type = duration_type_value(@form) %>
+            <div class="form-group">
+                <%= hidden_inputs_for(@form) %>
+                <%= hidden_input @form, :type %>
+                <%= radio_select @form, :duration_type, SLADurationType.select_options(allow_none: true, none_label: "Duration", excluded_options: if(@type == :acceptance, do: [:duration_before_time], else: [])), [class: "radio-button-group radio-button-group--sm"], [class: "radio-button"] %>
+                <span class="error" data-test-id="<%= @type %>-error-message"><%= error_tag @form, :duration_type %></span>
+                <p class="caption u-push__bottom--sm">
+                    <%= case duration_type do %>
+                        <% nil -> %>
+                            <%= case @type do %>
+                                <% :acceptance -> %>
+                                    The acceptance SLA will start at the authorized time and end after the below duration.<br/>
+                                    If the pickup time minus (-) the pickup SLA duration is further out than duration of the acceptance SLA, that time will be used for the acceptance SLA end time and the duration will be ignored.
+                                    If the pickup SLA uses a set time in this scenario, the acceptance SLA end time will end at the scheduled pickup time.
+                                <% :pickup -> %>
+                                    The pickup SLA will start at the end of the acceptance SLA and will end after the below duration.
+                                    If the scheduled pickup time is after the end of the duration, the pickup time will be used instead as the end time and the duration will be ignored.<br/>
+                                    The driver's Pickup SLA will start at the accepted time instead of the end of the acceptance SLA, but will otherwise function identically.
+                                <% :delivery -> %>
+                                    The delivery SLA will start at the end of the pickup SLA, and will end after the below duration.
+                                    If the scheduled dropoff time is after the end of the duration, the dropoff time will be used instead as the end time and the duration will be ignored.<br/>
+                                    The Driver's Delivery SLA will function identically
+                            <% end %>
+                        <% duration_type -> %>
+                            <%= case @type do %>
+                                <% :acceptance -> %>
+                                    The acceptance SLA will start at the authorized time and will end at the time specified below
+                                <% :pickup -> %>
+                                    The pickup SLA will start at the end of the acceptance SLA and will end at the time specified below
+                                <% :delivery -> %>
+                                    The delivery SLA will start at the end of the pickup SLA and will end at the time specified below
+                            <% end %>
+                            <%= if duration_type == "duration_before_time" do %>
+                                minus (-) the duration
+                            <% end %>.
+                            <%= case @type do %>
+                                <% :acceptance -> %>
+                                    <strong>Matches will be unable to be placed or scheduled any later than the acceptance SLA end time minus (-) the minimum duration.</strong><br/>
+                                    <i>The pickup time will not affect the acceptance SLA end time.</i>
+                                <% :pickup -> %>
+                                    <br/>
+                                    If the Frayt or driver's pickup SLA duration is less than the minimum duration, the minimum duration will be used to calculate the SLA end time.
+                                    If the Match has a scheduled pickup time, the pickup SLA will start at that time.<br/>
+                                    The driver's Pickup SLA will start at the accepted time instead of the end of the acceptance SLA, but will otherwise function identically.
+                                <% :delivery -> %>
+                                    If the Frayt or driver's delivery SLA duration is less than the minimum duration, the minimum duration will be used to calculate the SLA end time.
+                                    <strong>The dropoff time will not be allowed to be set.</strong>
+                                <% _ -> %>
+                            <% end %>
+                    <% end %>
+                </p>
+                <%= if duration_type in ~w(end_time duration_before_time) do %>
+                    <div class="u-push__bottom--sm">
+                        <%= label @form, :time, if(duration_type == "end_time", do: humanize(@type) <> " End Time", else: "Time"), class: "control-label u-text--bold" %>
+                        <%= time_input @form, :time %>
+                        <span class="error"><%= error_tag @form, :time %></span>
+                    </div>
+                <% end %>
+                <%= if duration_type in ["duration_before_time", nil] do %>
+                    <div class="u-push__bottom--sm">
+                        <%= label @form, :duration, duration_label(@type, duration_type), class: "control-label u-text--bold" %>
+                        <%= formula_input @form, :duration, variables: ContractSLA.duration_var_defs(), style: "width: 80%", data_test_id: "#{@type}-sla-form-input" %>
+                        <span class="error" data-test-id="<%= @type %>-error-message"><%= error_tag @form, :duration %></span>
+                    </div>
+                <% end %>
+                <%= if duration_type in ["duration_before_time", "end_time"] do %>
+                    <div class="u-push__bottom--sm">
+                        <%= label @form, :min_duration, "Minimum Duration (minutes)", class: "control-label u-text--bold" %>
+                        <%= formula_input @form, :min_duration, variables: ContractSLA.duration_var_defs(), style: "width: 80%", data_test_id: "#{@type}-sla-form-input" %>
+                        <span class="error"><%= error_tag @form, :min_duration %></span>
+                    </div>
+                <% end %>
+            </div>
+        <% else %>
+            <p data-test-id="<%= "#{@type}-sla-form-value" %>">Default</p>
+        <% end %>
+    </div>
+</div>

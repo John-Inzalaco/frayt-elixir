@@ -1,0 +1,127 @@
+<%# desktop view %>
+<table class="u-hide--mobile">
+  <thead>
+    <tr class="u-border--none">
+      <th>Date</th>
+      <th>Amount</th>
+      <th>Payer</th>
+      <th colspan="2">Transaction Type</th>
+      <th colspan="2">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for payment <- @payments do %>
+      <tr class="u-pointer u-pointer--hover<%= if @show_more == payment.id, do: " u-background--gray" %><%= if payment.canceled_at, do: " caption" %>" tabindex=0 phx-click="toggle_show_more" phx-value-paymentid="<%= payment.id %>">
+        <td><%= display_date_time(payment.inserted_at, @time_zone) %></td>
+        <td>
+          <div class="u-flex u-flex__justify--space-between">
+            <span>$</span>
+            <span class="u-pad__left--sm"> <%= display_price(payment.amount) %></span>
+          </div>
+        </td>
+        <td data-test-id="payer-name"><p><%= payer_name(payment) %></p></td>
+        <td colspan="2">
+          <%= title_case(payment.transaction_type) %><%= if payment.driver_bonus, do: " Bonus" %>
+        </td>
+        <td colspan="2" class="<%= if payment.status == "error", do: "u-warning" %>"><%= if payment.canceled_at, do: "Void", else: title_case(payment.status) %>
+          <div class="caption"><b>External ID:</b> <%= payment.external_id %></div>
+        </td>
+      </tr>
+      <%= if @show_more == payment.id do%>
+      <tbody class="table__show-more <%= if @show_more == payment.id, do: "table__show-more--open" %>  <%= if payment.canceled_at, do: "caption" %>">
+        <tr class="u-border--none u-background--gray">
+          <%= unless payment.driver_bonus do %>
+            <td class="header--inline">Coupon</td>
+            <td><%= coupon_code(@match) %></td>
+          <% else %>
+            <td colspan="2"></td>
+          <% end %>
+          <td class="header--inline">Driver</td>
+          <td class="<%= if driver_disabled?(payment), do: "u-warning" %>">
+            <%= driver_name(payment) %><span class="caption"> <%= driver_unknown(payment) || driver_state(payment) %></span>
+          </td>
+          <%= if payment.driver_bonus do %>
+            <td class="header--inline">Bonus Notes</td>
+            <td data-test-id="bonus-notes"><%= payment.driver_bonus.notes %></td>
+          <% else %>
+            <td class="header--inline">Shipper</td>
+            <td data-test-id="shipper-name"><%= if @match, do: full_name(@match.shipper), else: "-" %></td>
+          <% end %>
+          <%= if payment.transaction_type == :transfer do %>
+            <td class="u-warning"><%= if payment.payment_provider_response, do: Poison.decode!(payment.payment_provider_response)["status_reason"] %></td>
+          <% else %>
+            <td class="u-warning"><%= if payment.payment_provider_response, do: Poison.decode!(payment.payment_provider_response)["message"] %></td>
+          <% end %>
+        </tr>
+      </tbody>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>
+
+<%# mobile view %>
+<table class="u-hide--desktop">
+  <thead>
+    <tr class="u-border--none">
+      <th>Date</th>
+      <th>Amount</th>
+    </tr>
+  </thead>
+  <%= for payment <- @payments do %>
+    <tbody class="<%= if payment.canceled_at, do: "caption" %>">
+      <tr onclick="" class="<%= if @show_more == payment.id, do: "u-background--gray" %>" phx-click="toggle_show_more" phx-value-paymentid="<%= payment.id %>">
+        <td class="u-pad__top--xs u-pad__bottom--xs"><%= display_date_time(payment.inserted_at, @time_zone) %></td>
+        <td>$ <span class="u-pad__left--sm"> <%= display_price(payment.amount) %></span></td>
+        <%= if payment.status == "error" do %>
+        <td>
+          <button class="button button--primary" type="submit">Retry <%= title_case(payment.transaction_type) %></button>
+        </td>
+        <% end %>
+      </tr>
+      <%= if @show_more == payment.id do%>
+        <%= unless payment.driver_bonus do %>
+          <tr class="u-border--none u-background--gray">
+            <td class="header--inline">Coupon</td>
+            <td><%= coupon_code(@match) %></td>
+          </tr>
+        <% end %>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Driver</td>
+          <td class="<%= if driver_disabled?(payment), do: "u-warning" %>">
+            <%= driver_name(payment) %><span class="caption"> <%= driver_unknown(payment) || driver_state(payment) %></span>
+          </td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Payer</td>
+          <td><p><%= payer_name(payment) %></p></td>
+        </tr>
+        <%= if payment.driver_bonus do %>
+          <tr class="u-border--none u-background--gray">
+            <td class="header--inline">Bonus Notes</td>
+            <td><%= payment.driver_bonus.notes %></td>
+          </tr>
+        <% else %>
+          <tr class="u-border--none u-background--gray">
+            <td class="header--inline">Shipper</td>
+            <td><%= if @match, do: full_name(@match.shipper), else: "-" %></td>
+          </tr>
+        <% end %>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Transaction Type</td>
+          <td><%= title_case(payment.transaction_type) %><%= if payment.driver_bonus, do: " Bonus" %></td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Status</td>
+          <td class="<%= if payment.status == "error", do: "u-warning" %>"><%= if payment.canceled_at, do: "Void", else: title_case(payment.status) %>
+          <%= payment.transaction_type %>
+          <div class="caption"><b>External ID:</b> <%= payment.external_id %></div>
+          <%= if payment.transaction_type == :transfer do %>
+            <div><%= if payment.payment_provider_response, do: Poison.decode!(payment.payment_provider_response)["status_reason"] %></div></td>
+          <% else %>
+            <div><%= if payment.payment_provider_response, do: Poison.decode!(payment.payment_provider_response)["message"] %></div></td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  <% end %>
+</table>

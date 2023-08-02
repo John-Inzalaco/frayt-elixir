@@ -1,0 +1,141 @@
+body {
+  color: $dark-gray;
+  font-family: $font-primary;
+  font-size: 14px;
+  font-weight: 400;
+
+    @media screen and (max-width: $screen-tablet) {
+      font-size: 12px;
+  }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+h1 {
+  font-size: 2.3rem;
+
+  @media screen and (max-width: $screen-tablet) {
+    font-size: 2.25rem;
+  }
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+h3 {
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+}
+
+h5 {
+  font-size: 1.1rem;
+  color: $light-gray;
+  margin-bottom: .25rem;
+}
+
+h6 {
+  font-size: 1rem;
+}
+
+p {
+  font-family: $font-primary;
+}
+
+b {
+  font-weight: 600;
+}
+
+strong {
+  font-weight: 800;
+}
+
+i {
+  font-style: italic;
+}
+
+ul {
+  list-style-type: none;
+
+  &.list {
+    &--bulleted {
+      list-style-type: circle;
+      list-style-position: inside;
+    }
+  }
+}
+
+li {
+  padding: 0 0 $pad-xxs;
+}
+
+a {
+  color: $blue;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: .8rem;
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: darken($blue, 30%);
+  }
+}
+
+button {
+  color: $dark-gray;
+}
+
+.caption {
+  color: $light-gray;
+  font-size: 0.8rem;
+  line-height: 1.5;
+
+  @media screen and (max-width: $screen-tablet) {
+    font-size: .75rem;
+  }
+
+  &--capacity {
+    position: relative;
+    top: -14px;
+  }
+
+  code {
+    color: $white;
+  }
+}
+
+.p--gray {
+  color: $light-gray;
+}
+
+.disabled {
+  color: $light-gray;
+  cursor: not-allowed;
+
+  &:hover {
+    color: $light-gray;
+  }
+}
+
+code {
+  background-color: $light-gray;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+pre {
+  background-color: $light-gray;
+  padding: 2px 5px;
+  border-radius: 4px;
+  white-space: normal;
+}

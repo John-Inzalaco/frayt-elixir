@@ -1,0 +1,10 @@
+.formula-input {
+  .drop-down.input__group--addon {
+    padding: 0;
+    .drop-down__label {
+      cursor: pointer;
+      padding: $pad-xxs $pad-xs;
+      opacity: 0.8;
+    }
+  }
+}

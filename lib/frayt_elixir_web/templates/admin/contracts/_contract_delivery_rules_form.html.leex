@@ -1,0 +1,43 @@
+<%= f = form_for @changeset, "#", [phx_change: :change_contract, phx_submit: :update_contract] %>
+  <div class="u-push__bottom--sm u-pad__top">
+    <div class="u-flex u-flex__justify--space-between u-flex__align--baseline u-push__bottom--sm">
+      <div>
+        <h4>Overlapping Rules</h4>
+      </div>
+    </div>
+    <div class="u-grid__3-column">
+      <div>
+        <%= label f, :active_matches, "Active Matches per Driver" %>
+        <%= number_input f, :active_matches %>
+        <span class="error"><%= error_tag f, :active_matches %></span>
+      </div>
+      <div class="u-push__bottom--sm">
+        <%= if input_value(f, :active_matches) not in ["", nil] do %>
+          <%= label f, :active_match_factor, "Active Match Factor" %>
+          <%= select f, :active_match_factor, FraytElixir.Contracts.ActiveMatchFactor.select_options(allow_none: false) %>
+          <span class="error"><%= error_tag f, :active_match_factor %></span>
+        <% else %>
+          <%= hidden_input f, :active_match_factor, value: nil %>
+        <% end %>
+      </div>
+      <div class="u-push__bottom--sm">
+        <%= if input_value(f, :active_match_factor) in ["fixed_duration", :fixed_duration] and input_value(f, :active_matches) not in ["", nil] do %>
+          <%= label f, :active_match_duration, "Active Match Duration from Pickup (min)" %>
+          <%= number_input f, :active_match_duration %>
+          <span class="error"><%= error_tag f, :active_match_duration %></span>
+        <% else %>
+          <%= hidden_input f, :active_match_duration, value: nil %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <div class="u-push__top">
+    <%= if length(f.errors) > 0 do %>
+      <p class="error u-push__bottom--xs">Please correct all errors in this form to continue.</p>
+    <% end %>
+    <button class="button button--primary" type="submit">Update Rules</button>
+    <%= if @contract.id do %>
+      <a onclick="" tabindex=0 phx-click="edit_contract" class="button">Cancel</a>
+    <% end %>
+  </div>
+</form>

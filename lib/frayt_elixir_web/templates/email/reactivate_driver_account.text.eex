@@ -1,0 +1,6 @@
+Frayt Account Reactivated
+<%= @name %>, your account has been reactivated.
+When you sign in, you can now see and accept matches.
+
+Thanks!
+- The Frayt Team

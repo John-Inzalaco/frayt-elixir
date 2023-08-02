@@ -1,0 +1,86 @@
+.drop-down {
+  position: relative;
+
+  > input[type="checkbox"] {
+    visibility: hidden;
+    height: 0;
+    width: 0;
+    overflow: hidden;
+    position: absolute;
+  }
+
+  label {
+    cursor: pointer;
+  }
+
+  &__trigger {
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+      align-items: center;
+  }
+
+  &__content {
+    display: none;
+    min-width: 250px;
+    background-color: $white;
+    border-radius: $border-radius;
+    border: 1px solid $light-gray;
+    color: $dark-gray;
+    padding: $pad-xs;
+    position: absolute;
+    width: 100%;
+  }
+
+  &__menu {
+    display: none;
+    position: absolute;
+    min-width: 100%;
+    background-color: $white;
+    flex-direction: column;
+    border-top: 2px solid $orange;
+    box-shadow: 0 0 3px rgba(0,0,0,0.2);
+    // border: 1px solid $;
+
+
+    &-item {
+      padding: .375rem 1rem;
+      color: $dark-gray; 
+      white-space: nowrap;
+      // border-left: 1px solid darken($white, 10%);
+      
+      &.selected {
+        border-bottom: 1px solid #BBB;
+        font-weight: 550;
+      }
+
+      &:hover, &:focus {
+        background-color: $gray-bg;
+        color: lighten($dark-gray, 15%);
+      }
+
+      &-header {
+        padding: .25rem 1rem .125rem;
+        background-color: darken($white, 5%);
+        border-bottom: 1px solid darken($white, 10%);
+        color: $dark-gray;
+        white-space: nowrap;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+    }
+    
+  }
+
+  input:checked ~, &.drop-down--open > {
+    .drop-down__content {
+      display: block;
+      z-index: 10;
+    }
+
+    .drop-down__menu {
+      display: flex;
+      z-index: 10;
+    }
+  }
+}

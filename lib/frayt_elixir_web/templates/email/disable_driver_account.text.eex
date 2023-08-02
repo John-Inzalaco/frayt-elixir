@@ -1,0 +1,7 @@
+Frayt Account Disabled
+Sorry, <%= @name %>, your account has been disabled.
+<%= @note %>
+Please contact support for more information or to challenge this decision.
+
+Thanks!
+- The Frayt Team

@@ -1,0 +1,82 @@
+<%= f = form_for @changeset, "#", [phx_change: :change_driver, phx_submit: :update_driver] %>
+  <section>
+    <div class="width--full">
+      <div class="width--half u-push__top--sm">
+        <div>
+          <%= label f, :first_name, "First Name" %>
+          <%= text_input f, :first_name, class: "input" %>
+          <span class="error"><%= error_tag f, :first_name %></span>
+        </div>
+
+        <div>
+          <%= label f, :last_name, "Last Name" %>
+          <%= text_input f, :last_name, class: "input" %>
+          <span class="error"><%= error_tag f, :last_name %></span>
+        </div>
+      </div>
+
+      <div class="width--half u-push__top--sm">
+        <%= inputs_for f, :user, fn u -> %>
+          <div>
+            <%= label u, :email, "Email" %>
+            <%= text_input u, :email, class: "input" %>
+            <span class="error"><%= error_tag u, :email %></span>
+          </div>
+        <% end %>
+
+        <div>
+          <%= label f, :phone_number, "Phone" %>
+          <%= text_input f, :phone_number, class: "input" %>
+          <span class="error"><%= error_tag f, :phone_number %></span>
+        </div>
+      </div>
+      <div class="width--half u-push__top--sm">
+        <div>
+          <%= label f, :market_id, "Market" %>
+          <%= record_select(f, :market_id, Market) %>
+          <span class="error"><%= error_tag f, :market_id %></span>
+        </div>
+      </div>
+      <%= address_input_group(f, :address, class: "u-push__top--sm") %>
+
+      <div class="width--half u-push__top--sm">
+        <div>
+          <%= label f, :ssn, "SSN" %>
+          <%= text_input f, :ssn, class: "input" %>
+          <span class="error"><%= error_tag f, :ssn %></span>
+        </div>
+        <div>
+          <%= label f, :birthdate, "Birthday" %>
+          <%= date_input f, :birthdate, class: "input" %>
+          <span class="error"><%= error_tag f, :birthdate %></span>
+        </div>
+      </div>
+
+      <div class="width--half u-push__top--sm">
+        <div>
+          <%= label f, :english_proficiency, "English Proficiency" %>
+          <%= select f, :english_proficiency, Proficience.select_options(), class: "input" %>
+          <span class="error"><%= error_tag f, :english_proficiency %></span>
+        </div>
+        <div>
+          <%= label f, :license_number, "Driver's License Number" %>
+          <%= text_input f, :license_number, class: "input" %>
+          <span class="error"><%= error_tag f, :license_number %></span>
+        </div>
+      </div>
+
+      <div class="width--half u-push__top--sm">
+        <div>
+          <%= label f, :active_match_limit, "Active Match Limit" %>
+          <%= number_input f, :active_match_limit, class: "input" %>
+          <span class="error"><%= error_tag f, :active_match_limit %></span>
+        </div>
+      </div>
+
+      <div class= "u-push__top--sm">
+        <button class="button button--primary" type="submit">Update Driver</button>
+        <a onclick="" class="button" phx-keyup="toggle_edit" phx-key="Enter" tabindex=0 phx-click="toggle_edit">Cancel</a>
+      </div>
+    </div>
+  </section>
+</form>

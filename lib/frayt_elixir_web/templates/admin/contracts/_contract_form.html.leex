@@ -1,0 +1,42 @@
+<%= f = form_for @changeset, "#", [phx_change: :change_contract, phx_submit: :update_contract] %>
+  <div class="width--half">
+    <div class="u-push__bottom--sm">
+      <%= label f, :name, "Contract Name *" %>
+      <%= text_input f, :name %>
+      <span class="error"><%= error_tag f, :name %></span>
+    </div>
+    <div class="u-push__bottom--sm">
+      <%= label f, :contract_key, "Contract Key *" %>
+      <%= text_input f, :contract_key %>
+      <p class="caption">This is the key that clients will enter to use this Contract over the API</p>
+      <span class="error">
+        <%= error_tag f, :contract_key %>
+        <%= error_tag f, :contract_key_company_id %>
+      </span>
+    </div>
+    <div class="u-push__bottom--sm">
+      <%= label f, :company_id, "Company *" %>
+      <%= record_select(f, :company_id, Company, initial_record: @contract.company) %>
+      <span class="error"><%= error_tag f, :company_id %></span>
+    </div>
+    <div class="u-push__bottom--sm">
+      <%= label f, :pricing_contract, "Pricing Contract" %>
+      <%= select f, :pricing_contract, CustomContracts.select_options() %>
+      <span class="error"><%= error_tag f, :pricing_contract %></span>
+    </div>
+  </div>
+  <div class="u-push__top">
+    <%= if length(f.errors) > 0 do %>
+      <p class="error u-push__bottom--xs">Please correct all errors in this form to continue.</p>
+    <% end %>
+    <button class="button button--primary" type="submit"><%= if @contract.id, do: "Update", else: "Create" %> Contract</button>
+    <%= if @contract.id do %>
+      <a onclick="" tabindex=0 phx-click="edit_contract" class="button">Cancel</a>
+      <%= if @contract.disabled do %>
+        <a onclick="" tabindex=0 phx-click="disable_contract" phx-value-disabled="false" class="button button--success u-float--right">Enable</a>
+      <% else %>
+        <a onclick="" tabindex=0 data-confirm="Are you sure you want to disable this contract? This will block all Matches attempted to be created with this contract." phx-click="disable_contract" phx-value-disabled="true" class="button button--danger u-float--right">Disable</a>
+      <% end %>
+    <% end %>
+  </div>
+</form>

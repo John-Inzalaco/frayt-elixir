@@ -1,0 +1,54 @@
+<%= f = form_for @company_changeset, "#", [phx_change: :change, phx_submit: :update] %>
+  <div class="inline-edit inline-edit__details-page">
+    <div class="width--full u-push__top--sm">
+      <div class="width--half">
+        <div class="u-flex__flex-1">
+
+          <%= if @company.integration == :bringg do %>
+            <%= inputs_for f, :webhook_config, fn w -> %>
+              <div>
+                <%= label w, :client_id, "Client ID" %>
+                <%= text_input w, :client_id %>
+                <span class="error"><%= error_tag w, :client_id %></span>
+              </div>
+              <div>
+                <%= label w, :secret, "Secret" %>
+                <%= text_input w, :secret %>
+                <span class="error"><%= error_tag w, :secret %></span>
+              </div>
+            <% end %>
+          <% else %>
+          <div>
+            <%= label f, :webhook_url, "Webhook URL" %>
+            <%= text_input f, :webhook_url %>
+            <span class="error"><%= error_tag f, :webhook_url %></span>
+          </div>
+          <%= for w <- inputs_for(f, :webhook_config) do %>
+            <%= if input_value(f, :webhook_url) && input_value(f, :webhook_url) != "" do %>
+              <div>
+                <%= label w, :auth_header, "Webhook Auth Header" %>
+                <%= text_input w, :auth_header %>
+                <span class="error"><%= error_tag w, :auth_header %></span>
+              </div>
+              <div>
+                <%= label w, :api_version, "API Version" %>
+                <%= select w, :api_version, APIVersion.select_options(none_label: "All", allow_none: false) %>
+                <span class="error"><%= error_tag w, :api_version %></span>
+              </div>
+              <div>
+                <%= label w, :auth_token, "Webhook Auth Token" %>
+                <%= text_input w, :auth_token %>
+                <span class="error"><%= error_tag w, :auth_token %></span>
+              </div>
+            <% end %>
+          <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="inline-edit__buttons">
+      <button class="button button--primary" type="submit" tabindex="0">Update</button>
+      <a onclick="" class="button" tabindex="0" phx-click="cancel_edit">Cancel</a>
+    </div>
+  </div>
+</form>

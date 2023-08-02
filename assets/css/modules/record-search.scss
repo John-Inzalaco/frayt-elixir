@@ -1,0 +1,80 @@
+.record-search {
+    position: relative;
+
+    &__input {
+        width: 100%;
+        &:focus {
+            + .record-search__results {
+                display: block;
+            }
+
+            ~ .record-search__selected {
+                display: none;
+            }
+        }
+
+        &:not(:focus) {
+            color: transparent;
+        }
+    }
+
+    &__selected {
+        cursor: text;
+        position: absolute;
+        top: 0;
+        padding: .45rem .5rem;
+        white-space: nowrap;
+        width: 100%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        font-size: .9rem;
+        margin: 0;
+    }
+
+    &__results {
+        transition: all 0.3s ease;
+        position: absolute;
+        display: none;
+        border-bottom: 3px solid $orange;
+        box-shadow: 0 0 4px #000;
+        z-index: 100;
+        min-width: 100%;
+
+        &:active {
+            display: block;
+        }
+
+        li {
+            text-decoration: none;
+            padding: 0;
+
+            > span, > a {
+                display: block;
+                padding: .5rem;
+                background-color: $gray-bg;
+                color: $dark-gray;
+            }
+
+            > a {
+                &:hover, &:active {
+                    color: contrast($dark-gray, -20%);
+                    background-color: $white;
+                }
+            }
+
+            &.disabled {
+                font-style: italic;
+                > span, > a {
+                    background-color: contrast($gray-bg, 3%);
+                }
+            }
+
+            &.record-search__selected-option {
+                > span, > a {
+                    font-weight: bold;
+                    background-color: $white;
+                }
+            }
+        }
+    }
+}

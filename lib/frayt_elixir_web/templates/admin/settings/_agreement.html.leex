@@ -1,0 +1,109 @@
+<tbody class="hover">
+  <%= Table.show_more_button(@data_table, @agreement.id, :tr, [active_class: "u-background--gray"], fn -> %>
+    <td class="u-pad__top--sm u-pad__bottom--sm"><%= @agreement.title || "(Untitled)" %></td>
+    <td class="u-pad__top--sm u-pad__bottom--sm"><%= content_tag :span, DocumentState.name(@agreement.state), class: (if @agreement.state == :draft, do: "error") %></td>
+    <td class="u-hide--mobile u-pad__top--sm u-pad__bottom--sm"><%= DocumentType.name(@agreement.type) %></td>
+    <td class="u-hide--mobile u-pad__top--sm u-pad__bottom--sm"><%= UserType.name(@agreement.user_types) %></td>
+    <td class="u-hide--mobile u-pad__top--sm u-pad__bottom--sm"><%= display_date_time(@agreement.updated_at, @time_zone) %></td>
+  </tr>
+  <% end) %>
+  <%= if @editing == @agreement.id do %>
+    <tr class="u-border--none u-background--gray">
+      <td colspan="5">
+        <%= f = form_for @changeset, "#", [phx_change: :change_agreement, phx_submit: :update_agreement] %>
+          <div class="width--half">
+            <div class="u-push__bottom--sm">
+              <%= label f, :state, "Document Status *" %>
+              <%= select f, :state, DocumentState.select_options(), value: input_value(f, :state) %>
+              <span class="error"><%= error_tag f, :state %></span>
+            </div>
+            <div class="u-push__bottom--sm">
+              <%= label f, :parent_document_id, "Parent Document" %>
+              <%= record_select(f, :parent_document_id, AgreementDocument, initial_record: @agreement.parent_document) %>
+              <span class="error"><%= error_tag f, :parent_document_id %></span>
+            </div>
+            <div class="u-push__bottom--sm">
+              <%= label f, :type, "Document Type *" %>
+              <%= select f, :type, DocumentType.select_options(), value: input_value(f, :type) %>
+              <span class="error"><%= error_tag f, :type %></span>
+            </div>
+            <div class="u-push__bottom--sm">
+              <%= label f, :user_types, "Target User *" %>
+              <%= checkbox_select f, :user_types, UserType.options(excluded_options: [:admin]), selected: input_value(f, :user_types) %>
+              <span class="error"><%= error_tag f, :user_types %></span>
+            </div>
+          </div>
+          <div class="u-push__bottom--sm">
+            <%= label f, :title, "Document Title *" %>
+            <%= text_input f, :title, value: input_value(f, :title) %>
+            <span class="error"><%= error_tag f, :title %></span>
+          </div>
+          <div class="u-push__bottom--sm">
+            <%= label f, :content, "Content *" %>
+            <%= html_input f, :content, value: input_value(f, :content) %>
+            <span class="error"><%= error_tag f, :content %></span>
+          </div>
+          <span class="error"><%= error_tag f, :type_user_type %></span>
+          <%= if input_value(f, :state) in ["published", :published] do %>
+            <strong class="caption">NOTICE: Saving this document will require <%= UserType.name(input_value(f, :user_types)) %>'s to agree to this updated agreement.</strong>
+          <% else %>
+            <strong class="caption">NOTICE: This document must be published before <%= UserType.name(input_value(f, :user_types)) %>'s can agree to these terms.</strong>
+          <% end %>
+          <div class="u-push__top">
+            <%= if length(f.errors) > 0 do %>
+              <p class="error u-push__bottom--xs">Please correct all errors in this form to continue.</p>
+            <% end %>
+            <button class="button button--primary" type="submit"><%= save_agreement_label(@agreement.id, input_value(f, :state)) %></button>
+            <a onclick="" tabindex=0 phx-click="cancel_edit" class="button">Cancel</a>
+            <%= if @agreement.id != "new" do %>
+              <a onclick="" tabindex=0 data-confirm="Are you sure you want to delete this agreement? This will remove all records of agreements to this document and cannot be undone." phx-click="delete_agreement:<%= @agreement.id %>" class="button button--danger u-float--right">Delete</a>
+            <% end %>
+          </div>
+        </form>
+      </td>
+    </tr>
+  <% else %>
+    <%= if Table.show_more?(@data_table, @agreement.id) do %>
+      <tr class="u-hide--desktop u-border--none u-background--gray">
+        <td class="header--inline">Type</td>
+        <td colspan="5"><%= DocumentType.name(@agreement.type) %></td>
+      </tr>
+      <tr class="u-hide--desktop u-border--none u-background--gray">
+        <td class="header--inline">Target User</td>
+        <td colspan="5"><%= UserType.name(@agreement.user_types) %></td>
+      </tr>
+      <tr class="u-hide--desktop u-border--none u-background--gray">
+        <td class="header--inline">Updated At</td>
+        <td colspan="5"><%= display_date(@agreement.updated_at, @time_zone) %></td>
+      </tr>
+      <tr class="u-border--none u-background--gray">
+        <td class="header--inline">Created At</td>
+        <td colspan="5"><%= display_date(@agreement.inserted_at, @time_zone) %></td>
+      </tr>
+      <%= if @agreement.parent_document do %>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Parent Document</td>
+          <td colspan="5">
+              <p><%= @agreement.parent_document.title %> (<%= DocumentType.name(@agreement.parent_document.type) %> for <%= UserType.name(@agreement.parent_document.user_types) %>)</p>
+          </td>
+        </tr>
+      <% end  %>
+      <%= if length(@agreement.support_documents) > 0 do %>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Supporting Documents</td>
+          <td colspan="5">
+            <%= for support <- @agreement.support_documents do %>
+              <p><%= support.title %> (<%= DocumentType.name(support.type) %> for <%= UserType.name(support.user_types) %>)</p>
+            <% end  %>
+          </td>
+        </tr>
+      <% end  %>
+      <tr class="u-border--none u-background--gray">
+        <td colspan=5>
+          <a href="<%= agreement_document_url(@agreement.id) %>" target="_blank" class="button button--primary">View Agreement <i class="fa fa-external-link"></i></a>
+          <a onclick="" phx-click="edit_agreement:<%= @agreement.id %>" class= "button">Edit Agreement</a>
+        </td>
+      </tr>
+    <% end %>
+  <% end %>
+</tbody>

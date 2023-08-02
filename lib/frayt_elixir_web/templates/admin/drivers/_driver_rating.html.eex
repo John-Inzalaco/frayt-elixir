@@ -1,0 +1,10 @@
+<%= with %DriverMetrics{
+           rating: rating,
+           completed_matches: completed_matches,
+           rated_matches: rated_matches
+         } <- Drivers.get_driver_metrics(@driver) do %>
+  <div>
+    <span class="label__stars"><%= render FraytElixirWeb.Admin.DriversView, "_star_rating.html", rating: rating %></span>
+    <p class="caption">(<%= rating %> stars, <%= display_large_numbers(completed_matches) %> Deliveries, <%= display_large_numbers(rated_matches) %> Ratings)</p>
+  </div>
+<% end %>

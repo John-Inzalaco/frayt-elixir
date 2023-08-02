@@ -1,0 +1,304 @@
+{
+  "swagger": "2.0",
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "paths": {
+    "/oauth/token": {
+      "post": {
+        "tags": [
+          "Oauth"
+        ],
+        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "required": false,
+            "name": "client_id",
+            "in": "query",
+            "description": "Client ID"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "secret",
+            "in": "query",
+            "description": "Secret"
+          }
+        ],
+        "operationId": "FraytElixirWeb.OauthController.authenticate",
+        "description": "Acquire JWT Token"
+      }
+    },
+    "/matches/{id}": {
+      "get": {
+        "tags": [
+          "Match"
+        ],
+        "summary": "",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "required": true,
+            "name": "id",
+            "in": "path",
+            "description": "Estimate ID"
+          }
+        ],
+        "operationId": "FraytElixirWeb.API.MatchController.show",
+        "description": "Get match"
+      }
+    },
+    "/matches": {
+      "post": {
+        "tags": [
+          "Match"
+        ],
+        "summary": "",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "required": false,
+            "name": "estimate",
+            "in": "query",
+            "description": "Estimate ID"
+          },
+          {
+            "type": "integer",
+            "required": false,
+            "name": "dimensions_length",
+            "in": "query",
+            "description": "Length"
+          },
+          {
+            "type": "integer",
+            "required": false,
+            "name": "dimensions_width",
+            "in": "query",
+            "description": "Width"
+          },
+          {
+            "type": "integer",
+            "required": false,
+            "name": "dimensions_height",
+            "in": "query",
+            "description": "Height"
+          },
+          {
+            "type": "integer",
+            "required": false,
+            "name": "weight",
+            "in": "query",
+            "description": "Weight"
+          },
+          {
+            "type": "integer",
+            "required": false,
+            "name": "pieces",
+            "in": "query",
+            "description": "Pieces"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "shipper_email",
+            "in": "query",
+            "description": "Shipper Email"
+          },
+          {
+            "type": "boolean",
+            "required": false,
+            "name": "load_unload",
+            "in": "query",
+            "description": "Load/Unload"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "pickup_notes",
+            "in": "query",
+            "description": "Pickup Notes"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "dropoff_notes",
+            "in": "query",
+            "description": "Dropoff Notes"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "description",
+            "in": "query",
+            "description": "Description"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "job_number",
+            "in": "query",
+            "description": "Job Number"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "recipient_name",
+            "in": "query",
+            "description": "Recipient Name"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "recipient_phone",
+            "in": "query",
+            "description": "Recipient Phone"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "recipient_email",
+            "in": "query",
+            "description": "Recipient Email"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "scheduled_pickup",
+            "in": "query",
+            "description": "Scheduled Pick up date"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "scheduled_dropoff",
+            "in": "query",
+            "description": "Scheduled Drop off date"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "identifier",
+            "in": "query",
+            "description": "Identifier"
+          }
+        ],
+        "operationId": "FraytElixirWeb.API.MatchController.create",
+        "description": "Create match",
+        "consumes": [
+          "application/json"
+        ]
+      }
+    },
+    "/estimates": {
+      "post": {
+        "tags": [
+          "Match"
+        ],
+        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "required": false,
+            "name": "origin_address",
+            "in": "query",
+            "description": "Origin Address"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "destination_address",
+            "in": "query",
+            "description": "Destination Address"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "service_level",
+            "in": "query",
+            "description": "Service Level"
+          },
+          {
+            "type": "string",
+            "required": false,
+            "name": "vehicle_class",
+            "in": "query",
+            "description": "Vehicle Class"
+          },
+          {
+            "type": "integer",
+            "required": false,
+            "name": "weight",
+            "in": "query",
+            "description": "Weight"
+          },
+          {
+            "type": "boolean",
+            "required": false,
+            "name": "load_fee",
+            "in": "query",
+            "description": "Load fee"
+          }
+        ],
+        "operationId": "FraytElixirWeb.API.MatchController.create_estimate",
+        "description": "Create new estimate",
+        "consumes": [
+          "application/json"
+        ]
+      }
+    }
+  },
+  "info": {
+    "version": "1.1",
+    "title": "Frayt API"
+  },
+  "host": "frayt-prod.gigalixirapp.com",
+  "definitions": {},
+  "basePath": "/api/v1.1"
+}

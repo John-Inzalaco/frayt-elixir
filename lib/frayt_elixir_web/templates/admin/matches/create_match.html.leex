@@ -1,0 +1,220 @@
+<div>
+  <section class="show-layout__header">
+    <%= go_back_link("All Matches", Routes.matches_path(@socket, :index)) %>
+    <div>
+      <h3>Create Match</h3>
+    </div>
+  </section>
+  <form phx-submit="search_shippers" phx-change="change_shipper">
+    <section data-test-id="shipper">
+      <div class="u-push__top--xxs u-push__bottom--xxs">
+        <%= label :search_shipper, :shipper_email, "Shipper Email" %><span class="caption"> Note: Shipper must exist to be added to a match </span>
+        <div class="search">
+          <%= text_input :search_shipper, :shipper_email, [class: input_error(@errors, :shipper), type: "search", placeholder: "Search Shippers", value: @match.shipper.user.email, class: input_error(@errors, :shipper_id)] %>
+          <button class="search__submit"><i class="material-icons">search</i></button>
+        </div>
+        <%= display_error(@errors, :shipper_id) %>
+      </div>
+      <%= if @found_shipper do %>
+        <div class="u-push__top--xxs u-push__bottom--xxs">
+          <label>Shipper</label>
+          <p><%= full_name(@match.shipper) %></p>
+          <p><%= display_shipper_phone(@match.shipper.phone) %></p>
+          <p><%= @match.shipper.user.email %></p>
+        </div>
+      <% end %>
+    </section>
+  </form>
+  <form phx-submit="create_match" phx-change="change_match">
+    <section data-test-id="logistics">
+      <div class="width--full">
+        <div class="u-push__bottom--sm">
+          <%= label :match, :origin_address, "Pick Up Address" %>
+          <%= text_input :match, :origin_address, value: @match.origin_address, class: input_error(@errors, :origin_address) %>
+          <%= display_error(@errors, :origin_address) %>
+        </div>
+        <div class="u-push__bottom--sm">
+          <%= label :match, :pickup_notes, "Pick Up Notes", class: "optional" %>
+          <%= text_input :match, :pickup_notes, value: @match.pickup_notes %>
+        </div>
+        <div class="slider--vertical u-push__top--xxs u-push__bottom--sm">
+          <%= label :match, :scheduled, "Scheduled" %>
+          <div class="slide">
+            <div>
+              <%= checkbox :match, :scheduled, checked: @match.scheduled == "true" %>
+              <label class="caption" for="match_scheduled" tabindex="0" phx-keyup="toggle_slider" phx-key="Enter" phx-click="toggle_slider", phx-value-field="scheduled"></label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <%= if @match.scheduled == "true" do %>
+        <div class="width--full u-push__bottom--sm">
+          <%= label :match, :pickup_at_date, "Pickup Date" %>
+          <div class="u-grid__3-column">
+            <%= date_input :match, :pickup_at_date, value: @match.pickup_at_date, class: input_error(@errors, :pickup_at) %>
+            <%= time_input :match, :pickup_at_time, value: @match.pickup_at_time, class: input_error(@errors, :pickup_at) %>
+            <p>Timezone: <%= @match.pickup_at |> timezone_abbr_from_full(@time_zone) %></p>
+            <%= display_error(@errors, :pickup_at) %>
+          </div>
+        </div>
+      <% else %>
+        <div class="u-push__bottom--sm">
+          <%= label :match, :service_level, "Service Level" %>
+          <%= select :match, :service_level, ["Dash": 1, "Same Day": 2], value: @match.service_level, class: input_error(@errors, :service_level) %>
+          <%= display_error(@errors, :service_level) %>
+        </div>
+      <% end %>
+      <div class="u-push__bottom--sm">
+        <%= label :match, :vehicle_class, "Vehicle Type" %>
+        <%= select :match, :vehicle_class, ["Car": 1, "Midsize": 2, "Cargo Van": 3, "Box Truck": 4], value: @match.vehicle_class, class: input_error(@errors, :vehicle_class) %>
+        <%= display_error(@errors, :vehicle_class) %>
+      </div>
+      <div class="width--full">
+        <div class="u-push__bottom--sm">
+          <%= label :match, :destination_address, "Drop Off Address" %>
+          <%= text_input :match, :destination_address, value: @match.destination_address, class: input_error(@errors, :destination_address) %>
+          <%= display_error(@errors, :destination_address) %>
+        </div>
+        <div class="u-push__bottom--sm">
+          <%= label :match, :delivery_notes, "Delivery Notes", class: "optional" %>
+          <%= text_input :match, :delivery_notes, value: @match.delivery_notes %>
+        </div>
+        <div class="slider--vertical u-push__top--xxs u-push__bottom--sm">
+          <%= label :match, :self_recipient, "Self Recipient" %><span class="caption"> <%= if @match.self_recipient == "true", do: "Only send order updates to shipper", else: "Share order updates with a recipient" %> </span>
+          <div class="slide">
+            <%= checkbox :match, :self_recipient, checked: @match.self_recipient == "true" %>
+            <label class="caption" for="match_self_recipient"  tabindex="0" phx-keyup="toggle_slider" phx-key="Enter" phx-click="toggle_slider", phx-value-field="self_recipient"></label>
+          </div>
+        </div>
+        <%= if @match.self_recipient == "false" do %>
+          <div class="width--full u-push__bottom--sm">
+            <label>Recipient</label>
+            <div class="width--third">
+              <div>
+                <%= label :match, :recipient_name, "Name" %>
+                <%= text_input :match, :recipient_name, value: @match.recipient_name, class: input_error(@errors[:recipient], :name) %>
+                <%= display_error(@errors[:recipient], :name) %>
+              </div>
+              <div>
+                <%= label :match, :recipient_phone, "Phone" %>
+                <%= text_input :match, :recipient_phone, value: @match.recipient_phone, class: input_error(@errors[:recipient], :email) %>
+                <%= display_error(@errors[:recipient], :phone_number) %>
+              </div>
+              <div>
+                <%= label :match, :recipient_email, "Email" %>
+                <%= text_input :match, :recipient_email, value: @match.recipient_email, class: input_error(@errors[:recipient], :phone_number) %>
+                <%= display_error(@errors[:recipient], :email) %>
+              </div>
+            </div>
+          </div>
+        <% else %>
+          <%= hidden_input :match, :recipient_name, value: @match.recipient_name %>
+          <%= hidden_input :match, :recipient_phone, value: @match.recipient_phone %>
+          <%= hidden_input :match, :recipient_email, value: @match.recipient_email %>
+        <% end %>
+        <%= if @match.scheduled == "true" do %>
+          <div class="slider--vertical u-push__top--xxs u-push__bottom--sm">
+            <%= label :match, :dropoff_asap, "Now" %>
+            <div class="slide">
+              <%= checkbox :match, :dropoff_asap, checked: @match.dropoff_asap == "true"  %>
+              <label class="caption" for="match_dropoff_asap"  tabindex="0" phx-keyup="toggle_slider" phx-key="Enter" phx-click="toggle_slider", phx-value-field="dropoff_asap"></label>
+            </div>
+          </div>
+          <%= if @match.dropoff_asap == "false" do %>
+            <div class="width--full u-push__bottom--xxs">
+              <%= label :match, :dropoff_at_date, "Dropoff Date" %>
+              <div class="u-grid__3-column">
+                <%= date_input :match, :dropoff_at_date, value: @match.dropoff_at_date, class: input_error(@errors, :dropoff_at) %>
+                <%= time_input :match, :dropoff_at_time, value: @match.dropoff_at_time, class: input_error(@errors, :dropoff_at) %>
+                Timezone: <%= @match.dropoff_at |> timezone_abbr_from_full(@time_zone) %>
+                <%= display_error(@errors, :dropoff_at) %>
+              </div>
+            </div>
+          <% else %>
+            <%= hidden_input :match, :dropoff_at_date, value: @match.dropoff_at_date %>
+            <%= hidden_input :match, :dropoff_at_time, value: @match.dropoff_at_time %>
+          <% end %>
+          <%= hidden_input :match, :service_level, value: @match.service_level %>
+        <% else %>
+          <%= hidden_input :match, :dropoff_asap, value: @match.dropoff_asap %>
+          <%= hidden_input :match, :dropoff_at_date, value: @match.dropoff_at_date %>
+          <%= hidden_input :match, :dropoff_at_time, value: @match.dropoff_at_time %>
+          <%= hidden_input :match, :pickup_at_date, value: @match.pickup_at_date %>
+          <%= hidden_input :match, :pickup_at_time, value: @match.pickup_at_time %>
+      </div>
+        <% end %>
+    </section>
+
+    <section data-test-id="cargo">
+      <div class="width--full u-push__bottom--sm">
+        <%= label :match, :description, "Cargo Description", class: "optional" %>
+        <%= textarea :match, :description, value: @match.description, "data-test-id": "description-input" %>
+      </div>
+      <div class="u-push__bottom--sm">
+          <%= label :match, :weight, "Cargo Weight (lbs)" %>
+          <%= text_input :match, :weight, type: "number", value: @match.weight, step: 1, min: 1, class: input_error(@errors, :weight) %>
+          <%= display_error(@errors, :weight) %>
+      </div>
+
+      <div class="u-push__bottom--sm">
+        <%= label :match, :pieces, "Pieces" %>
+        <%= text_input :match, :pieces, type: "number", value: @match.pieces, min: 1, step: 1, class: input_error(@errors, :pieces) %>
+        <%= display_error(@errors, :pieces) %>
+      </div>
+
+      <div class="width--full u-push__bottom--sm">
+        <label>Cargo Dimensions (in)</label>
+        <div class="u-grid u-grid__3-column u-grid__3-column--nowrap">
+          <div>
+            <%= label :match, :length, "Length" %>
+            <%= text_input :match, :length, type: "number", value: @match.length, min: 1, step: 1, class: input_error(@errors, :length) %>
+            <%= display_error(@errors, :length) %>
+          </div>
+          <div>
+            <%= label :match, :width, "Width" %>
+            <%= text_input :match, :width, type: "number", value: @match.width, min: 1, step: 1, class: input_error(@errors, :width) %>
+            <%= display_error(@errors, :width) %>
+          </div>
+          <div>
+            <%= label :match, :height, "Height" %>
+            <%= text_input :match, :height, type: "number", value: @match.height, min: 1, step: 1, class: input_error(@errors, :height) %>
+            <%= display_error(@errors, :height) %>
+          </div>
+        </div>
+      </div>
+
+      <div class="u-push__bottom--sm">
+        <%= label :match, :po, "P.O./Job #", class: "optional" %>
+        <%= text_input :match, :po, value: @match.po, "data-test-id": "po-input" %>
+      </div>
+
+      <div>
+        <label>Load/Unload Fee</label>
+        <div class="slide u-push__bottom--xs">
+          <%= checkbox :match, :has_load_fee, checked: @match.has_load_fee == "true" %>
+          <%= label :match, :has_load_fee, "", tabindex: "0", phx_keyup: "toggle_slider", phx_key: "Enter", phx_click: "toggle_slider", phx_value_field: "has_load_fee" %>
+        </div>
+      </div>
+    </section>
+
+    <section data-test-id="assign-network-operator">
+      <div>
+        <%= label :match, :coupon, "Coupon", class: "optional" %>
+        <%= text_input :match, :coupon, value: @match.coupon, class: input_error(@errors, :coupon_id) %>
+        <%= display_error(@errors, :coupon_id) %>
+      </div>
+    </section>
+
+    <section data-test-id="assign-network-operator">
+      <div class="width--full">
+        <%= label :match, :network_operator_id, "Assign Network Operator", class: "optional" %>
+        <%= select :match, :network_operator_id, [{"(none)", nil}] ++ network_operators(), [placeholder: "Select", value: @match.network_operator_id] %>
+      </div>
+    </section>
+
+    <div class="width--full u-text--center u-push__top--sm">
+      <%= display_error(@errors, :general) %>
+      <button class="button button--primary" type="submit">Create Match</button>
+    </div>
+  </form>
+</div>

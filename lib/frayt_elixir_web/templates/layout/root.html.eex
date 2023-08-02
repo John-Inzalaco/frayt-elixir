@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%= render(FraytElixirWeb.LayoutView, "_head.html") %>
+    <title><%= assigns[:page_title] || "Frayt Admin" %></title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+  </head>
+  <body class="<%= theme_class(@conn) %> <%= live_class(@conn) %>">
+    <nav class="nav" role="navigation">
+      <div class="nav__logo">
+        <a href="/admin/matches"><img src="/images/logo-color.png" alt="Frayt Logo"/></a>
+      </div>
+      <label class="toggle" for="nav__toggle">
+        <i class="material-icons">menu</i>
+      </label>
+      <input type="checkbox" class="checkbox" id="nav__toggle" />
+      <ul class="nav__links toggle__container">
+        <li><%= nav_link(@conn, "/admin/batches",          "Batches") %></li>
+        <li><%= nav_link(@conn, "/admin/markets",          "Markets") %></li>
+        <li><%= nav_link(@conn, "/admin/shippers",         "Shipper") %></li>
+        <li><%= nav_link(@conn, "/admin/drivers",          "Driver") %></li>
+        <li><%= nav_link(@conn, "/admin/companies",        "Companies") %></li>
+        <li><%= nav_link(@conn, "/admin/payments",         "Payment") %></li>
+        <li><%= nav_link(@conn, "/admin/reports",          "Reports") %></li>
+        <li><%= nav_link(@conn, "/admin/settings/profile", "Settings") %></li>
+      </ul>
+    </nav>
+    <%= @inner_content %>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/29.1.0/inline/ckeditor.js"></script>
+    <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
+  </body>
+</html>

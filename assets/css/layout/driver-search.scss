@@ -1,0 +1,79 @@
+.driver-search {
+  display: grid;
+  gap: $pad-xs $pad-lg;
+  grid-template-areas:
+  "header header"
+  "results map";
+  grid-template-columns: 1fr 1fr;
+
+  @media screen and (max-width: $screen-tablet) {
+    grid-template-areas:
+    "header"
+    "map"
+    "results";
+    grid-template-columns: 1fr;
+  }
+
+  &__header {
+    grid-area: header;
+  }
+
+  &__results {
+    display: grid;
+    grid-area: results;
+    grid-template-rows: 1fr auto auto;
+    min-height: 500px;
+    height: 50vh;
+
+    @media screen and (max-width: $screen-tablet) {
+      height: unset;
+      min-height: unset;
+    }
+  }
+
+  &__map {
+    grid-area: map;
+    height: 50vh;
+    min-height: 500px;
+
+    @media screen and (max-width: $screen-tablet) {
+      height: 30vh;
+      min-height: unset;
+    }
+  }
+}
+
+.driver {
+  &__vehicle-details {
+    display: grid;
+    gap: $pad;
+    grid-template-columns: max-content 1fr max-content;
+    border-bottom: 1px solid $light-gray;
+    padding: $pad-sm 0;
+
+    @media screen and (max-width: $screen-tablet) {
+      gap: $pad-sm;
+      grid-template-columns: max-content 1fr;
+    }
+
+    .inline-details {
+      display: grid;
+      grid-template-columns: 30% max-content;
+      margin-bottom: $pad-xs;
+
+      @media screen and (max-width: $screen-tablet) {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+
+  &__number {
+    background-color: $orange;
+    padding: $pad-xxs $pad-xs;
+  }
+}
+
+.drivers {
+  box-shadow: inset 0px -10px 8px -6px darken($white, 5%);
+  overflow: scroll;
+}

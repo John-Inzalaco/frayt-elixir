@@ -1,0 +1,33 @@
+<form phx-submit="send_notification" data-test-id="send-notification-form">
+  <section>
+    <div class="width--full">
+    This will send a test push notification to driver <%= @driver.first_name %> <%= @driver.last_name %>. Feel free to edit the message.
+    </div>
+    <div>
+    <%= label :send_notification, :title, "Title" %>
+    <%= textarea :send_notification, :title, [value: @fields.title] %>
+    </div>
+
+    <div>
+        <%= label :send_notification, :message, "Message" %>
+        <%= textarea :send_notification, :message, [value: @fields.message] %>
+    </div>
+
+    <%= if @errors do %>
+    <div>
+      Failed to send push notification to driver. Reason: <%= @errors %>
+    </div>
+    <% end %>
+
+    <%= if @sent do %>
+    <div>
+      Successfully sent a push notification to driver!
+    </div>
+    <% end %>
+
+    <div class="u-pad__top u-text--center width--full">
+      <button class="button button--primary">Send</button>
+      <a onclick="" class="button" tabindex=0 phx-keyup="close_modal" phx-key="Enter" phx-click="close_modal">Cancel</a>
+    </div>
+  </section>
+</form>

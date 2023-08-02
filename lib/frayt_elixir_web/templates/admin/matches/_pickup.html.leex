@@ -1,0 +1,138 @@
+<div class="match-layout__details">
+    <%= if @edit do %>
+        <%= f = form_for @match_changeset, "#", [phx_change: :change_pickup, phx_submit: :update_pickup] %>
+            <%= address_input_group(f, :origin_address) %>
+            <div class="width--third u-push__bottom--sm">
+                <div>
+                    <label>Require Bill of Lading</label>
+                    <div class="slide u-push__bottom--xs">
+                        <%= checkbox f, :bill_of_lading_required %>
+                        <%= label f, :bill_of_lading_required, "" %>
+                    </div>
+                </div>
+                <div>
+                    <label>Require Origin Photo</label>
+                    <div class="slide u-push__bottom--xs">
+                        <%= checkbox f, :origin_photo_required %>
+                        <%= label f, :origin_photo_required, "" %>
+                    </div>
+                </div>
+                <div>
+                    <label>Require Parking Spot</label>
+                    <div class="slide u-push__bottom--xs">
+                        <%= checkbox f, :parking_spot_required %>
+                        <%= label f, :parking_spot_required, "" %>
+                    </div>
+                </div>
+            </div>
+            <div>
+            <div class="u-push__bottom--sm">
+              <label>Scheduled</label>
+              <div class="slide u-push__bottom--xs">
+                <%= checkbox f, :scheduled %>
+                <%= label f, :scheduled, "" %>
+                </div>
+            </div>
+            <%= if is_checked(f, :scheduled) do %>
+                <div class="u-push__bottom--sm">
+                    <label>Pickup At</label>
+                    <div class="match-layout__date-time-select-group">
+                        <%= text_input f, :pickup_at, "phx-hook": "DateTimePicker" %>
+                        <%= label f, :pickup_at, "" %>
+                        <%= timezone_abbr_from_full(@match.pickup_at, @time_zone) %>
+                    </div>
+                    <span class="error"><%= error_tag f, :pickup_at %></span>
+                </div>
+                <div class="u-push__bottom--sm">
+                    <label>Dropoff At</label>
+                    <div class="match-layout__date-time-select-group">
+                        <%= text_input f, :dropoff_at, "phx-hook": "DateTimePicker" %>
+                        <%= label f, :dropoff_at, "" %>
+                        <%= timezone_abbr_from_full(@match.dropoff_at, @time_zone) %>
+                    </div>
+                    <span class="error"><%= error_tag f, :dropoff_at %></span>
+                </div>
+            <% end %>
+            </div>
+            <div class="u-push__bottom--sm">
+                    <label>Self Sender</label>
+                    <div class="slide u-push__bottom--xs">
+                        <%= checkbox f, :self_sender %>
+                        <%= label f, :self_sender, "" %>
+                    </div>
+            </div>
+            <%= unless is_checked(f, :self_sender) do %>
+                <%= inputs_for f, :sender, fn s -> %>
+                    <%= render(FraytElixirWeb.Admin.ContactsView, "_contact_form.html", name: "Sender", form: s) %>
+                <% end %>
+            <% end %>
+            <div class="u-push__bottom--sm">
+                <%= label f, :pickup_notes, "Notes" %>
+                <%= textarea f, :pickup_notes, "data-test-id": "pickup-notes-input" %>
+                <span class="error"><%= error_tag f, :pickup_notes %></span>
+            </div>
+            <div class="u-push__top">
+                <button class="button button--primary" type="submit" data-test-id="save-pickup">Update Pickup</button>
+                <a onclick="" tabindex=0 phx-key="Enter" phx-keyup="cancel_edit" phx-click="cancel_edit" class="button">Cancel</a>
+            </div>
+        </form>
+    <% else %>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Address</p>
+            <div>
+                <p data-test-id="origin-address"><%= @match.origin_address.formatted_address %></p>
+                <%= if @match.scheduled do %>
+                    <p data-test-id="pickup-at"><%= scheduled_datetime(@match.pickup_at, @time_zone) %></p>
+                <% end %>
+            </div>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Name</p>
+            <p><%= @match.origin_address.name || "-" %></p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Notes:</p>
+            <p data-test-id="pickup-notes"><%= @match.pickup_notes || "-" %></p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Bill of Lading</p>
+            <div>
+                <p>
+                    <%= if @match.bill_of_lading_required, do: "Required", else: "Optional" %>
+                    <div>
+                        <%= display_photo_modal_link(:bill_of_lading_photo, "Bill of Lading", @match.bill_of_lading_photo) %>
+                    </div>
+                </p>
+            </div>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Photo</p>
+            <div>
+                <p>
+                    <%= if @match.origin_photo_required, do: "Required", else: "Optional" %>
+                    <div>
+                        <%= display_photo_modal_link(:origin_photo, "Photo", @match.origin_photo) %>
+                    </div>
+                </p>
+            </div>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Parking Spot</p>
+            <p data-test-id="parking_spot_required_value">
+              <%= if @match.parking_spot_required, do: "Required", else: "Optional" %>
+            </p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Sender Contact</p>
+            <%= if not @match.self_sender and @match.sender do %>
+                <div>
+                    <div data-test-id="sender-name"><%= @match.sender.name %> (Notify: <%= if @match.sender.notify do "Yes" else "No" end %>)</div>
+                    <div data-test-id="sender-phone"><a href="<%= phone_link(@match.sender.phone_number) %>"><%= display_phone(@match.sender.phone_number) %></a></div>
+                    <div data-test-id="sender-email"><a href="<%= email_link(@match.sender.email) %>"><%= @match.sender.email %></a></div>
+                </div>
+            <% else %>
+                <p data-test-id="no-sender">Same as Shipper</p>
+            <% end %>
+        </div>
+    <% end %>
+</div>

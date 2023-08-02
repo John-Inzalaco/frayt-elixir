@@ -1,0 +1,40 @@
+<tr>
+  <td class="u-pad__bottom--none">
+    <p><%= display_date(@action.recorded_at, @time_zone) %></p>
+    <p><%= display_time(@action.recorded_at, @time_zone) %></p>
+  </td>
+  <td class="u-pad__bottom--none"><%= "#{title_case(@action.action)} #{@action.entity_name}" %></td>
+  <td colspan="2" class="u-pad__bottom--none">
+    <div>User: <%= display_email(@action.user) %></div>
+  </td>
+</tr>
+<tr class="u-border--none u-push--none">
+  <td colspan="4" class=" u-push--none u-pad__top--none">
+    <div class="drop-down">
+      <div class="caption">
+        <label class="drop-down__trigger u-flex__justify--end caption" colspan="4" for="update-info-<%= @action.id %>">See changes <i class="material-icons">keyboard_arrow_down</i></label>
+      </div>
+      <input type="checkbox" id="update-info-<%= @action.id %>">
+
+      <div class="drop-down__content">
+        <div class="match-log__changes">
+          <%= for {field, _change} = change <- Enum.filter(@action.patch, fn {field, _} -> field not in MatchLog.ignored_changes() end) do %>
+            <b><%= title_case(field) %></b>
+            <%# desktop %>
+            <div class="u-push__bottom--sm u-flex u-align--center u-hide--mobile">
+              <div class="u-flex u-flex__flex-2"><p class="u-push__left--auto"><%= display_change(change, :old) %></p></div>
+              <div class="u-flex u-flex__flex-1"><i class="material-icons u-push--auto">arrow_right_alt</i></div>
+              <div class="u-flex u-flex__flex-2"><p class="u-push__right--auto"><%= display_change(change, :new) %></p></div>
+            </div>
+            <%# mobile %>
+            <div class="u-push__bottom u-text--center u-hide--desktop">
+              <div><p><%= display_change(change, :old) %></p></div>
+              <div class="u-flex u-flex__align--center u-flex__justify--center"><i class="material-icons">arrow_right_alt</i></div>
+              <div><p><%= display_change(change, :new) %></p></div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>

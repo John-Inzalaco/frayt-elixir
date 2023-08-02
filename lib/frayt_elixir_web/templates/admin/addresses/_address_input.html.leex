@@ -1,0 +1,77 @@
+<div class="<%= @class %>">
+    <h6 class="u-push__bottom--xs">Address</h6>
+    <fieldset>
+        <button class="u-push__bottom--sm button <%= if @specify_details?, do: "button--primary" %>" type="button" phx-click="toggle_specify_details" phx-target="<%= @myself %>" id="origin_address_specify_details">Specify Details</button>
+        <%= if @specify_details? do %>
+            <%= inputs_for @form, @field, fn a -> %>
+                <div class="width--half u-push__bottom--sm">
+                    <div class="u-push__bottom--sm">
+                        <%= label a, :lat, "Latitude" %>
+                        <%= text_input a, :lat, "data-test-id": "#{@field}-lat-input", value: point_input_value(a, :geo_location, :lat) %>
+                        <span class="error"><%= error_tag a, :geo_location %></span>
+                    </div>
+                    <div class="u-push__bottom--sm">
+                        <%= label a, :lng, "Longitude" %>
+                        <%= text_input a, :lng, "data-test-id": "#{@field}-lng-input", value: point_input_value(a, :geo_location, :lng) %>
+                    </div>
+                </div>
+                <div class="width--half u-push__bottom--sm">
+                    <div class="u-push__bottom--sm">
+                        <%= label a, :address, "Address" %>
+                        <%= text_input a, :address, "data-test-id": "#{@field}-address-input" %>
+                        <span class="error"><%= error_tag a, :address %></span>
+                    </div>
+
+                    <div class="u-push__bottom--sm">
+                        <%= label a, :address2, "Address 2" %>
+                        <%= text_input a, :address2, "data-test-id": "#{@field}-address2-input" %>
+                        <span class="error"><%= error_tag a, :addresss2 %></span>
+                    </div>
+                </div>
+                <div class="width--third u-push__bottom--sm">
+                    <div class="u-push__bottom--sm">
+                        <%= label a, :neighborhood, "Neighborhood" %>
+                        <%= text_input a, :neighborhood, "data-test-id": "#{@field}neighborhood-input" %>
+                        <span class="error"><%= error_tag a, :neighborhood %></span>
+                    </div>
+
+                    <div class="u-push__bottom--sm">
+                        <%= label a, :city, "City" %>
+                        <%= text_input a, :city, "data-test-id": "#{@field}-city-input" %>
+                        <span class="error"><%= error_tag a, :city %></span>
+                    </div>
+
+                    <div class="u-push__bottom--sm">
+                        <%= label a, :county, "County" %>
+                        <%= text_input a, :county, "data-test-id": "#{@field}-county-input" %>
+                        <span class="error"><%= error_tag a, :county %></span>
+                    </div>
+                </div>
+                <div class="width--third u-push__bottom--sm">
+                    <div class="u-push__bottom--sm">
+                        <%= label a, :state_code, "State Code" %>
+                        <%= select(a, :state_code, state_code_options(), "data-test-id": "#{@field}-state-code-input") %>
+                        <span class="error"><%= error_tag a, :state_code %></span>
+                    </div>
+
+                    <div class="u-push__bottom--sm">
+                        <%= label a, :zip, "Zip" %>
+                        <%= text_input a, :zip, "data-test-id": "#{@field}-zip-input" %>
+                        <span class="error"><%= error_tag a, :zip %></span>
+                    </div>
+
+                    <div class="u-push__bottom--sm">
+                        <%= label a, :country_code, "Country Code" %>
+                        <%= select(a, :country_code, country_code_options(), "data-test-id": "#{@field}-country-code-input") %>
+                        <span class="error"><%= error_tag a, :country_code %></span>
+                    </div>
+                </div>
+            <% end %>
+        <% else %>
+            <div class="u-push__bottom--sm">
+                <%= text_input @form, @field, value: address_input_value(@form, @field), "data-test-id": "#{@field}-input" %>
+                <span class="error"><%= address_error_tag(@form, @field) %></span>
+            </div>
+        <% end %>
+    </fieldset>
+</div>

@@ -1,0 +1,11 @@
+.map {
+  min-height: 500px;
+  height: 55vh;
+
+  color: #383838;
+
+  @media screen and (max-width: $screen-tablet) {
+    height: 50vh;
+    order: -1;
+  }
+}

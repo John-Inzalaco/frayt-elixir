@@ -1,0 +1,14 @@
+@function contrast($color, $percent) {
+    $newcolor: $color;
+    @if $contrast == dark and $percent > 0 {
+        $newcolor: lighten($color, $percent)
+    } @else if $contrast == light and $percent > 0 {
+        $newcolor: darken($color, $percent)
+    } @else if $contrast == dark {
+        $newcolor: darken($color, -$percent)
+    } @else {
+        $newcolor: lighten($color, -$percent)
+    }
+
+    @return $newcolor;
+}

@@ -1,0 +1,22 @@
+<%= if @fee.amount !== 0 || @fee.driver_amount !== 0 do %>
+    <% frayt_amount = (@fee.amount || 0) - (@fee.driver_amount || 0) %>
+    <tr>
+        <td>
+            <span class="fee-type"><%= title_case(@fee.type) %></span><br/>
+            <span class="u-text--sm u-light-gray"><%= @fee.description %></span>
+        </td>
+        <td>
+            <%= render_price(@fee.driver_amount, test_id: "#{@fee.type}_driver_amount") %>
+            <%= if @fee.driver_amount not in [0, nil] do %>
+                <span class="caption">(<%= display_progress(@fee.driver_amount, @fee.amount) %>)</span>
+            <% end %>
+        </td>
+        <td>
+            <%= render_price(frayt_amount, test_id: "#{@fee.type}_frayt_amount") %>
+            <%= if frayt_amount not in [0, nil] do %>
+                <span class="caption">(<%= display_progress(frayt_amount, @fee.amount) %>)</span>
+            <% end %>
+        </td>
+        <td><%= render_price(@fee.amount, test_id: "#{@fee.type}_amount") %></td>
+    </tr>
+<% end %>

@@ -1,0 +1,148 @@
+<%= f = form_for @changeset, "#", [phx_change: :change_contract, phx_submit: :update_contract] %>
+  <div class="u-push__bottom--sm">
+    <%= label f, :allowed_cancellation_states, "Allow cancellation in the following states:", class: "header--label" %>
+    <%= checkbox_select f, :allowed_cancellation_states, EnumHelper.select_options(MatchState.editable_range(), &MatchState.name/1, placeholder: false)  %>
+    <span class="error"><%= error_tag f, :allowed_cancellation_states %></span>
+  </div>
+  <div class="u-push__bottom--sm">
+    <div class="slider">
+      <%= label f, :enable_cancellation_code, "Enable Cancellation Codes" %>
+      <div class="slide">
+        <%= checkbox f, :enable_cancellation_code %>
+        <%= label f, :enable_cancellation_code, "" %>
+      </div>
+    </div>
+  </div>
+  <%= if input_value(f, :enable_cancellation_code) in [true, "true"] do %>
+    <div class="u-push__bottom--sm u-pad__top">
+      <div class="u-flex u-flex__justify--space-between u-flex__align--baseline u-push__bottom--sm">
+        <div>
+          <h4>Cancellation Codes</h4>
+        </div>
+        <button class="button button--primary" type="button" phx-click="form_repeater.add" phx-target="#contract_cancellation_codes_repeater">Add</button>
+      </div>
+      <%= repeater_for f, :cancellation_codes, [default: %CancellationCode{}, item_class: "form-repeater__item--numbered", draggable: false], fn r -> %>
+        <div class="form-repeater__item--actions">
+          <button
+            type="button"
+            class="icon-button icon-button--danger u-flex__align-self--end"
+            phx-click="form_repeater.remove"
+            phx-value-index="<%= r.index %>"
+            phx-target="#contract_cancellation_codes_repeater"
+            data-confirm="Are you sure you want to remove this code?"
+          >
+            <span class="material-icons">delete_outline</span>
+          </button>
+        </div>
+        <div class="u-flex u-flex--wrap u-flex__pad--column u-flex__columns--2">
+          <div>
+            <%= label r, :code, "Cancellation Code" %>
+            <%= text_input r, :code %>
+            <span class="error"><%= error_tag r, :code %></span>
+
+            <%= label r, :message, "Cancellation Message" %>
+            <%= text_input r, :message %>
+            <span class="error"><%= error_tag r, :message %></span>
+          </div>
+        </div>
+      <% end %>
+      <span class="error"><%= error_tag f, :cancellation_codes %></span>
+    </div>
+  <% else %>
+    <%= hidden_input f, :cancellation_codes, name: input_name(f, :cancellation_codes) <> "[]", value: "" %>
+  <% end %>
+
+
+
+  <div class="u-push__bottom--sm u-pad__top">
+    <div class="u-flex u-flex__justify--space-between u-flex__align--baseline u-push__bottom--sm">
+      <div>
+        <h4>Cancellation Pay Rules</h4>
+        <p>Rules will be evaluated in the order they are listed</p>
+      </div>
+      <button class="button button--primary" type="button" phx-click="form_repeater.add" phx-target="#contract_cancellation_pay_rules_repeater">Add Rule</button>
+    </div>
+    <%= repeater_for f, :cancellation_pay_rules, [default: %CancellationPayRule{}, item_class: "form-repeater__item--numbered", draggable: true], fn r -> %>
+      <div class="form-repeater__item--actions">
+        <button class="icon-button form-repeater__item--drag-handle" type="button"><span class="material-icons">drag_handle</span></button>
+        <button
+          type="button"
+          class="icon-button icon-button--danger u-flex__align-self--end"
+          phx-click="form_repeater.remove"
+          phx-value-index="<%= r.index %>"
+          phx-target="#contract_cancellation_pay_rules_repeater"
+          data-confirm="Are you sure you want to remove this rule?"
+        >
+          <span class="material-icons">delete_outline</span>
+        </button>
+      </div>
+      <div class="u-flex u-flex--wrap u-flex__pad--column u-flex__columns--2">
+        <div>
+          <%= label r, :cancellation_percent, "Cancellation Percent" %>
+          <%= number_input r, :cancellation_percent %>
+          <span class="error"><%= error_tag r, :cancellation_percent %></span>
+
+          <%= label r, :driver_percent, "Driver Cut" %>
+          <%= number_input r, :driver_percent %>
+          <span class="error"><%= error_tag r, :driver_percent %></span>
+
+          <%= label r, :vehicle_class, "Vehicle class" %>
+          <div class="header__filter--checkboxes">
+            <%= checkbox_select r, :vehicle_class, VehicleType.options(), selected: input_value(r, :vehicle_class) %>
+          </div>
+          <p class="caption">Vehicle classes that are allowed for this cancellation rule</p>
+          <span class="error"><%= error_tag r, :vehicle_class %></span>
+
+          <%= label r, :canceled_by, "When Canceled By" %>
+          <div class="header__filter--checkboxes">
+            <%= checkbox_select r, :canceled_by, UserType.options(excluded_options: [:driver]), selected: input_value(r, :canceled_by) %>
+          </div>
+          <p class="caption">Only apply when cancelled by the selected users</p>
+          <span class="error"><%= error_tag r, :canceled_by %></span>
+        </div>
+        <div>
+          <%= label r, :time_on_match, "Time on Match (min)" %>
+          <%= number_input r, :time_on_match %>
+          <p class="caption">The minimum amount of time that has passed since the driver accepted the Match</p>
+          <span class="error"><%= error_tag r, :time_on_match %></span>
+
+          <%= label r, :max_matches, "# of Matches @ Pickup" %>
+          <%= number_input r, :max_matches %>
+          <p class="caption">When the driver has no more than "x" Matches at the pickup within 30 minutes before or after that have not been picked up</p>
+          <span class="error"><%= error_tag r, :max_matches %></span>
+
+          <div class="u-push__bottom--sm">
+            <div class="slider">
+              <%= label r, :restrict_states, "Restrict by Match state" %>
+              <div class="slide">
+                <%= checkbox r, :restrict_states %>
+                <%= label r, :restrict_states, "" %>
+              </div>
+            </div>
+            <span class="error"><%= error_tag r, :restrict_states %></span>
+
+            <%= if input_value(r, :restrict_states) not in [false, "false"] do %>
+              <%= label r, :in_states, "When in States" %>
+              <%= checkbox_select r, :in_states, EnumHelper.select_options(MatchState.editable_range(), &MatchState.name/1, placeholder: false)  %>
+            <% end %>
+            <span class="error"><%= error_tag r, :in_states %></span>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    <%= if Enum.count(input_value(f, :cancellation_pay_rules)) == 0 do %>
+      <h5>No Rules</h5>
+      <p>Click "Add Rule" to continue</p>
+    <% end %>
+    <span class="error"><%= error_tag f, :cancellation_pay_rules %></span>
+  </div>
+  <div class="u-push__top">
+    <%= if length(f.errors) > 0 do %>
+      <p class="error u-push__bottom--xs">Please correct all errors in this form to continue.</p>
+    <% end %>
+    <button class="button button--primary" type="submit">Update Rules</button>
+    <%= if @contract.id do %>
+      <a onclick="" tabindex=0 phx-click="edit_contract" class="button">Cancel</a>
+    <% end %>
+  </div>
+</form>

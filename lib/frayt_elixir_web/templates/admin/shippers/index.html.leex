@@ -1,0 +1,244 @@
+<section class="header u-push__bottom">
+  <div class="header header--stacked">
+    <div class="header__title">
+      <h1>Shippers</h1>
+      <div>
+        <a onclick="" data-test-id="add-shipper" tabindex=0 phx-keyup="show_modal_named" phx-key="Enter" phx-click="show_modal_named" phx-value-liveview="AdminAddShipper" phx-value-title="Invite Shipper"><i class="material-icons icon">add_circle_outline</i></a>
+        <%= Table.refresh_button(@data_table) %>
+      </div>
+    </div>
+    <div class="header__actions">
+      <%= f = form_for @data_table, "#", [class: "header__select"] %>
+        <%= record_select f, :company_id, Company %>
+      </form>
+      <%= f = form_for @data_table, "#", [class: "header__select"] %>
+        <%= record_select f, :sales_rep_id, AdminUser, filters: %{role: :sales_rep}, schema_name: "Sales Rep" %>
+      </form>
+      <%= form_for @data_table, "#", [class: "header__select"], fn f -> %>
+        <%= select f, :role, ShipperRole.select_options(none_label: "All Roles", allow_none: true) %>
+      <% end %>
+      <%= form_for @data_table, "#", [class: "header__select"], fn f -> %>
+        <%= select f, :state, ShipperState.select_options(none_label: "All Statuses", allow_none: true) %>
+      <% end %>
+      <%= form_for @data_table, "#", [class: "header__search", filter_on: :phx_submit], fn f -> %>
+        <div class="search">
+          <%= text_input f, :query, [class: "input", type: "search", placeholder: "Search"] %>
+          <button class="search__submit"><i class="material-icons">search</i></button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<section>
+  <%= Table.pagination_nav(@data_table, id: "top") %>
+<%# desktop view %>
+  <table class="u-hide--mobile">
+    <thead>
+      <tr class="u-border--none">
+        <%= Table.sort_header(@data_table, "Name", :shipper_name) %>
+        <%= Table.sort_header(@data_table, "Company", :company) %>
+        <th>Account Type</th>
+        <th>State</th>
+        <%= Table.sort_header(@data_table, "Last Active", :updated_at) %>
+        <%= Table.sort_header(@data_table, "Sales Rep", :shipper_sales_rep) %>
+        <th></th>
+        <th class="u-text--right width--revenue">May Revenue</th>
+        <th class="width--edit"></th>
+        <th class="u-text--right width--revenue">Q1 Revenue</th>
+      </tr>
+    </thead>
+    <%= for shipper <- @shippers do %>
+      <tbody class="hover">
+        <%= Table.show_more_button(@data_table, shipper.id, :tr, [active_class: "u-background--gray"], fn -> %>
+          <td class="u-pad__top--sm u-pad__bottom--sm" data-test-id="shipper-name"><%= full_name(shipper) %></td>
+          <td class="u-pad__top--sm u-pad__bottom--sm" data-test-id="shipper-company"><%= display_user_info(shipper, :company) || "-" %></td>
+          <td class="u-pad__top--sm u-pad__bottom--sm" data-test-id="account-type"><%= if shipper.commercial do %>Business<% else %>Personal<% end %></td>
+          <td class="u-pad__top--sm u-pad__bottom--sm">
+            <span class="<%= if shipper.state == :disabled, do: "u-warning" %>" > <%= ShipperState.name(shipper.state) %> </span>
+          </td>
+          <td class="u-pad__top--sm u-pad__bottom--sm" data-test-id="shipper-updated"><%= display_date(shipper.updated_at, @time_zone) %></td>
+          <td class="u-pad__top--sm u-pad__bottom--sm"><%= display_shipper_sales_rep(shipper) %></td>
+          <td class="u-text--right u-pad__top--sm u-pad__bottom--sm">$</td>
+          <td class="u-text--right u-pad__top--sm u-pad__bottom--sm">000.00</td>
+          <td class="u-text--right u-pad__top--sm u-pad__bottom--sm">$</td>
+          <td class="u-text--right u-pad__top--sm u-pad__bottom--sm">000.00</td>
+        <% end) %>
+        <%= if Table.show_more?(@data_table, shipper.id) do %>
+          <%= if @editable_id == shipper.id do %>
+            <tr class="u-border--none">
+              <td colspan="10" class="u-background--gray">
+                <%= live_component @socket, FraytElixirWeb.LiveComponent.AdminEditShipper,
+                  id: "edit_shipper_#{shipper.id}",
+                  fields: @shipper_changeset,
+                  shipper_company_location: shipper.location_id,
+                  display_sales_rep: display_shipper_sales_rep(shipper)
+                %>
+              </td>
+            </tr>
+          <% else %>
+          <tbody colspan="9" class="table__show-more <%= if Table.show_more?(@data_table, shipper.id) do "table__show-more--open" end %>">
+            <tr class="u-border--none u-background--gray">
+              <td class="header--inline">Email</td>
+              <td colspan="2"><div><a href="<%= email_link(shipper.user.email) %>"><%= shipper.user.email %></a></td>
+              <td class="header--inline">Referrer</td>
+              <td colspan="2" ><%= shipper.referrer || "-" %></td>
+              <td colspan="2"></td>
+              <%= unless shipper.state == :disabled do %>
+                <td colspan="2" class="u-text--right"><a class="button button--sm" tabindex=0 phx-keyup="edit<%= shipper.id %>" phx-key="Enter" phx-click="edit<%= shipper.id %>">Edit Shipper</a></td>
+              <% else %>
+                <td colspan="2"></td>
+              <% end %>
+            </tr>
+            <tr class="u-border--none u-background--gray">
+              <td class="header--inline u-pad__top--none">Phone</td>
+              <td colspan="2" class="u-pad__top--none"><a href="<%= shipper_phone_link(shipper.phone) %>"><%= display_shipper_phone(shipper.phone) %></a></td>
+              <td class="header--inline u-pad__top--none">Credit Card</td>
+              <td colspan="2" class="u-pad__top--none"><%= display_credit_card(shipper.credit_card) %></td>
+              <td colspan="2"></td>
+              <%= unless shipper.state == :disabled do %>
+                <td colspan="2" class="u-text--right u-pad__top--none"><a class="button button--sm" tabindex=0 phx-keyup="show_modal_named" phx-key="Enter" phx-click="show_modal_named" phx-value-liveview="AdminResetUserPassword" phx-value-title="Reset Password" phx-value-shipper_id="<%= shipper.id %>">Reset Password</a></td>
+              <% else %>
+                <td colspan="2"></td>
+              <% end %>
+            </tr>
+            <tr class="u-border--none u-background--gray">
+              <td class="header--inline u-pad__top--none">Address 1</td>
+              <%= if (!is_nil(shipper.address)) do %>
+                <td colspan="2" class="u-pad__top--none"><%= shipper.address.address || "-" %><div><%= unless !shipper.address.city or !shipper.address.state or !shipper.address.zip, do: shipper.address.city <> ", " <> shipper.address.state <> " " <> shipper.address.zip %></div></td>
+              <% else %>
+                <td colspan="2" class="u-pad__top--none"> - </td>
+              <% end %>
+              <td class="header--inline u-pad__top--none">Stripe Debug</td>
+              <td colspan="2" class="u-pad__top--none"><%= shipper.stripe_customer_id || "-" %></td>
+              <td colspan="2" class="header--inline u-pad__top--none"> State</td>
+              <td colspan="2" class="u-text--right u-pad__top--none">
+                <%= form_for :update_shipper_state, "#", [phx_change: :update_shipper_state], fn s -> %>
+                  <div>
+                    <%= hidden_input s, :shipper_id, value: shipper.id %>
+                    <%= select s, :state, ShipperState.select_options(excluded_options: [:pending_approval]), selected: shipper.state %>
+                  </div>
+                <% end %>
+              </td>
+            </tr>
+            <tr class="u-border--none u-background--gray">
+              <td class="header--inline u-pad__top--none">Role</td>
+              <td colspan="2" class="u-pad__top--none"><%= ShipperRole.name(shipper.role) %></td>
+              <td colspan="7"></td>
+            </tr>
+          </tbody>
+          <% end %>
+        <% end %>
+      </tbody>
+    <% end %>
+  </table>
+<%# mobile view %>
+  <table class="u-hide--desktop">
+    <thead>
+      <tr class="u-border--none">
+        <th>Name</th>
+        <th>Company</th>
+      </tr>
+    </thead>
+    <%= for shipper <- @shippers do %>
+    <tbody>
+      <%= Table.show_more_button(@data_table, shipper.id, :tr, [active_class: "u-background--gray"], fn -> %>
+        <td class="u-pad__top--xs u-pad__bottom--xs"><%= full_name(shipper) %></td>
+        <td class="u-pad__top--xs u-pad__bottom--xs"><%= shipper.company || "-" %></td>
+      <% end) %>
+      <%= if @editable_id == shipper.id do %>
+        <tr class="u-border--none">
+          <td colspan="4" class="u-pad--none u-background--gray">
+            <%= live_component @socket, FraytElixirWeb.LiveComponent.AdminEditShipper, id: "edit_shipper_mobile_#{shipper.id}", fields: @shipper_changeset, shipper_company_location: shipper.location_id, display_sales_rep: display_shipper_sales_rep(shipper) %>
+          </td>
+        </tr>
+      <% else %>
+      <%= if Table.show_more?(@data_table, shipper.id) do %>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Account Type</td>
+          <td><%= if shipper.commercial do %>Business<% else %>Personal<% end %></td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Last Active</td>
+          <td><%= display_date(shipper.updated_at, @time_zone) %></td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">State</td>
+          <td>
+            <%= ShipperState.name(shipper.state) %>
+          </td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">May Revenue</td>
+          <td>$ 000.00</td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Q1 Revenue</td>
+          <td>$ 000.00</td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Sales Rep</td>
+          <td><%= display_shipper_sales_rep(shipper) %></td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Referrer</td>
+          <td><%= shipper.referrer || "-" %></td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td class="header--inline">Phone</td>
+          <td><a href="<%= shipper_phone_link(shipper.phone) %>"><%= display_shipper_phone(shipper.phone) %></a></td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td colspan="2"><div class="header--inline">Email</div><a href="<%= email_link(shipper.user.email) %>"><%= shipper.user.email %></a></td>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <%= if (!is_nil(shipper.address)) do %>
+            <td colspan="2">
+              <div class="header--inline">Address 2</div>
+                <%= shipper.address.address %>
+              <div>
+                <%= "#{shipper.address.city}, #{shipper.address.state} #{shipper.address.zip}" %>
+              </div>
+            </td>
+          <% else %>
+            <td colspan="2"> - </td>
+          <% end %>
+        </tr>
+        <tr class="u-border--none u-background--gray">
+          <td colspan="2"><div class="header--inline">Credit Card</div><%= display_credit_card(shipper.credit_card) %></td>
+        </tr>
+        <tr class="u-border--none u-background--gray"><td colspan="2"><div class="header--inline">Stripe Debug</div><%= shipper.stripe_customer_id || "-" %></td></tr>
+        <tr class="u-border--none u-background--gray">
+          <td colspan="4">
+            <%= unless shipper.state == :disabled do %>
+              <div class="u-push__bottom--xs">
+                <a onclick="" class="button" phx-click="edit<%= shipper.id %>">Edit Shipper</a>
+              </div>
+              <div class="u-push__bottom--xs">
+                <a onclick="" class="button" phx-click="show_modal_named" phx-value-liveview="AdminResetUserPassword" phx-value-title="Reset Password" phx-value-shipper_id="<%= shipper.id %>">Reset Password</a>
+              </div>
+            <% end %>
+            <%= form_for :update_shipper_state, "#", [phx_change: :update_shipper_state], fn s -> %>
+              <div>
+                <%= hidden_input s, :shipper_id, value: shipper.id %>
+                <%= select s, :state, ShipperState.select_options(excluded_options: [:pending_approval]), selected: shipper.state %>
+              </div>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+      </tbody>
+    <% end %>
+    <% end %>
+  </table>
+
+  <%= Table.pagination_nav(@data_table, id: "bottom") %>
+</section>
+
+<%= if @show_modal, do: live_component @socket, FraytElixirWeb.LiveComponent.ModalLive,
+  live_view: @live_view,
+  child_id: "test-modal",
+  title: @title,
+  wide: "false",
+  shipper_state: @shipper_state,
+  shipper_id: @shipper_id %>

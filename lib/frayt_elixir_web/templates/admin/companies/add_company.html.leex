@@ -1,0 +1,104 @@
+<%= if @display_form == :company do %>
+  <h4>Add Details</h4>
+  <form phx-submit="next_page" phx-change="change_form">
+    <section>
+      <div class="width--full">
+        <%= label :company_form, :company_name, "Company Name" %>
+        <%= text_input :company_form, :company_name, [id: "company-name", name: "company-name", type: "text", value: @new_company.name, class: input_error(@errors, :name)] %>
+        <%= display_error(@errors, :name) %>
+      </div>
+      <div>
+        <%= label :company_form, :company_email, "Company Email", class: "optional" %>
+        <%= text_input :company_form, :company_email, [type: "text", id: "company-email", name: "company-email", value: @new_company.email] %>
+      </div>
+      <div>
+        <%= label :company_form, :sales_rep_id, "Sales Rep", class: "optional" %>
+        <%= select :company_form, :sales_rep_id, sales_rep_options(), [class: "select", id: "sales-rep-id", name: "sales-rep-id", value: @new_company.sales_rep_id] %>
+      </div>
+      <div class="slider--vertical" data-test-id="account-billing-<%= if @new_company.account_billing_enabled, do: "checked", else: "unchecked" %>">
+        <%= label :company_form, :account_billing_enabled, "Account Billing" %>
+        <div class="slide">
+          <%= checkbox :company_form, :account_billing_enabled, [id: "account-billing", name: "account-billing", checked: @new_company.account_billing_enabled]  %>
+          <label class="caption" for="account-billing"></label>
+        </div>
+      </div>
+      <div>
+        <%= if @new_company.account_billing_enabled == true do %>
+          <%= label :company_form, :invoice_period, "Net Terms" %>
+          <%= text_input :company_form, :invoice_period, [type: "number", id: "company-terms", name: "company-terms", value: @new_company.invoice_period, class: input_error(@errors, :invoice_period), min: "0"] %>
+          <%= display_error(@errors, :invoice_period) %>
+        <% else %>
+          <%= hidden_input :company_form, :invoice_period, [value: "", id: "company-terms", name: "company-terms"] %>
+        <% end %>
+      </div>
+      <div class="u-pad__top u-text--center width--full">
+        <button class="button button--primary">Next</button>
+        <a onclick="" class="button" tabindex=0 phx-keyup="close_modal" phx-key="Enter" phx-click="close_modal">Cancel</a>
+      </div>
+    </section>
+  </form>
+<% else %>
+  <h4>Add Location</h4>
+  <form phx-submit="submit">
+    <section>
+      <div>
+        <%= label :location_form, :location_name, "Location Name" %>
+        <%= text_input :location_form, :location_name, [type: "text", id: "location-name", name: "location-name", value: @new_location.location.location, class: input_error(@errors, :location)] %>
+        <%= display_error(@errors, :location) %>
+      </div>
+      <div>
+        <%= label :location_form, :store_id, "Store ID", class: "optional" %>
+        <%= text_input :location_form, :store_id, [type: "text", id: "store-id", name: "store-id", value: @new_location.location.store_number] %>
+      </div>
+      <div>
+        <%= label :location_form, :address_1, "Address 1" %>
+        <%= text_input :location_form, :address_1, [type: "text", id: "address-1", name: "address-1", value: @new_location.address.address, class: input_error(@errors, :address)] %>
+        <%= display_error(@errors, :address) %>
+      </div>
+      <div>
+        <%= label :location_form, :address_2, "Address 2" %>
+        <%= text_input :location_form, :address_2, [type: "text", id: "address-2", name: "address-2", value: @new_location.address.address2] %>
+      </div>
+      <div>
+        <%= label :location_form, :city, "City" %>
+        <%= text_input :location_form, :city, [type: "text", id: "city", name: "city", value: @new_location.address.city, class: input_error(@errors, :city)] %>
+        <%= display_error(@errors, :city) %>
+      </div>
+      <div class="width--half">
+        <div>
+          <%= label :location_form, :state, "State" %>
+          <%= text_input :location_form, :state, [type: "text", id: "state", name: "state", value: @new_location.address.state, class: input_error(@errors, :state)] %>
+          <%= display_error(@errors, :state) %>
+        </div>
+        <div>
+          <%= label :location_form, :zip_code, "Zip Code" %>
+          <%= text_input :location_form, :zip_code, [type: "text", id: "zip-code", name: "zip-code", value: @new_location.address.zip, class: input_error(@errors, :zip)] %>
+          <%= display_error(@errors, :zip) %>
+        </div>
+      </div>
+      <div>
+        <%= label :location_form, :location_email, "Email", class: "optional" %>
+        <%= text_input :location_form, :location_email, [type: "text", id: "location-email", name: "location-email", value: @new_location.location.email] %>
+      </div>
+      <%= if @new_location.location.account_billing_enabled do %>
+        <div>
+          <%= label :location_form, :location_terms, "Net Terms (optional)" %>
+          <%= text_input :location_form, :location_terms, [type: "number", id: "location-terms", name: "location-terms", value: @new_location.location.invoice_period, class: input_error(@errors, :name), min: "0"] %>
+          <%= display_error(@errors, :location_terms) %>
+        </div>
+      <% else %>
+        <%= hidden_input :location_form, :invoice_period, [value: "", id: "location-terms", name: "location-terms"] %>
+      <% end %>
+      <div>
+        <div>
+          <%= label :location_form, :sales_rep_id, "Sales Rep" %>
+        </div>
+        <%= select :location_form, :sales_rep_id, sales_rep_options(), [class: "select", id: "sales-rep-id", name: "sales-rep-id", value: @new_location.location.sales_rep_id] %>
+      </div>
+      <div class="u-pad__top u-text--center width--full">
+        <button class="button button--primary">Next</button>
+        <a onclick="" class="button" tabindex=0 phx-keyup="close_modal" phx-key="Enter" phx-click="close_modal">Cancel</a>
+      </div>
+    </section>
+  </form>
+<% end %>

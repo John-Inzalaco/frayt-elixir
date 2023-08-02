@@ -1,0 +1,356 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" /><!--[if !mso]><!-->
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" /><!--<![endif]-->
+    <!--[if (gte mso 9)|(IE)]>
+    <xml>
+    <o:OfficeDocumentSettings>
+    <o:AllowPNG/>
+    <o:PixelsPerInch>96</o:PixelsPerInch>
+    </o:OfficeDocumentSettings>
+    </xml>
+    <![endif]-->
+    <!--[if (gte mso 9)|(IE)]>
+    <style type="text/css">
+      body {width: 600px;margin: 0 auto;}
+      table {border-collapse: collapse;}
+      table, td {mso-table-lspace: 0pt;mso-table-rspace: 0pt;}
+      img {-ms-interpolation-mode: bicubic;}
+    </style>
+    <![endif]-->
+
+    <style type="text/css">
+      body, p, div {
+        font-family: helvetica,arial,sans-serif;
+        font-size: 16px;
+      }
+      body {
+        color: inherit !important;
+      }
+      body a {
+        color: 'Source Sans Pro';
+        text-decoration: none;
+      }
+
+      p {
+        margin: 0;
+        padding: 0;
+        line-height: 1.5;
+      }
+
+      table.wrapper {
+        width:100% !important;
+        table-layout: fixed;
+        -webkit-font-smoothing: antialiased;
+        -webkit-text-size-adjust: 100%;
+        -moz-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+      img.max-width {
+        max-width: 100% !important;
+      }
+      .column.of-2 {
+        width: 50%;
+      }
+      .column.of-3 {
+        width: 33.333%;
+      }
+      .column.of-4 {
+        width: 25%;
+      }
+      @media screen and (max-width:480px) {
+        .preheader .rightColumnContent,
+        .footer .rightColumnContent {
+            text-align: left !important;
+        }
+        .preheader .rightColumnContent div,
+        .preheader .rightColumnContent span,
+        .footer .rightColumnContent div,
+        .footer .rightColumnContent span {
+          text-align: left !important;
+        }
+        .preheader .rightColumnContent,
+        .preheader .leftColumnContent {
+          font-size: 80% !important;
+          padding: 5px 0;
+        }
+        table.wrapper-mobile {
+          width: 100% !important;
+          table-layout: fixed;
+        }
+        img.max-width {
+          height: auto !important;
+          max-width: 480px !important;
+        }
+        a.bulletproof-button {
+          display: block !important;
+          width: auto !important;
+          font-size: 80%;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+        }
+        .columns {
+          width: 100% !important;
+        }
+        .column {
+          display: block !important;
+          width: 100% !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+        }
+      }
+    </style>
+    <!--user entered Head Start-->
+    <style type="text/css">
+  h1 {
+    color: #f99d1d !important;
+  }
+
+  hr {
+  	border-top: 1px solid #8c8b8b !important;
+  }
+</style>
+     <!--End Head user entered-->
+  </head>
+  <body>
+    <center class="wrapper" data-link-color="'Source Sans Pro'" data-body-style="font-size: 16px; font-family: helvetica,arial,sans-serif; color: inherit !important; background-color: #e9ecef;">
+      <div class="webkit">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" class="wrapper" bgcolor="#e9ecef">
+          <tr>
+            <td valign="top" bgcolor="#e9ecef" width="100%">
+              <table width="100%" role="content-container" class="outer" align="center" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td width="100%">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td>
+                          <!--[if mso]>
+                          <center>
+                          <table><tr><td width="600">
+                          <![endif]-->
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width:600px;" align="center">
+                            <tr>
+                              <td role="modules-container" style="padding: 0px 0px 0px 0px; color: inherit !important; text-align: left;" bgcolor="#e9ecef" width="100%" align="left">
+
+                                <table class="module preheader preheader-hide" role="module" data-type="preheader" border="0" cellpadding="0" cellspacing="0" width="100%"
+                                       style="display: none !important; mso-hide: all; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0;">
+                                  <tr>
+                                    <td role="module-content">
+                                      <p></p>
+                                    </td>
+                                  </tr>
+                                </table>
+                              <table class="module" role="module" data-type="code" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+                                  <tr>
+                                    <td height="100%" valign="top">
+                                      <div><meta charset="utf-8"><meta http-equiv="x-ua-compatible" content="ie=edge"></div>
+                                      <title></title>
+                                      <meta name="viewport" content="width=device-width, initial-scale=1">
+                                      <style type="text/css">/**
+                                         * Google webfonts. Recommended to include the .woff version for cross-client compatibility.
+                                         */
+                                        /*@media screen {
+                                          @font-face {
+                                            font-family: 'Source Sans Pro';
+                                            font-style: normal;
+                                            font-weight: 400;
+                                            src: local('Source Sans Pro Regular'), local('SourceSansPro-Regular'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff) format('woff');
+                                          }
+
+                                          @font-face {
+                                            font-family: 'Source Sans Pro';
+                                            font-style: normal;
+                                            font-weight: 700;
+                                            src: local('Source Sans Pro Bold'), local('SourceSansPro-Bold'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff) format('woff');
+                                          }
+                                        }*/
+
+                                        .sg-campaigns body {
+                                          background-color: #e9ecef;
+                                        }
+
+                                        /**
+                                         * Avoid browser level font resizing.
+                                         * 1. Windows Mobile
+                                         * 2. iOS / OSX
+                                         */
+                                        .sg-campaigns body, .sg-campaigns table, .sg-campaigns td, .sg-campaigns a {
+                                          -ms-text-size-adjust: 100%; /* 1 */
+                                          -webkit-text-size-adjust: 100%; /* 2 */
+                                        }
+
+                                        /**
+                                         * Remove extra space added to tables and cells in Outlook.
+                                         */
+                                        .sg-campaigns table, .sg-campaigns td {
+                                          mso-table-rspace: 0pt;
+                                          mso-table-lspace: 0pt;
+                                        }
+
+                                        /**
+                                         * Better fluid images in Internet Explorer.
+                                         */
+                                        .sg-campaigns img {
+                                          -ms-interpolation-mode: bicubic;
+                                        }
+
+                                        /**
+                                         * Remove blue links for iOS devices.
+                                         */
+                                        .sg-campaigns a[x-apple-data-detectors] {
+                                          font-family: inherit !important;
+                                          font-size: inherit !important;
+                                          font-weight: inherit !important;
+                                          line-height: inherit !important;
+                                          color: inherit !important;
+                                          text-decoration: none !important;
+                                        }
+
+                                        /**
+                                         * Fix centering issues in Android 4.4.
+                                         */
+                                        .sg-campaigns div[style*="margin: 16px 0;"] {
+                                          margin: 0 !important;
+                                        }
+
+                                        .sg-campaigns body {
+                                          width: 100% !important;
+                                          height: 100% !important;
+                                          padding: 0 !important;
+                                          margin: 0 !important;
+                                        }
+
+                                        /**
+                                         * Collapse table borders to avoid space between cells.
+                                         */
+                                        .sg-campaigns table {
+                                          border-collapse: collapse !important;
+                                        }
+
+                                        .sg-campaigns a {
+                                          color: #ffffff;
+                                        }
+
+                                        .sg-campaigns img {
+                                          height: auto;
+                                          line-height: 100%;
+                                          text-decoration: none;
+                                          border: 0;
+                                          outline: none;
+                                        }
+                                      </style>
+
+                                      <table border="0" cellpadding="0" cellspacing="0" width="100%"><!-- start logo -->
+                                      	<tbody>
+                                      		<tr>
+                                      			<td align="center" bgcolor="#e9ecef"><!--[if (gte mso 9)|(IE)]>
+                                              <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+                                              <tr>
+                                              <td align="center" valign="top" width="600">
+                                              <![endif]-->
+                                      			<table border="0" cellpadding="0" cellspacing="0" style="max-width: 600px;" width="100%">
+                                      				<tbody>
+                                      					<tr>
+                                      						<td align="center" style="padding: 22px 24px;" valign="top"><span class="sg-image" data-imagelibrary="%7B%22width%22%3A%22170%22%2C%22height%22%3A0%2C%22alt_text%22%3A%22Logo%22%2C%22alignment%22%3A%22%22%2C%22border%22%3A0%2C%22src%22%3A%22https%3A//cdn.frayt.com/img/logo@2x.png%22%2C%22link%22%3A%22https%3A//sendgrid.com%22%2C%22classes%22%3A%7B%22sg-image%22%3A1%7D%7D"><a href="https://sendgrid.com" style="display: inline-block;" target="_blank"><img alt="Logo" border="0" src="https://cdn.frayt.com/img/logo@2x.png" style="width: 170px; max-width: 170px; min-width: 48px;" width="170"></a></span></td>
+                                      					</tr>
+                                      				</tbody>
+                                      			</table>
+                                      			<!--[if (gte mso 9)|(IE)]>
+                                              </td>
+                                              </tr>
+                                              </table>
+                                              <![endif]--></td>
+                                      		</tr>
+                                      		<!-- end logo --><!-- start hero -->
+                                      		<tr>
+                                      			<td align="center" bgcolor="#e9ecef"><!--[if (gte mso 9)|(IE)]>
+                                              <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+                                              <tr>
+                                              <td align="center" valign="top" width="600">
+                                              <![endif]-->
+                                      			<table border="0" cellpadding="0" cellspacing="0" style="max-width: 600px;" width="100%">
+                                      				<tbody>
+                                      					<tr>
+                                      						<td align="left" bgcolor="#ffffff" style="padding: 24px 24px 30px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; border-top: 3px solid #d4dadf;">
+                                                    <h1 style="color: #f99d1d; font-size: 26px; text-align: center; padding-bottom: 16px;"><b>Join Frayt</b></h1>
+                                                    <%= if @name do %>
+                                                      <p>Hello, <%= @name %>!</p>
+                                                    <% end %>
+                                                    <p>You've been invited to join the Frayt admin.</p>
+                                                    <div style="background-color: #f99d1d; width: 80px; margin: 20px auto 16px; color: #ffffff; padding: 5px 15px 5px 15px; border-radius: 5px; font-weight: bold; text-align: center; "><%= link "Join Now", to: @url, target: "_blank" %></div>
+                                                    <p>Or visit <span style="color: #1630dc; text-decoration: none;"><%= @url %></span> to join now.</p>
+                                                    <p style="margin-top: 20px;"> Thanks!</p>
+                                                    <p> &#8212;The Frayt Team</p>
+                                      						</td>
+                                      					</tr>
+                                      				</tbody>
+                                      			</table>
+                                      			<!--[if (gte mso 9)|(IE)]>
+                                              </td>
+                                              </tr>
+                                              </table>
+                                              <![endif]--></td>
+                                      		</tr>
+                                      		<!-- end hero --><!-- start footer -->
+                                      		<tr>
+                                      			<td align="center" bgcolor="#e9ecef" style="padding: 24px;"><!--[if (gte mso 9)|(IE)]>
+                                              <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+                                              <tr>
+                                              <td align="center" valign="top" width="600">
+                                              <![endif]-->
+                                      			<table border="0" cellpadding="0" cellspacing="0" style="max-width: 600px;" width="100%"><!-- start permission -->
+                                      				<tbody>
+                                      					<!-- end permission --><!-- start unsubscribe -->
+                                      					<tr>
+                                      						<td align="center" bgcolor="#e9ecef" style="padding: 12px 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 20px; color: #666;">
+                                      						<p style="margin: 0;"><span style="font-size:14px;">Frayt Technologies, Inc. / 1311 Vine Street, Cincinnati, OH 45202</span></p>
+                                      						</td>
+                                      					</tr>
+                                      					<!-- end unsubscribe -->
+                                      				</tbody>
+                                      			</table>
+                                      			</td>
+                                      		</tr>
+                                      	</tbody>
+                                      </table>
+
+                                      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                      	<tbody>
+                                      		<tr>
+                                      			<td align="center" bgcolor="#e9ecef" style="padding: 24px;"><span style="font-size:14px;"><!--[if (gte mso 9)|(IE)]>
+                                              </td>
+                                              </tr>
+                                              </table>
+                                              <![endif]--></span></td>
+                                      		</tr>
+                                      		<!-- end footer -->
+                                      	</tbody>
+                                      </table>
+                                      <!-- end body -->
+                                    </td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                          <!--[if mso]>
+                          </td></tr></table>
+                          </center>
+                          <![endif]-->
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </center>
+  </body>
+</html>

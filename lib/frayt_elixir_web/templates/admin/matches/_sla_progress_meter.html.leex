@@ -1,0 +1,60 @@
+<%= if @sla do %>
+  <span><%= if @sla.driver_id, do: "Driver", else: "Frayt" %></span>
+  <div
+    id="<%= @sla.id %>_progress_meter"
+    phx-hook="ProgressMeter"
+    data-progress-meter-start="<%= @sla.start_time %>"
+    data-progress-meter-end="<%= @sla.end_time %>"
+  >
+    <div class="match-sla__meter" data-progress-meter-marker-class="match-sla__meter--">
+      <button class="tooltip" data-test-id="tooltip-<%= @sla.id %>">
+        <span data-progress-meter-label="on_time">On Time</span>
+        <span data-progress-meter-label="caution" data-progress-meter-label-type="time_remaining"></span>
+        <span data-progress-meter-label="late" data-progress-meter-label-type="time_past"></span>
+        <span class="tooltip__content tooltip__content--center tooltip__content--md">
+          <h6>Time Allowance</h6>
+          <span data-test-id="time-allowance-<%= @sla.id %>">
+            <%= display_time_allowance(@sla, @match) %>
+          </span>
+        </span>
+      </button>
+      <span
+        class="match-sla__meter--progress"
+        data-progress-meter="<%= @sla.completed_at %>"
+      ></span>
+      <button
+        class="match-sla__meter--marker match-sla__meter--marker__on_time tooltip"
+        data-progress-meter-marker="on_time"
+        data-progress-meter-marker-time="<%= @sla.start_time %>"
+      >
+        <span class="tooltip__content">Started @ <%= display_date_time(@sla.start_time, @time_zone) %></span>
+      </button>
+      <% caution_time = DateTime.add(@sla.end_time, -8 * 60) %>
+      <button
+        class="match-sla__meter--marker match-sla__meter--marker__caution tooltip"
+        data-progress-meter-marker="caution"
+        data-progress-meter-marker-active-only
+        data-progress-meter-marker-time="<%= caution_time %>"
+      >
+        <span class="tooltip__content tooltip__content--center">Caution @ <%= display_date_time(caution_time, @time_zone) %></span>
+      </button>
+      <button
+        class="match-sla__meter--marker match-sla__meter--marker__late tooltip"
+        data-progress-meter-marker="late"
+        data-progress-meter-marker-time="<%= @sla.end_time %>"
+      >
+        <span class="tooltip__content tooltip__content--left">Late @ <%= display_date_time(@sla.end_time, @time_zone) %></span>
+      </button>
+      <%= if @sla.completed_at do %>
+        <button
+          class="match-sla__meter--marker match-sla__meter--marker__completed tooltip"
+          data-progress-meter-marker="completed"
+          data-progress-meter-marker-time="<%= @sla.completed_at %>"
+          data-progress-meter-marker-dynamic
+        >
+          <span class="tooltip__content tooltip__content--left">Completed @ <%= display_date_time(@sla.completed_at, @time_zone) %></span>
+        </button>
+      <% end %>
+    </div>
+  </div>
+<% end %>

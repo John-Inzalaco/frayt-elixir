@@ -1,0 +1,16 @@
+<tr>
+  <td>
+    <p><%= display_date(@action.inserted_at, @time_zone) %></p>
+    <p><%= display_time(@action.inserted_at, @time_zone) %></p>
+  </td>
+  <td><%= title_case(@action.type) %></td>
+  <td colspan="2">
+    <div class="u-flex u-flex--wrap u-flex__align--center">
+      <%= content_tag(:a, full_name(@action.driver), href: Routes.driver_show_path(FraytElixirWeb.Endpoint, :add, @action.driver.id), target: "_blank") %>
+      <%= if  not is_nil(@action.reason) do %>
+        <i class="material-icons">arrow_right_alt</i>
+        <div>Reason: <%= @action.reason %></div>
+      <% end %>
+    </div>
+  </td>
+</tr>

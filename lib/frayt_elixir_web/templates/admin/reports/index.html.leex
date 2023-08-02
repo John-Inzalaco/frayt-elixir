@@ -1,0 +1,19 @@
+<section class="header">
+  <div class="header__title">
+    <h1>Reports</h1>
+    <%= if user_has_role(@current_user, :admin) do %>
+      <%= live_patch to: Routes.report_path(@socket, :index, "new"), replace: false do %>
+        <i class="material-icons icon">add_circle_outline</i>
+      <% end %>
+    <% end %>
+  </div>
+</section>
+
+<%= for dashboard <- @dashboards do %>
+  <section class="u-grid u-grid--fluid">
+    <a class="card" href="<%= Routes.report_path(@socket, :index, dashboard.id) %>">
+      <h4 class="u-push__bottom--xs"><%= dashboard.name %></h4>
+      <p><%= dashboard.description %></p>
+    </a>
+  </section>
+<% end %>

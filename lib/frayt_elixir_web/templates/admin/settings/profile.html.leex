@@ -1,0 +1,110 @@
+<section class="container__profile">
+  <div class="header">
+    <h4>My Profile</h4>
+    <div>
+      <%= unless @is_editing do %>
+        <a onclick="" class="button button--sm" phx-click="toggle_editing">Edit Profile</a>
+      <% end %>
+      <a class="button button--danger button--sm" href="/sessions/log-out">Sign Out</a>
+    </div>
+  </div>
+
+  <%= unless @is_editing do %>
+    <div class="container__profile--section">
+      <p class="header--inline">Name</p>
+      <div class="name">
+        <p><%= @user.name || "-" %></p>
+      </div>
+    </div>
+    <div class="container__profile--section">
+      <p class="header--inline">Email</p>
+      <div class="name">
+        <p><%= @user.user.email %></p>
+      </div>
+    </div>
+
+    <div class="container__profile--section">
+      <p class="header--inline">Phone Number</p>
+      <div class="name">
+        <p><%= @user.phone_number %></p>
+      </div>
+    </div>
+    <div class="container__profile--section">
+      <p class="header--inline">Role</p>
+      <div class="name">
+        <p><%= title_case(@user.role) %></p>
+      </div>
+    </div>
+
+    <%= if @user.role == :sales_rep do %>
+      <div class="container__profile--section">
+        <p class="header--inline">Sales Goal</p>
+        <div class="name">
+          <p>$<%= display_revenue(@user.sales_goal) %></p>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <%= form_for @admin_changeset, "#", [phx_change: :change_admin, phx_submit: :save_admin], fn f -> %>
+      <div>
+        <div class="container__profile--section">
+          <%= label f, :name, "Name" %>
+          <%= text_input f, :name %>
+          <span class="error"><%= error_tag f, :name %></span>
+        </div>
+        <div class="u-push__top--sm container__profile--section">
+          <%= inputs_for f, :user, fn u -> %>
+            <%= label u, :email, "Email" %>
+            <%= text_input u, :email %>
+            <span class="error"><%= error_tag u, :email %></span>
+          <% end %>
+        </div>
+        <div class="u-push__top--sm container__profile--section">
+          <%= label f, :phone_number, "Phone Number" %>
+          <%= text_input f, :phone_number %>
+          <p class="caption">Example: +10123456789</p>
+          <span class="error"><%= error_tag f, :phone_number %></span>
+        </div>
+        <div class="container__profile--section u-push__bottom">
+          <div class="u-text--center-tablet u-push__top--sm">
+            <button class="button button--primary">Update Profile</button>
+            <a onclick="" class="button" phx-click="toggle_editing">Cancel</a>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+  <div class="u-push__top container__profile--section">
+    <div>
+      <p class="header--inline u-push__bottom--xxs">Reset Password</p>
+      <p class="caption u-push__bottom--xxs">Password must contain:</p>
+      <ul class="caption list--bulleted">
+        <li>Must contain at least 8 characters</li>
+        <li>Must contain a special character</li>
+        <li>Must contain a number</li>
+      </ul>
+    </div>
+    <div>
+      <form phx-submit="reset_password" phx-change="change_password_inputs" data-test-id="password-form">
+        <ul phx-click="clear_flash" class="list--bulleted u-push__left--none u-pad__bottom--xs u-pad__top--none">
+          <%= for flash <- @flash do %>
+            <%= if is_binary(elem(flash, 1)) do %>
+              <li class="<%= elem(flash, 0) %>"><%= elem(flash, 1) %></li>
+            <% else %>
+              <%= for message <- elem(flash, 1) do %>
+                <li class="<%= elem(flash, 0) %>"><%= message %></li>
+              <% end %>
+            <% end %>
+          <% end %>
+        </ul>
+        <%= text_input :password_form, :old_password, [class: "input u-push__bottom--sm", value: @password_inputs["old_password"], placeholder: "Old Password", type: @password_view] %>
+        <%= text_input :password_form, :new_password, [class: "input u-push__bottom--sm", value: @password_inputs["new_password"], placeholder: "New Password", type: @password_view] %>
+        <%= text_input :password_form, :confirm_password, [class: "input u-push__bottom--xs", value: @password_inputs["confirm_password"], placeholder: "Confirm Password", type: @password_view] %>
+        <div class="u-push__bottom">
+          <a onclick="" phx-click="toggle_password_view"><%= if @password_view == :password, do: "Show", else: "Hide" %> Password</a>
+        </div>
+        <button class="button button--primary" data-test-id="save-button">Save</button>
+      </form>
+    </div>
+  </div>
+</section>

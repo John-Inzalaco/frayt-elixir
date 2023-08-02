@@ -1,0 +1,46 @@
+.address {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-auto-rows: minmax(min-content, auto);
+  grid-template-areas:
+    "street street street"
+    "street-2 street-2 street-2"
+    "city state zip";
+  gap: $pad-sm $pad;
+
+  &__street {
+    grid-area: street;
+  }
+
+  &__street-2 {
+    grid-area: street-2;
+  }
+
+  &__city {
+    grid-area: city;
+  }
+
+  &__state {
+    grid-area: state;
+  }
+
+  &__zip {
+    grid-area: zip;
+  }
+
+  &--single-street {
+    grid-template-areas:
+      "street street street"
+      "city state zip";
+  }
+
+  @media screen and (max-width: $screen-tablet) {
+    gap: $pad-xxs;
+    grid-template-areas:
+      "street street street"
+      "street-2 street-2 street-2"
+      "city city city"
+      "state state state"
+      "zip zip zip";
+  }
+}

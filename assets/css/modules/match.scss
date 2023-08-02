@@ -1,0 +1,239 @@
+.match {
+    &-sla {
+        &__header {
+            display: flex;
+            margin: 0 -5px;
+            > * {
+                padding: 0 5px;
+            }
+
+            button {
+                color: $dark-gray;
+                cursor: pointer;
+                &:hover, &:active {
+                    opacity: .5;
+                }
+            }
+        }
+
+        &__meter {
+            min-width: 10rem;
+            padding: 6px .75rem 10px;
+            text-align: center;
+            position: relative;
+            background-color: $gray-bg;
+            font-weight: 500;
+            border-top-right-radius: 4px;
+            border-top-left-radius: 4px;
+
+            button {
+                color: $dark-gray;
+            }
+
+            &--progress, &:after {
+                max-width: 100%;
+                min-width: 5px;
+                height: 6px;
+                display: block;
+                position: absolute;
+                left: 0;
+                bottom: 0;
+            }
+
+            &--on_time {
+                &::after {
+                    background-color: rgba($green, .4);
+                    content: "";
+                    width: 100%;
+                }
+                .match-sla__meter--progress {
+                    background-color: $green;
+                }
+            }
+
+            &--caution {
+                background-color: rgba($orange, .4);
+                .match-sla__meter--progress {
+                    background-color: $orange;
+                    max-width: calc(100% - 5px);
+                }
+            }
+            &--late {
+                background-color: rgba($red, .4);
+                .match-sla__meter--progress {
+                    background-color: $red;
+                }
+            }
+
+            &--marker {
+                position: absolute!important;
+                background-color: $dark-gray;
+                width: 12px;
+                height: 12px;
+                border-radius: 6px;
+                bottom: -3px;
+                margin-left: -6px;
+                border: 1px solid $white;
+                z-index: 10;
+
+                &__on_time {
+                    background-color: $green;
+                }
+
+                &__caution {
+                    background-color: $orange;
+                }
+
+                &__late {
+                    background-color: $red;
+                }
+
+                &__completed {
+                    background-color: $blue;
+                    width: 14px;
+                    height: 14px;
+                    border-radius: 7px;
+                    bottom: -3.5px;
+                    margin-left: -7px;
+                    border-color: $dark-gray;
+                }
+            }
+        }
+    }
+
+    &-layout {
+        &__details {
+            background-color: $gray-bg;
+            padding: 1rem;
+            margin-bottom: .5rem;
+            width: 100%;
+
+            fieldset {
+                border: none;
+                border-left: 3px solid $orange;
+                padding: 0 1rem;
+                margin: .5rem 0 1rem;
+            }
+        }
+
+        &__date-time-select-group {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-bottom: 0.25rem;
+
+            > label {
+                width: auto;
+                min-width: 50%;
+                margin-right: 0.5rem;
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    &-stop {
+        margin-left: 1rem;
+        display: flex;
+        
+        h5 {
+            font-size: 1.25rem;
+            width: 2rem;
+            color: $orange;
+        }
+    }
+
+    &-repeater {
+        &__add-item-button {
+            color: $orange;
+            display: inline-flex;
+            flex-direction: row;
+            cursor: pointer;
+            height: 1.25rem;
+            padding-left: .25rem;
+            font-weight: bold;
+            font-size: 0.875rem;
+            margin-top: -2px;
+
+            & .material-icons {
+                font-size: 1.25rem;
+            }
+        
+            &:hover,
+            &:active {
+                opacity: 0.75;
+            }
+        }
+
+        &__remove-item-button {
+            position: absolute;
+            right: 1rem;
+        }
+
+
+        &__items {
+            padding: .5rem 0;
+            h6 {
+                // color: $orange;
+                display: flex;
+                margin-top: 0.5rem;
+            }
+        }
+
+        &__item {
+            position: relative;
+        }
+    }
+
+    &__pricing-table {
+        &.editing {
+            opacity: .5;
+        }
+
+        &--voided {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        td, th {
+            padding: .375rem .5rem;
+
+            .fee-type {
+                font-weight: 500;
+            }
+        }
+
+        thead {
+            tr {
+                border-bottom: 1px solid $light-gray;
+            }
+        }
+
+        tbody {
+            tr {
+                border: none;
+                > td {
+                    color: rgba($dark-gray, 0.67);
+                    &:first-child {
+                        color: $dark-gray;
+                    }
+                    &:last-child {
+                        color: $dark-gray;
+                        font-weight: 500;
+                    }
+                }
+            }
+        }
+
+        tfoot {
+            td {
+                font-weight: 500;
+            }
+
+            tr {
+                > td:last-child {
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+}

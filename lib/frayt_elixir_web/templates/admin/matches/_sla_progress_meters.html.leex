@@ -1,0 +1,78 @@
+<%= if @eta do %>
+  <br/>
+  <span>
+    <i class="fa fa-clock"></i> <span style="font-weight: bold">ETA:</span>
+    <% {time, duration} = get_eta_time(@eta, @match.timezone) %>
+    <%= time %>
+    <%= if duration do %>
+      <span style="color: #6B6B6B">(<%= duration %>)</span>
+    <% end %>
+  </span>
+  <p class="caption">updated <%= from_now(@eta.updated_at) %></p>
+<% end %>
+<% match_sla_types = Enum.map(@match.slas, & &1.type) |> Enum.uniq() |> Enum.sort() %>
+<%= with {type, slas} <- @slas do %>
+  <% current_type = if @showing_sla_type, do: @showing_sla_type, else: type %>
+  <div class="match-sla__header">
+    <% open_class = if @open_sla_dropdown?, do: "drop-down--open" %>
+    <div class="drop-down <%= open_class %>"
+      phx-target="<%= @myself %>"
+      phx-click="toggle_sla_dropdown" style="cursor: pointer">
+        <p class="u-push__bottom--xxs u-text--bold">
+          <span data-test-id="<%= current_type %>-sla-label">
+            <%= title_case(current_type) %>
+          </span>&nbsp;<i class="fa fa-angle-down"></i>
+        </p>
+        <div class="drop-down__menu" style="z-index: 10000">
+          <span class="drop-down__menu-item-header">SLA</span>
+          <%= for t <- match_sla_types do %>
+            <a  phx-target="<%= @myself %>"
+              phx-click="change_sla_type"
+              phx-value-type="<%= t %>"
+              class="drop-down__menu-item <%= if current_type == t, do: "selected", else: "" %>">
+              <%= title_case(t) %>
+            </a>
+          <% end %>
+      </div>
+    </div>
+  </div>
+  <%= if @editing_sla? do %>
+    <div class="u-push__bottom--sm" style=" padding-bottom: 15px">
+      <button style="color: #999;"
+            class="tooltip u-float--right"
+            phx-click="edit_match_sla"
+            phx-value-action="close"
+            phx-target="<%= @myself %>">
+        <i class="fa fa-times"></i>&nbsp;Close
+      </button>
+      <%= for sla <- slas do %>
+        <%= live_component(FraytElixirWeb.LiveComponent.EditMatchSlaTimestamp, id: sla.id, sla: sla) %>
+      <% end %>
+    </div>
+  <% else %>
+    <%= if @editable? do %>
+      <button style="cursor: pointer; margin-left: 10px"
+              class="u-float--right"
+              data-test-id="edit-match-sla-<%= @match.id %>"
+              phx-target="<%= @myself %>"
+              phx-click="edit_match_sla"
+              phx-value-action="edit">
+        <i class="fa fa-edit"></i>
+      </button>
+    <% end %>
+  <% end %>
+  <%= if @editable? do %>
+    <button
+      class="u-float--right"
+      phx-click="recalculate_sla"
+      phx-target="<%= @myself %>"
+      title="Recalculate SLA"
+      data-confirm="Are you sure you want to recalculate this Match's SLA? Any manual changes made to the start and end times will be reset."
+    >
+      <i class="fa fa-refresh"></i>
+    </button>
+  <% end %>
+  <%= for sla <- slas do %>
+    <%= render FraytElixirWeb.Admin.MatchesView, "_sla_progress_meter.html", sla: sla, time_zone: @time_zone, match: @match %>
+  <% end %>
+<% end %>

@@ -1,0 +1,230 @@
+<div>
+  <%= AdminAlerts.render(@alerts) %>
+  <section>
+    <%= go_back_link("All Companies", Routes.companies_path(@socket, :index)) %>
+    <div>
+      <h3><%= @company.name %></h3>
+    </div>
+  </section>
+
+  <section>
+    <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+      <h4>Company Information</h4>
+      <%= if !@editing do %>
+        <a class="button u-text--right" tabindex=0 phx-click="edit_company">Edit Company</a>
+      <% end %>
+    </div>
+    <%= if @editing == "company" do %>
+      <%= live_component(FraytElixirWeb.LiveComponent.AdminEditCompany, id: "#{@company.id}", edit_form: @edit_form, company: @company, errors: @errors) %>
+    <% else %>
+      <div class="u-grid u-grid__2-column">
+        <div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Revenue</p>
+            <p class="u-grid__span--3">$<%= display_revenue(@company.revenue || nil) %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Locations</p>
+            <p class="u-grid__span--3" data-test-id="location-count"><%= @company.location_count |> display_large_numbers %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Shippers</p>
+            <p class="u-grid__span--3" data-test-id="shipper-count"><%= @company.shipper_count |> display_large_numbers %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Matches</p>
+            <p class="u-grid__span--3" data-test-id="match-count"><%= @company.match_count |> display_large_numbers %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Sales Rep</p>
+            <p class="u-grid__span--3"><%= display_sales_rep(@company.sales_rep) %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Net Terms</p>
+            <p class="u-grid__span--3"><%= @company.invoice_period || "-" %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Email</p>
+            <p class="u-grid__span--3"><%= if @company.email do %><a href="<%= email_link(@company.email) %>"><%= @company.email %></a><% else %> - <% end %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Default contract</p>
+            <p class="u-grid__span--3"><%= @company.default_contract && @company.default_contract.name || "(None)" %> </p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Available contracts</p>
+            <p class="u-grid__span--3">
+              <%= if length(@company.contracts) > 0 do %>
+                <%= for contract <- @company.contracts do %>
+                  <%= contract.name %> <code><%= contract.contract_key %></code><br/>
+                <% end %>
+              <% else %>
+                (None)
+              <% end %>
+            </p>
+          </div>
+        </div>
+        <div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Enterprise Company</p>
+            <p class="u-grid__span--3"><%= humanize_boolean(@company.is_enterprise) %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Auto Select Vehicle Class</p>
+            <p class="u-grid__span--3"><%= humanize_boolean(@company.autoselect_vehicle_class) %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Auto Cancel Late Matches</p>
+            <p class="u-grid__span--3"><%= humanize_boolean(@company.auto_cancel) %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Auto Cancel when Driver Cancels</p>
+            <p class="u-grid__span--3"><%= humanize_boolean(@company.auto_cancel_on_driver_cancel) %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Require Origin Photo</p>
+            <p class="u-grid__span--3"><%= humanize_boolean(@company.origin_photo_required) %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Require Proof of Delivery</p>
+            <p class="u-grid__span--3"><%= humanize_boolean(@company.destination_photo_required) %></p>
+          </div>
+          <div class="u-grid__4-column">
+            <p class="header--inline">Require Signature</p>
+            <p class="u-grid__span--3"><%= humanize_boolean(@company.signature_required) %></p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="u-push__top">
+    <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+      <h4>API Information</h4>
+      <%= if !@editing and user_has_role(@current_user, [:admin, :developer]) do %>
+        <%= if @company.api_account || @company.webhook_url do %>
+          <a class="button u-text--right" tabindex=0 phx-click="edit_api_config">Edit API Config</a>
+        <% end %>
+      <% end %>
+    </div>
+    <%= if @editing == "api_config" do %>
+      <%= render(FraytElixirWeb.Admin.CompaniesView, "_edit_api_config.html", company: @company, company_changeset: @company_changeset) %>
+    <% else %>
+      <div class="u-grid u-grid__2-column">
+        <%= if @company.api_account do %>
+          <div>
+            <div class="u-grid__4-column">
+              <p class="header--inline">Client ID</p>
+              <p class="u-grid__span--3">
+                <%= if user_has_role(@current_user, [:admin, :developer]) do %>
+                  <%= display_text(@company.api_account.client_id) %>
+                <% else %>
+                  <%= private_text(@company.api_account.client_id, 8) %>
+                <% end %>
+              </p>
+            </div>
+            <div class="u-grid__4-column">
+              <p class="header--inline">Secret Key</p>
+              <p class="u-grid__span--3">
+                <%= if user_has_role(@current_user, [:admin, :developer]) do %>
+                  <%= display_text(@company.api_account.secret) %>
+                <% else %>
+                  <%= private_text(@company.api_account.secret, 8) %>
+                <% end %>
+              </p>
+            </div>
+            <%= if user_has_role(@current_user, [:admin]) do %>
+              <div class="u-push__top--xs">
+                <a class="button button--danger inverse u-text--right" tabindex=0 phx-click="revoke_api_account" data-confirm="Are you sure you want to revoke this API key? This action is irreversible and will prevent this Company from placing ANY Matches over the API.">Revoke API Key</a>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="u-push__top--sm">
+            <%= if user_has_role(@current_user, [:admin, :developer]) do %>
+              <a class="button" tabindex=0 phx-click="create_api_account">Create API Account</a>
+            <% else %>
+              <strong>No Account</strong>
+            <% end %>
+          </div>
+        <% end %>
+        <%= if @company.api_account || @company.webhook_url do %>
+          <div>
+            <div class="u-grid__4-column">
+              <p class="header--inline">Webhook URL</p>
+              <p class="u-grid__span--3"><%= @company.webhook_url |> display_text() %></p>
+            </div>
+            <%= if @company.webhook_url do %>
+              <div class="u-grid__4-column">
+                <p class="header--inline">Webhook Version</p>
+                <p class="u-grid__span--3"><%= display_webhook_config(@company, :api_version) |> display_text() %></p>
+              </div>
+              <div class="u-grid__4-column">
+                <p class="header--inline">Webhook Auth Header</p>
+                <p class="u-grid__span--3"><%= display_webhook_config(@company, :auth_header) |> display_text() %></p>
+              </div>
+              <div class="u-grid__4-column">
+                <p class="header--inline">Webhook Auth Token</p>
+                <p class="u-grid__span--3"><%= display_webhook_config(@company, :auth_token) |> private_text(8) %></p>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="u-push__top">
+    <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+      <div class="header__title">
+        <h4>Locations</h4>
+        <a onclick="" phx-click="add_location" tabindex="0"><i class="material-icons icon u-icon--inline">add_circle_outline</i></a>
+      </div>
+      <%= form_for @data_table, "#", [class: "header__search", filter_on: :phx_submit], fn f -> %>
+        <div class="search">
+          <%= text_input f, :query, [class: "input", type: "search", placeholder: "Search"] %>
+          <button class="search__submit"><i class="material-icons">search</i></button>
+        </div>
+      <% end %>
+    </div>
+    <div class="u-grid__2-column u-grid--wrap-mobile">
+      <%= for {location, i} <- Enum.with_index(@locations, 1) do %>
+        <div class="driver__vehicle-details">
+          <div>
+            <div class="driver__number"><%= i + @data_table.filters.page * @data_table.filters.per_page %></div>
+          </div>
+          <div>
+            <div>
+              <p class="header--inline u-push__bottom--xxs"><b><%= location.location %><%= if location.store_number, do: " (##{location.store_number})" %></b></p>
+            </div>
+            <div class="inline-details">
+              <p>Revenue:</p>
+              <p>$<%= display_revenue(FraytElixir.Accounts.get_location_revenue(location.id)) %></p>
+            </div>
+            <div class="inline-details">
+              <p>Active Shippers:</p>
+              <p data-test-id="active-shippers"><%= Enum.count(location.shippers, & &1.state != :disabled) %></p>
+            </div>
+            <div class="inline-details">
+              <p>Email:</p>
+              <p><%= if location.email do %><a href="<%= email_link(location.email) %>"><%= location.email %></a><% else %> - <% end %></p>
+            </div>
+            <div class="u-push__top--sm">
+              <a class="button button--primary" href="<%= Table.details_path(@data_table, location.id) %>">View Details</a>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <%= Table.pagination_nav(@data_table) %>
+  </section>
+</div>
+<%= if @show_modal, do: live_component @socket, FraytElixirWeb.LiveComponent.ModalLive,
+  live_view: set_live_view(@default_form),
+  child_id: @default_form,
+  title: @title,
+  wide: "false",
+  default_form: @default_form,
+  chosen_company: @company.id,
+  chosen_company_name: @company.name,
+  attrs: @attrs %>

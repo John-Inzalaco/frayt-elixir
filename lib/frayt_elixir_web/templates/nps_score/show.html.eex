@@ -1,0 +1,18 @@
+<div>
+  <%= if @score < 5 do %>
+    <h1 class="u-white u-push__bottom">What can we improve?</h1>
+  <% else %>
+    <h1 class="u-white u-push__bottom">Let us know about your experience!</h1>
+  <% end %>
+  <%= form_for @conn, Routes.nps_score_path(@conn, :update, @shipper_id, @nps_score_id,  score: @score), fn f -> %>
+    <section>
+      <div class="width--full">
+          <%= label f, :feedback, class: "inverse" %>
+          <%= textarea f, :feedback, placeholder: "Your feedback", required: @score < 5 %>
+      </div>
+      <div class="u-push__top width--full">
+        <%= submit "Submit", class: "button button--primary inverse session__submit" %>
+      </div>
+    </section>
+  <% end %>
+</div>

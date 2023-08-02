@@ -1,0 +1,300 @@
+<%= live_render(@socket, FraytElixirWeb.Admin.MetricsDashboardLive, id: "metrics_dahsboard") %>
+
+<section class="header header--matches">
+  <%= AdminAlerts.render(@alerts) %>
+  <div class="header__title">
+    <h1>Matches</h1>
+    <div>
+      <a href="<%= Table.details_path(@data_table, "create") %>"><i class="material-icons icon">add_circle_outline</i></a>
+      <%= if @enable_multistop do %>
+        <a href="<%= Table.details_path(@data_table, "multistop") %>"><i class="material-icons icon">publish</i></a>
+      <% end %>
+      <%= Table.refresh_button(@data_table) %>
+    </div>
+  </div>
+  <div class="header__filters">
+    <%= form_for @data_table, "#", [style: "display: inline-block"], fn f -> %>
+      <div class="slider">
+        <div class="slide slide--left">
+          <%= checkbox f, :only_mine, unchecked_value: nil, checked_value: @user_id %>
+          <%= label f, :only_mine, class: "caption" do %><% end %>
+        </div>
+        <div class="caption">My Matches Only</div>
+      </div>
+    <% end %>
+    <%= form_for @data_table, "#", [class: "filter-sla"], fn f -> %>
+      <div class="button__checkbox">
+        <%= checkbox f, :sla, unchecked_value: nil, checked_value: :caution %>
+        <%= label f, :sla do %>
+          <i class="material-icons">warning</i>
+        <% end %>
+      </div>
+    <% end %>
+    <%= form_for @data_table, "#", [filter_on: :phx_submit, class: "header__search"], fn f -> %>
+      <div class="search">
+        <%= text_input f, :query, [class: "input", type: "search", placeholder: "Search"]%>
+        <button class="search__submit"><i class="material-icons">search</i></button>
+      </div>
+    <% end %>
+  </div>
+  <%= f = form_for @data_table, "#", class: "header__actions" %>
+    <div class="header__select">
+      <%= case @data_table.filters.customer_filter do %>
+        <% :company_id -> %>
+          <%= record_select f, :company_id, Company, default_options: @enterprise_companies %>
+        <% :contract_id -> %>
+          <%= record_select f, :contract_id, Contract %>
+        <% :shipper_id -> %>
+          <%= record_select f, :shipper_id, Shipper %>
+      <% end %>
+      <%= radio_select f, :customer_filter, [[key: "Company", value: :company_id], [key: "Contract", value: :contract_id], [key: "Shipper", value: :shipper_id]], [class: "radio-button-group radio-button-group--sm"], [class: "radio-button"] %>
+    </div>
+    <div class="header__select">
+      <%= record_select f, :driver_id, Driver, filters: %{state: :active} %>
+    </div>
+    <div class="header__select">
+        <div class="filter-states">
+          <%= select f, :vehicle_class, [{"All Vehicle Types", nil}] ++ VehicleClass.select_options(), [class: "vehicle-select", data: [test_id: "filter-vehicle"]] %>
+        </div>
+    </div>
+    <div class="header__select">
+      <div class="filter-states">
+        <%= select f, :states, [{"All Match States", "all"}, {"Open Matches", "active"}, {"Inactive Matches", "inactive"}, {"Scheduled Matches", "scheduled"}, {"Unassigned Matches", "assigning_driver"}, {"Complete Matches", "complete"}, {"Canceled Matches", "canceled"}, {"Unable to Pickup", "unable_to_pickup"},], [class: "states-select", data: [test_id: "filter-states"]] %>
+      </div>
+    </div>
+    <div class="header__select">
+      <div class="filter-stops">
+        <%= select f, :stops, [{"All Stops", nil}, {"Multiple Stops", "multi"}, {"Single Stop", "single"}], [class: "stops-select", data: [test_id: "filter-stops"]] %>
+      </div>
+    </div>
+    <div class="header__select">
+      <input id="daterange" readonly="readonly" placeholder="Filter By Date" phx-hook="DateRangePicker" value="<%= @displayed_date_range %>"/>
+    </div>
+  </form>
+</section>
+
+<section>
+  <%= Table.pagination_nav(@data_table, id: "top") %>
+  <%# desktop view %>
+  <table class="u-hide--mobile admin-table">
+    <thead>
+      <tr class="u-border--none">
+        <%= Table.sort_header(@data_table, "Date", :inserted_at) %>
+        <th>Match ID</th>
+        <th>Location</th>
+        <%= Table.sort_header(@data_table, "Current State", :state) %>
+        <%= Table.sort_header(@data_table, "Driver", :match_driver_name) %>
+        <%= Table.sort_header(@data_table, "Shipper", :match_shipper_name) %>
+        <%= Table.sort_header(@data_table, "Level", :service_level) %>
+        <%= Table.sort_header(@data_table, "SLA", :sla) %>
+        <%= Table.sort_header(@data_table, "Network Operator", :network_operator_name) %>
+        <th tabindex=0></th>
+      </tr>
+    </thead>
+    <%= for match <- @matches do %>
+      <% stops_count = Enum.count(match.match_stops) %>
+      <tbody>
+        <tr tabindex=0>
+          <td data-test-id="match-date">
+            <%= display_date(match.inserted_at, @time_zone) %>
+            <div class="caption">
+              <%= display_time(match.inserted_at, @time_zone) %>
+            </div>
+          </td>
+          <td data-test-id="match-id">
+            #<%= match.shortcode %><br/>
+            <%= if match.po do %>
+              <span data-test-id="po"><%= match.po %></span><br/>
+            <% end %>
+            <%= for stop <- match.match_stops do %>
+              <%= if stop.po do %>
+                <span><%= stop.po %></span><br/>
+              <% end %>
+            <% end %>
+          </td>
+          <td data-test-id="match-locations">
+            <div class="u-flex u-flex--wrap u-flex__align--center">
+              <%= if stops_count > 1 do %>
+                <b><%= stops_count %>&nbsp;</b> Stops in <%= display_city_state(match.origin_address) %> <span class="label label--multistop">Multistop</span>
+              <% else %>
+                <span data-test-id="origin-address"><%= display_city_state(match.origin_address) %></span><i class="material-icons">arrow_right_alt</i><span data-test-id="destination-address"><%= display_city_state(destination_address(match)) %></span>
+              <% end %>
+              <%= if match.vehicle_class == 4 do %>
+                <span class="label label--box-truck">Box Truck</span>
+              <% end %>
+            </div>
+          </td>
+          <td data-test-id="stage" class="<%= if match.state in [:admin_canceled, :canceled], do: "u-warning" %>">
+            <%= display_stage(match.state) %>
+            <%= if (stops_count > 1 && match.state === :picked_up) do %>
+              <br/>
+              Stop <b><%= display_current_stop_number(match) %></b> of <b><%= stops_count %></b>
+            <% end %>
+          </td>
+          <td data-test-id="driver" class="u-text--center" style="text-align: left">
+            <%= if match.driver do %>
+              <button class="tooltip">
+                <%= full_name(match.driver) %> <br/>
+                <%= display_phone(match.driver.phone_number) %>
+                  <div class="tooltip__content tooltip__content--center tooltip__content--lg">
+                    <a href="/admin/drivers/<%= match.driver.id %>">
+                      <%= if is_nil(match.driver) do %>
+                        <i class="fas fa-image profile-image-icon u-pad__bottom--xs"></i>
+                      <% else %>
+                        <% driver_profile_photo = get_driver_profile_photo(match.driver.id) %>
+                        <div
+                          class="round-image u-pad__bottom--sm"
+                          style="background-image: url(<%= '#{fetch_photo_url(match.driver.id, driver_profile_photo)}' %>);"
+                        > </div>
+                      <% end %>
+                      <h6><%= full_name(match.driver) %></h6>
+                    </a>
+                    <p class="u-pad__bottom--sm"><%= display_phone(match.driver.phone_number) %></p>
+                    <%= render FraytElixirWeb.Admin.DriversView, "_internal_rating.html", driver: match.driver %>
+                  </div>
+              </button>
+            <% else %>
+              -
+            <% end %>
+          </td>
+          <td data-test-id="match-shipper">
+            <%= display_user_info(match.shipper, :name) %>
+            <%= for tag <- match.tags do %>
+              <span class="label label--<%= tag.name %>"><%= title_case(tag.name) %></span>
+            <% end %>
+            <br/>
+            <%= display_shipper_phone(match.shipper.phone) %>
+            <br/>
+            <%= if match.contract do %>
+              <p class="caption">Contract: <%= match.contract.name %></p>
+            <% end %>
+          </td>
+          <td data-test-id="match-level"><%= service_level(match.service_level) %>
+            <%= if match.scheduled do %>
+              <div class="caption">Pickup: <span><%= display_date_time(match.pickup_at, match.origin_address) %></span></div>
+              <% match_stop = List.last(match.match_stops) %>
+              <% dropoff_time = if match.dropoff_at do match.dropoff_at else match_stop.dropoff_by end %>
+              <div class="caption">Dropoff: <span><%= if dropoff_time, do: display_date_time(dropoff_time, match_stop.destination_address), else: "Now" %></span></div>
+            <% end %>
+          </td>
+          <td data-test-id="sla" class="sla">
+            <%= live_component(FraytElixirWeb.LiveComponent.SLAStatus, id: "sla_status_#{match.id}", match: match, time_zone: @time_zone, editable?: false) %>
+          </td>
+          <td class="u-text--center">
+            <a onclick="" phx-click="open_assign_admin_modal" phx-value-match_id="<%= match.id %>">
+              <%= if match.network_operator, do: "Reassign", else: "Assign"%>
+            </a>
+            <hr/>
+            <%= if match.network_operator do %>
+              <%= match.network_operator.name || match.network_operator.user.email %>
+            <% else %>
+              <a onclick="" phx-click="assign_to_current_admin" phx-value-match_id="<%= match.id %>">
+                Assign to me
+              </a>
+            <% end %>
+          </td>
+          <td>
+            <%= live_patch "View Details", to: Table.details_path(@data_table, match.id), replace: false, class: "button" %>
+          </td>
+        </tr>
+      </tbody>
+    <% end %>
+  </table>
+
+  <%# mobile view %>
+  <table class="u-hide--desktop">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Match ID</th>
+        <th>Current State</th>
+      </tr>
+    </thead>
+    <%= for match <- @matches do %>
+      <% stops_count = Enum.count(match.match_stops) %>
+      <tbody>
+        <%= Table.show_more_button(@data_table, match.id, :tr, [active_class: "u-background--gray"], fn -> %>
+          <td>
+            <%= display_date(match.inserted_at, @time_zone) %>
+            <div class="caption">
+              <%= display_time(match.inserted_at, @time_zone) %>
+            </div>
+          </td>
+          <td>#<%= match.shortcode %></td>
+          <td class="<%= if match.state in [:admin_canceled, :canceled], do: "u-warning" %>">
+            <%= display_stage(match.state) %>
+            <%= if (stops_count > 1 && match.state === :picked_up) do %>
+              <br/>
+              Stop <b><%= display_current_stop_number(match) %></b> of <b><%= stops_count %></b>
+            <% end %>
+          </td>
+        <% end) %>
+        <%= if Table.show_more?(@data_table, match.id) do %>
+          <tbody class="table__show-more">
+            <tr>
+              <td class="header--inline">Network Operator</td>
+              <td colspan="2">
+                <a onclick="" phx-click="open_assign_admin_modal" phx-value-match_id="<%= match.id %>">
+                  <%= if match.network_operator, do: match.network_operator.name || match.network_operator.user.email, else: "Assign"%>
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td class="header--inline">Location</td>
+              <td colspan="2" data-test-id="match-locations">
+                <div class="u-flex u-flex--wrap">
+                  <%= if stops_count > 1 do %>
+                    <b><%= stops_count %>&nbsp;</b> Stops in <%= display_city_state(match.origin_address) %> <span class="label label--multistop">Multistop</span>
+                  <% else %>
+                    <span data-test-id="origin-address"><%= display_city_state(match.origin_address) %></span><i class="material-icons">arrow_right_alt</i><span data-test-id="destination-address"><%= display_city_state(destination_address(match)) %></span>
+                  <% end %>
+                  <%= if match.vehicle_class == 4 do %>
+                    <span class="label label--box-truck">Box Truck</span>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="header--inline">Driver</td>
+              <td colspan="2" data-test-id="driver"><%= display_user_info(match.driver, :name) %>
+              <%= render FraytElixirWeb.Admin.DriversView, "_driver_rating.html", driver: match.driver %>
+            </tr>
+
+            <tr>
+              <td class="header--inline">Shipper</td>
+              <td colspan="2" data-test-id="match-shipper">
+                <%= display_user_info(match.shipper, :name) %>
+                <%= for tag <- match.tags do %>
+                  <span class="label label--<%= tag.name %>"><%= title_case(tag.name) %></span>
+                <% end %>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="header--inline">Level</td>
+              <td colspan="2" data-test-id="match-level"><%= service_level(match.service_level) %>
+                <%= if match.scheduled do %>
+                  <div class="caption">Pickup: <span><%= display_date_time(match.pickup_at, match.origin_address) %></span></div>
+                  <% match_stop = List.last(match.match_stops) %>
+                  <div class="caption">Dropoff: <span><%= if match.dropoff_at, do: display_date_time(match.dropoff_at, match_stop.destination_address), else: "Now" %></span></div>
+                <% end %>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3"><a href="<%= Table.details_path(@data_table, match.id) %>" class="button">View Details</a></td>
+            </tr>
+          </tbody>
+        <% end %>
+      </tbody>
+    <% end %>
+  </table>
+  <%= Table.pagination_nav(@data_table, id: "bottom") %>
+</section>
+
+<%= if @show_modal, do: live_component @socket, FraytElixirWeb.LiveComponent.ModalLive,
+  live_view: @live_view,
+  child_id: "test-modal",
+  title: @title,
+  wide: "false",
+  match: @match %>

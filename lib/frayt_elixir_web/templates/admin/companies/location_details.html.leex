@@ -1,0 +1,175 @@
+<div class="show-layout show-layout--location">
+  <section class="show-layout__header">
+    <%= go_back_link(@company.name, Routes.company_details_path(@socket, :details, @company.id)) %>
+    <div>
+      <h3><%= @location.location %><%= if @location.store_number do %><span> (#<%= @location.store_number %>)</span><% end %></h3>
+      <p><b><%= @company.name %></b></p>
+    </div>
+  </section>
+
+  <section class="show-layout__details">
+    <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+      <h4>Location Information</h4>
+      <%= if !@editing do %>
+          <a class="button u-text--right" tabindex=0 phx-keyup="edit_location" phx-key="Enter" phx-click="edit_location">Edit Location</a>
+      <% end %>
+    </div>
+    <%= if @editing do %>
+      <%= live_component(FraytElixirWeb.LiveComponent.AdminEditLocation, id: :edit_location, fields: @edit_form, errors: @errors, account_billing: @company.account_billing_enabled) %>
+    <% else %>
+      <div class="u-grid__4-column">
+        <p class="header--inline">Revenue</p>
+        <p class="u-grid__span--3">$<%= display_revenue(FraytElixir.Accounts.get_location_revenue(@location.id)) %></p>
+      </div>
+      <div class="u-grid__4-column">
+        <p class="header--inline">Shippers</p>
+        <p class="u-grid__span--3">
+          <%= Enum.count(@location.shippers, & &1.state == :disabled) %> disabled,
+          <%= Enum.count(@location.shippers, & &1.state == :approved) %> approved,
+          <%= Enum.count(@location.shippers, & &1.state == :pending_approval) %> pending approval,
+        </p>
+      </div>
+      <div class="u-grid__4-column">
+        <p class="header--inline">Sales Rep</p>
+        <p class="u-grid__span--3"><%= display_sales_rep(@location.sales_rep) %></p>
+      </div>
+      <div class="u-grid__4-column">
+        <p class="header--inline">Net Terms</p>
+        <p class="u-grid__span--3"><%= @location.invoice_period || "-" %></p>
+      </div>
+      <div class="u-grid__4-column">
+        <p class="header--inline">Email</p>
+        <p class="u-grid__span--3"><%= if @location.email do %><a href="<%= email_link(@location.email) %>"><%= @location.email %></a><% else %> - <% end %></p>
+      </div>
+      <div class="u-grid__4-column">
+        <p class="header--inline">Address</p>
+        <div class="u-grid__span--3" data-test-id="address">
+          <%= @location.address.address %>
+          <%= if @location.address.address2 do %>
+            <div data-test-id="address2">
+              <%= @location.address.address2 %>
+            </div>
+          <% end %>
+          <div data-test-id="city-state-zip">
+            <%= @location.address.city %>, <%= display_state(@location.address.state) %> <%= @location.address.zip %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="show-layout__shippers">
+    <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+      <h4>Shippers</h4>
+      <div>
+        <button class="button" phx-click="show_modal_named" phx-value-liveview="AdminSearchShipper" phx-value-title="Add Shippers" data-test-id="add-shipper">+ Add Shipper</button>
+      </div>
+    </div>
+    <%= for shipper <- @location.shippers do %>
+      <div class="driver__vehicle-details">
+        <div>
+          <div>
+            <p class="header--inline u-push__bottom--xxs">
+              <b>
+                <%= full_name(shipper) %> <%= if shipper.state == :disabled do %> <span class="error">(Disabled)</span><% end %>
+              </b>
+            </p>
+          </div>
+          <div class="inline-details">
+            <p>Email:</p>
+            <p><a href="<%= email_link(shipper.user.email) %>"><%= shipper.user.email %></a></p>
+          </div>
+          <div class="inline-details">
+            <p>Phone:</p>
+            <p><%= if shipper.phone do %><a href="<%= shipper_phone_link(shipper.phone) %>"><%= shipper.phone %></a><% else %> - <% end %></p>
+          </div>
+        </div>
+        <div><a tabindex=0 phx-keyup="remove_shipper_<%= shipper.id %>" phx-key="Enter" phx-click="remove_shipper_<%= shipper.id %>" data-test-id="delete-shipper"><i class="material-icons p--gray u-align__vertical--middle u-line-height--none">delete_outline</i></a></div>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="show-layout__schedule">
+    <div class="u-flex u-flex__justify--space-between u-flex__align--baseline">
+      <h4>Schedule</h4>
+      <div>
+        <%= unless @editing_schedule do %>
+          <button class="button" phx-click="edit_schedule"><%= if @schedule, do: "Edit", else: "Add" %> Schedule</button>
+        <% end %>
+      </div>
+    </div>
+    <%= if @editing_schedule do %>
+      <%= live_component @socket, FraytElixirWeb.LiveComponent.AdminEditSchedule, id: :edit_schedule, schedule: @schedule || %{}, time_zone: @time_zone, errors: @errors %>
+    <% else %>
+      <%= unless @schedule do %>
+        <div class="caption">(none)</div>
+      <% else %>
+        <div class="u-grid__4-column">
+          <p class="header--inline">SLA (hours)</p>
+          <p class="u-grid__span--3" data-test-id="sla"><%= @schedule.sla || "-" %></p>
+        </div>
+        <div class="u-grid__4-column">
+          <p class="header--inline">Min Drivers</p>
+          <p class="u-grid__span--3" data-test-id="min-drivers"><%= @schedule.min_drivers || "-" %></p>
+        </div>
+        <div class="u-grid__4-column">
+          <p class="header--inline">Max Drivers</p>
+          <p class="u-grid__span--3" data-test-id="max-drivers"><%= @schedule.max_drivers || "-" %></p>
+        </div>
+        <div class="u-push__top--sm">
+          <b>Pickup Times</b>
+          <div class="u-grid__7-column u-grid--wrap-mobile">
+            <%= for day <- days() do %>
+              <div>
+                <div><%= title_case(day) %></div>
+                <div data-test-id="<%= day %>-pickup"><%= display_time(Map.get(@schedule, day, nil), @time_zone) %></div>
+              </div>
+            <% end %>
+          </div>
+
+          <form phx-submit="send_fleet_notifications" class="u-push__top--sm">
+            <p class="alert alert-info"><%= live_flash(@flash, :info) %></p>
+            <p>Send a notification to all drivers within a certain mile radius about subscribing to this schedule.</p>
+            <div class="u-push__top">
+              <div class="checkbox">
+                <%= checkbox :fleet_notification_form, :exclude_notified, checked: true %>
+                <%= label :fleet_notification_form, :exclude_notified, "Exclude Notified Drivers", class: "caption" %>
+              </div>
+            </div>
+            <div class="u-grid__4-column">
+              <%= number_input :fleet_notification_form, :radius, value: @fleet_notification_radius, min: 1 %>
+              <button class="button">Send Notifications</button>
+            </div>
+          </form>
+
+          <div class="header--inline u-push__top--sm">
+            Fleet Size (<%= if @schedule.drivers do Enum.count(@schedule.drivers) else 0 end %>)
+          </div>
+          <a phx-click="show_modal_named" phx-keyup="show_modal_named" phx-value-liveview="AdminSearchDriver" phx-value-title="Add Drivers" phx-key="Enter" tabindex="0" onclick="">+ Add Driver</a>
+          <ul class="u-push--none">
+            <%= for driver <- @schedule.drivers do %>
+              <li>
+                <%= full_name(driver) %>
+                <p class="p--gray u-glex u-flex__align--center u-flex__justify--space-between">
+                  <a href="<%= email_link(driver.user.email) %>" class="p--gray"><%= driver.user.email %></a>
+                  <a phx-click="remove_driver_<%= driver.id %>" phx-keyup="remove_driver_<%= driver.id %>" phx-key="Enter" tabindex="0" onclick=""><i class="material-icons p--gray u-align__vertical--middle u-line-height--none">delete_outline</i></a>
+                </p>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+    <% end %>
+  </section>
+</div>
+
+<%= if @show_modal, do: live_component @socket, FraytElixirWeb.LiveComponent.ModalLive,
+  live_view: @live_view,
+  child_id: "modal",
+  title: @title,
+  wide: false,
+  chosen_company: @company_id,
+  chosen_company_name: @company.name,
+  chosen_location: @location.id,
+  schedule: @schedule,
+  attrs: @attrs %>

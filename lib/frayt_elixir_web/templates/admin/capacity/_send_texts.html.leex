@@ -1,0 +1,24 @@
+<form phx-submit="send_texts" data-test-id="send-texts-form">
+  <section>
+    This will send a mass text to all drivers regarding Match #<%= @match.shortcode %>. Your current search settings will have it reach <%= @drivers |> Enum.count() %> drivers in total. Feel free to edit the message.
+    <div>
+        <%= label :send_texts, :message, "Message" %>
+        <%= textarea :send_texts, :message, [value: @fields.message, class: input_error(@errors, :message)] %>
+        <%= display_error(@errors, :message) %>
+    </div>
+
+    <div class="u-pad__top u-text--center width--full">
+      <%= if length(@drivers) > 0 do %>
+        <%= if @max_mass_texts > @used_mass_texts do %>
+          <p class="u-pad__bottom--xs">You have used <%= @used_mass_texts %> out of <%= @max_mass_texts %> of today's mass text(s)</p>
+          <button class="button button--primary">Send</button>
+        <% else %>
+          <p class="error u-pad__bottom--xs">You have sent all <%= @max_mass_texts %> of your allowed daily mass texts</p>
+        <% end %>
+      <% else %>
+        <p class="error u-pad__bottom--xs">There are no matching drivers in your search that have not opted out of SMS</p>
+      <% end %>
+      <a onclick="" class="button" tabindex=0 phx-keyup="close_modal" phx-key="Enter" phx-click="close_modal">Cancel</a>
+    </div>
+  </section>
+</form>

@@ -1,0 +1,6 @@
+<%= for _ <- range_from_one_to(round(@rating)) do %>
+    <i data-test-id="star" class="fa fa-star icon u-light-gray u-align__vertical--middle"></i>
+<% end %>
+<%= for _ <- range_from_one_to(5 - round(@rating)) do %>
+    <i data-test-id="empty" class="far fa-star icon u-light-gray u-align__vertical--middle"></i>
+<% end %>

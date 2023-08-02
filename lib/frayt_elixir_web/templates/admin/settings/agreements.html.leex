@@ -1,0 +1,45 @@
+<section class="header">
+  <div class="header">
+    <div class="header__title">
+      <h1>Agreements</h1>
+      <div>
+        <a onclick="" phx-click="edit_agreement:new" tabindex="0"><i class="material-icons icon">add_circle_outline</i></a>
+        <%= Table.refresh_button(@data_table) %>
+      </div>
+    </div>
+    <div class="header__actions">
+      <%= form_for @data_table, "#", [class: "header__search", filter_on: :phx_submit], fn f -> %>
+        <div class="search">
+          <%= text_input f, :query, [class: "input", type: "search", placeholder: "Search"] %>
+          <button class="search__submit"><i class="material-icons">search</i></button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<section>
+  <%= if length(@agreements) > 0 or @editing do %>
+    <%= Table.pagination_nav(@data_table, id: "top") %>
+    <table>
+      <thead>
+        <tr class="u-border--none">
+          <th>Title</th>
+          <%= Table.sort_header(@data_table, "Status", :state) %>
+          <%= Table.sort_header(@data_table, "Type", :type, class: "u-hide--mobile") %>
+          <th class="u-hide--mobile">Target User</th>
+          <%= Table.sort_header(@data_table, "Updated At", :updated_at, class: "u-hide--mobile") %>
+        </tr>
+      </thead>
+      <%= if @editing == "new" do %>
+        <%= live_component(FraytElixirWeb.LiveComponent.Agreement, agreement: %AgreementDocument{id: "new", parent_document: nil}, data_table: @data_table, editing: @editing, changeset: @changeset, time_zone: @time_zone) %>
+      <% end %>
+      <%= for agreement <- @agreements do %>
+        <%= live_component(FraytElixirWeb.LiveComponent.Agreement, agreement: agreement, data_table: @data_table, editing: @editing, changeset: @changeset, time_zone: @time_zone) %>
+      <% end %>
+    </table>
+    <%= Table.pagination_nav(@data_table, id: "bottom") %>
+  <% else %>
+    <h3 class="u-text--center">No Results Found<h3/>
+  <% end %>
+</section>

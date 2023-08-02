@@ -1,0 +1,71 @@
+
+<div class="u-flex u-flex__justify--space-between">
+    <h4 class="u-push__bottom--sm">Stops</h4>
+    <div class="u-text--right">
+    <%= if is_editable(@match) and !@edit_stop_order do %>
+        <a onclick="" class="button button--sm" tabindex=0 phx-click="edit_stop_order">Reorder</a>
+        <%= if @edit_stop != "new" do %>
+            <%= if @match.delivery_batch_id do %>
+                <p class="u-pad__top--xxs u-pad__bottom--xxs caption">Note: Stops cannot be added to a Match when part of a Batch</p>
+            <% else %>
+                <a onclick="" class="button button--sm" tabindex=0 phx-click="add_stop" data-test-id="add-stop">Add Stop</a>
+            <% end %>
+        <% end %>
+    <% end %>
+    <%= if optimize_stops_limit_reached?(@match) do %>
+        <a onclick="" class="button button--sm button--disabled" tabindex=0 data-test-id="optimized-stops">Optimize</a>
+        <p class="u-pad__top--xxs u-pad__bottom--xxs caption">Cannot optimize more than 11 stops</p>
+    <% else %>
+        <%= if is_optimizable?(@match) do %>
+            <a onclick="" class="button button--sm" tabindex=0 phx-click="optimize_stops" data-test-id="optimize-stops">Optimize</a>
+        <% else %>
+            <a onclick="" class="button button--sm button--disabled" tabindex=0 data-test-id="optimized-stops">Optimized</a>
+        <% end %>
+    <% end %>
+    </div>
+</div>
+<%= if @edit_stop_order do %>
+    <%= f = form_for @match_changeset, "#", [phx_change: "change_stop_order", phx_submit: "update_stop_order"] %>
+        <ul class="match-stops">
+            <%= inputs_for f, :match_stops, fn s -> %>
+                <%= hidden_input s, :index, value: input_value(s, :index) %>
+                <li class="match-stop">
+                    <h5><%= input_value(s, :index) + 1 %>.</h5>
+                    <div class="match-layout__details">
+                        <div class="u-flex u-flex--gap">
+                            <div class="u-flex__flex-grow u-grid__2-column u-grid__2-column--uneven">
+                                <p class="header--inline">Address</p>
+                                <div>
+                                    <p><%= input_value(s, :destination_address).formatted_address %></p>
+                                </div>
+                                <span class="error"><%= error_tag s, :index %></span>
+                            </div>
+                            <div class="u-flex__flex-shrink u-flex u-flex__direction--vertical u-flex__justify--space-between">
+                                <%= move_stop_button(f, s, :up) %>
+                                <%= move_stop_button(f, s, :down) %>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            <% end %>
+        </ul>
+
+        <button type="submit" class="button button--primary button--sm">Update Order</button>
+        <a onclick="" class="button button--sm" tabindex=0 phx-click="cancel_edit">Cancel</a>
+    </form>
+<% else %>
+    <ul class="match-stops">
+        <%= for stop <- @match.match_stops do %>
+            <li class="match-stop">
+                <h5><%= stop.index + 1 %>.</h5>
+                <%= live_component(FraytElixirWeb.LiveComponent.MatchStop, id: "match_stop_#{stop.id}", match: @match, stop: stop, time_zone: @time_zone, edit: @edit_stop, match_changeset: @match_changeset) %>
+            </li>
+        <% end %>
+        <%= if @edit_stop == "new" do %>
+            <li class="match-stop">
+                <h5><%= Enum.count(@match.match_stops) + 1 %>.</h5>
+                <%= live_component(FraytElixirWeb.LiveComponent.MatchStop, id: "match_stop_new", match: @match, stop: @match_changeset.data, time_zone: @time_zone, edit: @edit_stop, match_changeset: @match_changeset) %>
+            </li>
+        <% end %>
+    </ul>
+<% end %>

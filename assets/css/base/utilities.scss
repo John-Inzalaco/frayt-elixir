@@ -1,0 +1,764 @@
+.u-animate {
+    &--spinning {
+        animation: spin 1s linear infinite;
+        animation-direction: reverse;
+    }
+}
+
+.u-align {
+    &__vertical {
+        &--middle {
+            vertical-align: middle;
+        }
+    }
+
+    &__items {
+        &--end {
+            align-items: end;
+        }
+    }
+}
+
+.u-float {
+    &--right {
+        float: right;
+    }
+    &--left {
+        float: left;
+    }
+}
+
+.u-border {
+    border: 1px solid $orange;
+
+    &--none {
+        border: 0;
+    }
+
+    &__top {
+        &--none {
+            border-top: 0;
+        }
+
+        &--thick {
+            border-top: 3px solid $orange;
+        }
+
+        &--thin {
+            border-top: 1px solid $orange;
+        }
+    }
+
+    &__bottom {
+        &--none {
+            border-bottom: 0;
+        }
+
+        &--thick {
+            border-bottom: 3px solid $orange;
+        }
+
+        &--thin {
+            border-bottom: 1px solid $orange;
+        }
+    }
+
+    &--light-gray {
+        border-color: $light-gray;
+    }
+
+    &__bottom {
+        border-bottom: 1px solid $light-gray;
+    }
+
+    &--light {
+        border-color: lighten($light-gray, 15%);
+    }
+}
+
+.u-flex {
+    display: flex;
+
+    &__columns {
+        &--2 {
+            > * {
+                display: flex;
+                flex-direction: column;
+                flex-basis: 100%;
+                max-width: 50%;
+
+                @media screen and (max-width: $screen-mobile) {
+                    max-width: 100%;
+                    
+                }
+            }
+        }
+     }
+
+    &__pad--column {
+        margin-right: -$pad-xs;
+        margin-left: -$pad-xs;
+         
+        > * {
+            padding-left: $pad-xs;
+            padding-right: $pad-xs;
+        }
+    }
+
+    &__pad--row {
+        margin-top: -$pad-xs;
+        margin-bottom: -$pad-xs;
+         
+        > * {
+            padding-top: $pad-xs;
+            padding-bottom: $pad-xs;
+        }
+    }
+
+    &__flex {
+        &-1 {
+            flex: 1
+        }
+
+        &-2 {
+            flex: 2
+        }
+
+        &-3 {
+            flex: 3
+        }
+
+        &-grow {
+            flex-grow: 1;
+        }
+
+        &-shrink {
+            flex-shrink: 0;
+        }
+    }
+
+    &__align {
+        &-self {
+            &--center {
+                align-self: center;
+            }
+            
+            &--end {
+                align-self: end;
+            }
+        }
+
+        &-content {
+            &--end {
+                align-content: flex-end;
+            }
+        }
+
+        &--center {
+            align-items: center;
+        }
+
+        &--end {
+            align-items: flex-end;
+        }
+
+        &--baseline {
+            align-items: baseline;
+        }
+    }
+
+    &__justify {
+        &--end {
+            justify-content: flex-end;
+        }
+
+        &--space-between {
+            justify-content: space-between;
+        }
+
+        &--center {
+            justify-content: center;
+        }
+
+        &--end {
+            justify-content: flex-end;
+        }
+
+        &--start {
+            justify-content: flex-start;
+        }
+    }
+
+    &__direction {
+        &--vertical {
+            flex-direction: column;
+        }
+    }
+
+    &__order-1 {
+        &--tablet {
+            @media screen and (max-width: $screen-tablet) {
+                order: -1;
+            }
+        }
+    }
+
+    &--wrap {
+        flex-wrap: wrap;
+    }
+
+    &--gap {
+        gap: $pad-sm;
+    }
+}
+
+.u-grid {
+    display: grid;
+    justify-content: start;
+
+    &__2-column {
+        display: grid;
+        gap: $pad-xs;
+        grid-template-columns: repeat(2, 1fr);
+        padding-bottom: $pad-xxs;
+
+        &--uneven {
+            grid-template-columns: 33% 66%;
+            margin-bottom: $pad-xxs;
+        }
+    }
+
+    &__3-column {
+        display: grid;
+        gap: $pad-sm;
+        grid-template-columns: repeat(3, 1fr);
+
+        @media screen and (max-width: $screen-tablet) {
+            grid-template-columns: 1fr;
+        }
+
+        &--nowrap {
+            @media screen and (max-width: $screen-tablet) {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    }
+    
+    &__7-column {
+        display: grid;
+        gap: $pad-xs;
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    &__4-column {
+        display: grid;
+        gap: $pad-xs;
+        grid-template-columns: repeat(4, 1fr);
+        padding-bottom: $pad-xxs;
+    }
+
+    &__span {
+        &--3 {
+            grid-column: span 3;
+        }
+    }
+
+    &--fluid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: $pad;
+    }
+
+    &--bigger-gap {
+        gap: $pad;
+    }
+
+    &--wrap-mobile {
+        @media screen and (max-width: $screen-tablet) {
+            gap: 0 $pad;
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+.u-hide {
+    &--desktop {
+        @media screen and (min-width: $screen-tablet) {
+            display: none;
+        }
+    }
+
+    &--mobile {
+        @media screen and (max-width: $screen-tablet) {
+            display: none;
+        }
+    }
+}
+
+.u-line-height {
+    &--none {
+        line-height: 0 !important;
+    }
+}
+
+.u-invisible {
+    height: 0;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    visibility: hidden;
+    width: 0;
+}
+
+.u-justify {
+    &--end {
+        display: grid;
+        justify-content: end;
+    }
+}
+
+.u-center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.u-width {
+    &--half {
+        width: 50%;
+
+        @media screen and (max-width: $screen-tablet) {
+            width: 90%;
+        }
+    }
+
+    &--full {
+        width: 100%;
+    }
+}
+
+.u-height {
+    &--full {
+        height: 100%;
+    }
+}
+
+.u-pad {
+    padding: $pad;
+
+    &--none {
+        padding: 0 !important;
+    }
+
+    &--xxs {
+        padding: $pad-xxs !important;
+    }
+
+    &--xs {
+        padding: $pad-xs !important;
+    }
+
+    &--sm {
+        padding: $pad-sm !important;
+    }
+
+    &--lg {
+        padding: $pad-lg !important;
+    }
+
+    &__top {
+        padding-top: $pad !important;
+
+        &--none {
+            padding-top: 0 !important;
+        }
+
+        &--xxs {
+            padding-top: $pad-xxs !important;
+        }
+
+        &--xs {
+            padding-top: $pad-xs !important;
+        }
+
+        &--sm {
+            padding-top: $pad-sm !important;
+        }
+
+        &--lg {
+            padding-top: $pad-lg !important;
+        }
+    }
+
+    &__right {
+        padding-right: $pad !important;
+
+        &--none {
+            padding-right: 0 !important;
+        }
+
+        &--xxs {
+            padding-right: $pad-xxs !important;
+        }
+
+        &--xs {
+            padding-right: $pad-xs !important;
+        }
+
+        &--sm {
+            padding-right: $pad-sm !important;
+        }
+
+        &--lg {
+            padding-right: $pad-lg !important;
+        }
+    }
+
+    &__bottom {
+        padding-bottom: $pad !important;
+
+        &--none {
+            padding-bottom: 0 !important;
+        }
+
+        &--xxs {
+            padding-bottom: $pad-xxs !important;
+        }
+
+        &--xs {
+            padding-bottom: $pad-xs !important;
+        }
+
+        &--sm {
+            padding-bottom: $pad-sm !important;
+        }
+
+        &--lg {
+            padding-bottom: $pad-lg !important;
+        }
+    }
+
+    &__left {
+        padding-left: $pad !important;
+
+        &--none {
+            padding-left: 0 !important;
+        }
+
+        &--xxs {
+            padding-left: $pad-xxs !important;
+        }
+
+        &--xs {
+            padding-left: $pad-xs !important;
+        }
+
+        &--sm {
+            padding-left: $pad-sm !important;
+        }
+
+        &--lg {
+            padding-left: $pad-lg !important;
+        }
+    }
+}
+
+.u-push {
+    margin: $pad;
+
+    &--auto {
+        margin: auto
+    }
+
+    &--none {
+        margin: 0 !important;
+    }
+
+    &--xxs {
+        margin: $pad-xxs;
+    }
+
+    &--xs {
+        margin: $pad-xs;
+    }
+
+    &--sm {
+        margin: $pad-sm;
+    }
+
+    &--lg {
+        margin: $pad-lg;
+    }
+
+    &__top {
+        margin-top: $pad;
+
+        &--xxs {
+            margin-top: $pad-xxs;
+        }
+
+        &--xs {
+            margin-top: $pad-xs;
+        }
+
+        &--sm {
+            margin-top: $pad-sm;
+        }
+
+        &--lg {
+            margin-top: $pad-lg;
+        }
+    }
+
+    &__bottom {
+        margin-bottom: $pad;
+
+        &--none {
+            margin-bottom: 0;
+        }
+
+        &--xxs {
+            margin-bottom: $pad-xxs;
+        }
+
+        &--xs {
+            margin-bottom: $pad-xs;
+        }
+
+        &--sm {
+            margin-bottom: $pad-sm;
+        }
+
+        &--lg {
+            margin-bottom: $pad-lg;
+        }
+    }
+
+
+    &__left {
+        margin-left: $pad;
+
+        &--auto {
+            margin-left: auto;
+        }
+
+        &--xxs {
+            margin-left: $pad-xxs;
+        }
+
+        &--xs {
+            margin-left: $pad-xs;
+        }
+
+        &--sm {
+            margin-left: $pad-sm;
+        }
+
+        &--lg {
+            margin-left: $pad-lg;
+        }
+    }
+
+    &__right {
+        margin-right: $pad;
+
+        &--auto {
+            margin-right: auto;
+        }
+
+        &--xxs {
+            margin-right: $pad-xxs;
+        }
+
+        &--xs {
+            margin-right: $pad-xs;
+        }
+
+        &--sm {
+            margin-right: $pad-sm;
+        }
+
+        &--lg {
+            margin-right: $pad-lg;
+        }
+    }
+
+    &__mobile {
+        &--none {
+            @media screen and (max-width: $screen-tablet) {
+                margin: 0 !important;
+            }
+        }
+    }
+}
+
+.u-background {
+    &--gray {
+        background-color: $gray-bg;
+    }
+
+    &--orange {
+        background-color: $orange;
+    }
+
+    &--white {
+        background-color: $white;
+    }
+}
+
+.u-justify {
+    &--end {
+        display: grid;
+        justify-content: end;
+    }
+}
+
+.u-pointer {
+    cursor: pointer;
+}
+
+.u-warning,
+.error {
+    color: $red;
+    font-size: .8rem;
+
+    &.inverse {
+        background-color: $white;
+        border-radius: $border-radius;
+        display: inline-block;
+        padding: $pad-xs;
+    }
+}
+
+.u-text {
+    &--right {
+        text-align: right;
+
+        &--center-mobile {
+            @media screen and (max-width: $screen-tablet) {
+                text-align: center;
+            }
+        }
+    }
+
+
+    &--left {
+        text-align: left;
+    }
+
+    &--center {
+        text-align: center;
+
+        &--tablet {
+            @media screen and (max-width: $screen-tablet) {
+                text-align: center;
+            }
+        }
+    }
+
+    &--compact-header {
+        text-transform: uppercase;
+        font-size: 0.6875rem;
+        margin-bottom: .5rem;
+    }
+
+    &--xs {
+        font-size: .6rem;
+    }
+
+    &--sm {
+        font-size: .8rem;
+    }
+
+    &--md {
+        font-size: 1rem;
+    }
+
+    &--lg {
+        font-size: 1.1rem;
+    }
+
+    &--bold {
+        font-weight: 800;
+    }
+}
+
+.u-canceled {
+    color: $red;
+}
+
+.u-success,
+.success {
+    color: $green;
+    font-size: .8rem;
+    &.inverse {
+        background-color: $white;
+        border-radius: $border-radius;
+        display: inline-block;
+        padding: $pad-xs;
+    }
+}
+
+.u-light-gray {
+    color: $light-gray;
+}
+
+.u-white {
+    color: $white;
+}
+
+.u-price {
+    &--negative {
+        color: $red;
+    }
+
+    &--empty {
+        opacity: 0.5;
+    }
+}
+
+.u-icon {
+    &--inline {
+        font-size: 1.5rem;
+        top: 4px;
+        position: relative;;
+    }
+}
+
+.round-image {
+    background-position: center center;
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin-left: 35%;
+}
+
+.round-image-medium {
+    background-position: center center;
+    height: 100px;
+    width: 100px; 
+    border-radius: 50%;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.profile-image-icon {
+    font-size: 48px;
+}
+
+.driver-info-container {
+    margin: 20px 20px 0 0;
+    overflow: auto;
+    .thumb {
+        float: left;
+    }
+    .content {
+        margin-left: 120px;
+        margin-top: 30px;
+    }
+}
+
+.centered {
+    padding: 1px;
+    text-align: center;
+}

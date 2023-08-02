@@ -1,0 +1,705 @@
+@mixin field-styles {
+  appearance: none !important;
+  background-color: $white;
+  border: solid 1px $light-gray;
+  border-radius: $border-radius;
+  color: $dark-gray;
+  font-size: 14px;
+  font-weight: 400;
+  height: 36px;
+  padding: $pad-xxs $pad-xs;
+  width: 100%;
+  outline: none;
+
+  @media screen and (max-width: $screen-tablet) {
+    padding: $pad-xxs $pad-xxs $pad-xxs $pad-xs;
+  }
+}
+
+
+form,
+.form {
+  section {
+    display: grid;
+    gap: $pad-sm $pad;
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 3rem;
+
+    @media screen and (max-width: $screen-tablet) {
+      display: block;
+    }
+  }
+
+  .width {
+    &--full {
+      grid-column: 1 / -1;
+    }
+
+    &--half {
+      display: grid;
+      gap: $pad-xxs $pad;
+      grid-template-columns: 1fr 1fr;
+
+      @media screen and (max-width: $screen-mobile) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    &--third {
+      display: grid;
+      gap: $pad-xxs $pad;
+      grid-template-columns: 1fr 1fr 1fr;
+
+      @media screen and (max-width: $screen-mobile) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    &--two-thirds {
+      display: grid;
+      gap: .75rem 1.5rem;
+      grid-template-columns: 66% 33%;
+
+      @media screen and (max-width: $screen-tablet) {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+
+  .payment {
+    align-items: center;
+    display: grid;
+    grid-template-columns: 1.5rem auto;
+
+    p {
+      color: $dark-gray;
+    }
+  }
+
+  &--controls-right {
+    display: grid;
+    gap: $pad;
+    grid-template-columns: 60% 40%;
+
+    @media screen and (max-width: $screen-tablet) {
+      display: block;
+    }
+  }
+}
+
+label {
+  color: $dark-gray;
+  font-size: .9rem;
+  margin-bottom: $pad-xxs;
+  display: block;
+
+  &.inverse {
+    color: $white;
+  }
+
+  &.optional {
+    &::after {
+      content: "(optional)";
+      color: $light-gray;
+      padding-left: $pad-xxs;
+    }
+  }
+
+  &.header--label  {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  @media screen and (max-width: $screen-tablet) {
+    font-size: .75rem;
+    margin-bottom: calc(#{$pad-xxs} / 2);
+    margin-top: $pad-xs;
+  }
+}
+
+input,
+.input {
+  @include field-styles;
+
+  &[contenteditable]:not(.input__area) {
+    overflow: auto;
+    /* Hide scrollbar for IE, Edge and Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+
+     /* Hide scrollbar for Chrome, Safari and Opera */
+      &::-webkit-scrollbar {
+        display: none;
+      }
+  }
+}
+
+.input {
+  &__area {
+    height: auto;
+    min-height: 36px;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: row;
+
+    &--addon:not(.button) {
+      @include field-styles;
+      width: auto;
+      background-color: $light-gray;
+      white-space: nowrap;
+    }
+
+    &--addon.button {
+      width: auto;
+      white-space: nowrap;
+      height: 36px;
+    }
+
+    &--compact {
+      input, .input, .input__group--addon {
+        height: 28px;
+        padding: $pad-xxxs $pad-xxs;
+      }
+    }
+
+    .input, input, &--addon {
+      &:not(:last-child):not(.input__area) {
+        border-bottom-right-radius: 0;
+        border-right-width: 0;
+      }
+
+      &:not(:first-child):not(.input__area) {
+        border-bottom-left-radius: 0;
+      }
+
+      &:not(:last-child) {
+        border-top-right-radius: 0;
+      }
+
+      &:not(:first-child) {
+        border-top-left-radius: 0;
+      }
+    }
+  }
+
+  &__with-icon {
+    align-items: center;
+    display: grid;
+    grid-template-columns: 2.5rem auto 2.5rem;
+
+    input {
+      grid-column: 1 / -1;
+      grid-row: 1;
+
+      &::placeholder {
+        color: $light-gray;
+      }
+    }
+
+    i {
+      color: $dark-gray;
+      grid-row: 1;
+      text-align: center;
+      z-index: 100;
+    }
+
+    &--left {
+      input {
+        padding-left: 2.5rem;
+      }
+
+      i {
+        grid-column: 1 / 2;
+      }
+    }
+
+    &--right {
+      input {
+        padding-right: 2.5rem;
+      }
+
+      i {
+        grid-column: 2 / -1;
+      }
+    }
+  }
+}
+
+::placeholder {
+  color: $dark-gray;
+}
+
+
+
+select[multiple] {
+  width: 100%;
+  height: auto;
+}
+
+select:not([multiple]) {
+  appearance: none !important;
+  background-image:
+    linear-gradient(45deg, $white 50%, $dark-gray 50%),
+    linear-gradient(135deg, $dark-gray 50%, $white 50%),
+    linear-gradient(to right, $light-gray, $light-gray);
+  background-position:
+    calc(100% - 17px) calc(1em + 2px),
+    calc(100% - 12px) calc(1em + 2px),
+    calc(100% - #{$pad}) 0.5em;
+  background-size:
+    5px 5px,
+    5px 5px,
+    1px 1.5em;
+  background-repeat: no-repeat;
+  background-color: $white;
+  border: solid 1px $light-gray;
+  border-radius: $border-radius;
+  color: $dark-gray;
+  font-size: 14px;
+  font-weight: 400;
+  height: 36px;
+  padding: $pad-xxs $pad $pad-xxs $pad-xxs;
+  width: 100%;
+}
+
+textarea {
+  @include field-styles;
+  height: 108px;
+  resize: vertical;
+}
+
+.html-input {
+  background-color: $white;
+  > .ck-content {
+    max-height: 75vh;
+  }
+}
+
+.error {
+  color: $red;
+  margin-top: $pad-xxs;
+
+  &--input {
+    border: 1px solid $red;
+  }
+}
+
+.checkbox {
+  margin-top: calc(-1 * #{$pad-xs});
+  padding-top: $pad-xxs;
+
+  &--horizontal {
+    display: inline-block;
+    margin-right: 1rem;
+  }
+
+  input[type="checkbox"] {
+    border: 0;
+    height: 0;
+    display: inline;
+    margin: 0;
+    opacity: 0;
+    padding: 0;
+
+    + label::after {
+      content: none;
+    }
+
+    &:focus + label::before {
+      outline: rgb(59, 153, 252) auto 5px;
+    }
+
+    &:checked + label::after {
+      content: "";
+    }
+  }
+
+  label {
+    padding: 3px 0 0 $pad;
+    position: relative;
+    cursor: pointer;
+
+    &::before,
+    &::after {
+      position: absolute;
+    }
+
+    &::before{
+      border: 1px solid $light-gray;
+      border-radius: $border-radius;
+      content: "";
+      display: inline-block;
+      height: 24px;
+      width: 24px;
+      top: 2px;
+      left: 0;
+    }
+
+    &::after {
+      border-bottom: 2px solid $orange;
+      border-left: 2px solid $orange;
+      content: "";
+      display: inline-block;
+      height: 6px;
+      transform: rotate(-45deg);
+      width: 9px;
+      left: 7px;
+      top: 10px;
+    }
+  }
+}
+
+.phx-submit-loading {
+  .hide-during-submission {
+    display: none;
+  }
+}
+
+.date-time-picker {
+  &__label {
+    @include field-styles();
+    cursor: pointer;
+  }
+
+  &__input {
+    visibility: hidden;
+    width: 0;
+    position: absolute;
+  }
+
+  &__placeholder {
+    color: $light-gray;
+  }
+}
+
+.daterangepicker {
+  background-color: $white;
+  border-color: $light-gray;
+
+  &.show-ranges.ltr .drp-calendar.left {
+    border-left-color: $light-gray;
+  }
+
+  .ranges {
+    li {
+      &.active {
+        background-color: $orange;
+      }
+
+      &:not(.active) {
+        &:hover, &:active {
+          background-color: $light-gray;
+        }
+      }
+    }
+  }
+
+  .drp-calendar.left.single {
+    padding-right: 8px;
+    .calendar-table {
+      padding-right: 0;
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+  }
+
+  .calendar-table {
+    background-color: $gray-bg;
+    border-color: $white;
+    padding-top: 5px;
+
+    thead {
+      th {
+        height: 24px;
+        line-height: inherit;
+
+        select {
+          background-image: none;
+          background-color: $white;
+          color: $dark-gray;
+          cursor: pointer;
+          border: none;
+          height: 100%;
+        }
+      }
+    }
+
+    .next, .prev {
+      &.available {
+        &:hover, &:active {
+          background-color: contrast($gray-bg, 20%);
+        }
+
+        span {
+          border-color: $dark-gray;
+        }
+      }
+    }
+
+    td {
+      transition: all 0.3s ease;
+
+      &.in-range {
+        background-color: contrast($orange, -10%);
+      }
+
+      &.active, &.end-date, &.start-date {
+        background-color: $orange;
+        color: $white;
+        font-weight: bold;
+      }
+
+      &.available:not(.active) {
+        &:hover {
+          background-color: contrast($gray-bg, 20%);
+        }
+      }
+
+      &.off, .off.in-range, .off.start-date, .off.end-date {
+        border-radius: 0;
+        background-color: $light-gray;
+        color: $gray-bg;
+        opacity: 0.6;
+      }
+    }
+  }
+
+  .drp-buttons {
+    border-color: $light-gray;
+
+    button {
+      color: $dark-gray;
+      cursor: pointer;
+
+      &:hover, &:active {
+        opacity: 0.7;
+      }
+    }
+  }
+
+  .calendar-time select {
+    background-color: $gray-bg;
+    border-color: $light-gray;
+    color: $dark-gray;
+    cursor: pointer;
+  }
+
+  .calendar-table {
+    td, th {
+      padding: 0;
+    }
+  }
+}
+
+.invalid-feedback {
+  display: block;
+}
+
+.phx-no-feedback.invalid-feedback, .phx-no-feedback .invalid-feedback {
+  display: none;
+}
+
+.form-repeater {
+  counter-reset: li-count;
+  &__item {
+    list-style: none;
+
+    &--actions {
+      position: absolute;
+      right: calc(100% - 1rem);
+      display: flex;
+      flex-direction: column;
+      width: 2rem;
+      align-items: flex-end;
+      text-align: right;
+      justify-content: space-between;
+      height: calc(100% - 2rem);
+    }
+
+    &--drag-handle {
+      cursor: grab;
+    }
+
+    &--numbered {
+      counter-increment: li-count;
+      padding-left: 1.4rem;
+      position: relative;
+
+      &:before {
+        content: counter( li-count) '. ';
+        position: absolute;
+        right: calc(100% - .5rem);
+        font-size: 1rem;
+        font-weight: bold;
+        color: $light-gray;
+      }
+
+      .form-repeater__item--actions {
+        padding-top: 2rem;
+      }
+    }
+
+    &.form-repeater__item--dragging {
+      opacity: 0.6;
+      .form-repeater__item--drag-handle {
+        cursor: grabbing;
+      }
+    }
+  }
+}
+
+.slider {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  align-items: center;
+  padding: .5rem 0;
+
+  > .slide {
+    margin-right: .5rem;
+
+    &--left {
+      margin-right: 0;
+      margin-left: .5rem;
+    }
+  }
+  > label {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  &--vertical {
+    display: block;
+  }
+
+  &--icon-caption {
+    grid-template-columns: repeat(3, max-content);
+
+    .caption {
+      height: 27px;
+      padding: 3px 0;
+
+      .material-icons {
+        font-size: 21px;
+      }
+    }
+  }
+}
+
+.slide {
+  margin: 0;
+
+  input[type="checkbox"] {
+    height: 0px;
+    width: 0px;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    display: inherit;
+  }
+
+  label {
+    width: 50px;
+    height: 25px;
+    background-color: $light-gray;
+    margin: 0;
+    position: relative;
+    border-radius: 50px;
+    display: block;
+    cursor: pointer;
+
+    &:before {
+      color: $orange;
+      position: absolute;
+      right: 7px;
+      top: 5px;
+      z-index: 0;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    &:after {
+      background: $white;
+      display: block;
+      width: 15px;
+      height: 15px;
+      position: absolute;
+      top: 5px;
+      left: 6px;
+      border-radius: 50px;
+      transition: all 0.4s ease;
+      content: "";
+      cursor: pointer;
+    }
+
+    @media screen and (max-width: $screen-tablet) {
+      width: 45px;
+      height: 25px;
+
+      &:after {
+        width: 15px;
+        height: 15px;
+      }
+    }
+  }
+
+  input[type="checkbox"] {
+    visibility: hidden;
+    &:checked + label {
+      background: $orange;
+    }
+
+    &:checked + label:after {
+      left: calc(50% + 4px);
+    }
+
+    &:checked + label:before {
+      color: $white;
+      left: 10px;
+      top: 3px;
+    }
+  }
+}
+
+.radio-button-group {
+  display: flex;
+  padding: .5rem 0;
+  margin-left: -4px;
+  margin-right: -4px;
+
+  > .radio-button {
+    padding-left: 4px;
+    padding-right: 4px;
+    input[type=radio] {
+      display: none;
+
+      &:checked + label {
+        @include button-theme($orange, $white);
+      }
+    }
+
+    label {
+      @include button()
+    }
+  }
+
+  &--sm {
+    > .radio-button {
+      label {
+        font-size: 0.7rem;
+        padding: $pad-xxs/2 $pad-xs/2;
+      }
+    }
+  }
+}
+
+fieldset {
+  border: none;
+  border-left: 3px solid #f99d1c;
+  margin-bottom: 1.5rem;
+}
+

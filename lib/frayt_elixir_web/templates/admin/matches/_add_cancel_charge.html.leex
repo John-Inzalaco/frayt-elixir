@@ -1,0 +1,29 @@
+<%= if @rule do %>
+  <p class="u-pad__top--xs"><strong>Default cancel charge is calculated from this Match's contract</strong></p>
+<% end %>
+<div class="width--half u-pad__top--sm">
+  <div>
+    <%= label @form_name, :cancel_charge, "Charge Shipper #{@cancel_charge}% of the original total."%>
+    <div class="width--third">
+      <div class="input__with-icon">
+        <%= number_input @form_name, :cancel_charge, [value: @cancel_charge, min: 0, max: 100, step: 1] %>
+        <i>%</i>
+      </div>
+    </div>
+    <span>They will be charged $<%= round(@amount_charged * @cancel_charge / 100) |> display_price() %>.</span>
+  </div>
+  <%= if @has_driver? do %>
+    <div>
+      <%= label @form_name, :cancel_charge_driver_pay, "Pay Driver #{@cancel_charge_driver_pay}% of the cancel fee." %>
+      <div class="width--third">
+        <div class="input__with-icon">
+          <%= number_input @form_name, :cancel_charge_driver_pay, [value: @cancel_charge_driver_pay, min: 0, max: 100, step: 1] %>
+          <i>%</i>
+        </div>
+      </div>
+      <span>They will be paid $<%= round(@amount_charged * @cancel_charge * @cancel_charge_driver_pay / 10000) |> display_price() %>.</span>
+    </div>
+  <% else %>
+    <%= hidden_input @form_name, :cancel_charge_driver_pay, value: @cancel_charge_driver_pay %>
+  <% end %>
+</div>

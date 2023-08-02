@@ -1,0 +1,110 @@
+<div class="match-layout__details">
+    <%= if @edit do %>
+        <%= f = form_for @match_changeset, "#", [phx_change: :change_logistics, phx_submit: :update_logistics] %>
+            <div class="u-push__bottom--sm">
+                <%= label f, :vehicle_class, "Vehicle Type" %>
+                <%= select f, :vehicle_class, VehicleClass.select_options(), value: input_value(f, :vehicle_class), "data-test-id": "vehicle-class-input" %>
+                <span class="error"><%= error_tag f, :vehicle_class %></span>
+            </div>
+            <div class="u-push__bottom--sm">
+                <%= label f, :unload_method, "Unload Method" %>
+                <%= select f, :unload_method, MatchUnloadMethod.select_options(allow_none: true), value: input_value(f, :unload_method), "data-test-id": "unload-method-input" %>
+                <span class="error"><%= error_tag f, :unload_method %></span>
+            </div>
+            <div class="u-push__bottom--sm">
+                <%= label f, :po, "P.O./Job #" %>
+                <%= text_input f, :po, value: @match.po, "data-test-id": "po-input" %>
+                <span class="error"><%= error_tag f, :po %></span>
+            </div>
+            <%= if company = @match.shipper.location && @match.shipper.location.company do %>
+                <div class="u-push__bottom--sm">
+                    <%= label f, :contract_id, "Contract" %>
+                    <%= record_select f, :contract_id, Contract, placeholder: "No Contract", filters: %{company_id: company.id}, default_options: company.contracts %>
+                    <span class="error"><%= error_tag f, :contract_id %></span>
+                </div>
+            <% end %>
+
+            <div class="u-push__top">
+                <button class="button button--primary" type="submit" data-test-id="save-logistics">Update Logistics</button>
+                <a onclick="" tabindex=0 phx-key="Enter" phx-keyup="cancel_edit" phx-click="cancel_edit" class="button">Cancel</a>
+            </div>
+        </form>
+    <% else %>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline u-push--none">Shipper</p>
+            <div>
+            <div>
+                <p data-test-id="shipper-name" class="u-push--none">
+                <%= display_user_info(@match.shipper, :name) %>
+                <%= for tag <- @match.tags do %>
+                    <span class="label label--<%= tag.name %>"><%= title_case(tag.name) %></span>
+                <% end %>
+                <span class="caption" data-test-id="shipper-company"><%= display_user_info(@match.shipper, :company) %></span>
+                </p>
+                <p data-test-id="shipper-email" class="u-push--none"><a href="<%= display_user_info(@match.shipper, :email_link) %>"><%= display_user_info(@match.shipper, :email) %></a></p>
+                <p data-test-id="shipper-phone"><a href="<%= display_user_info(@match.shipper, :phone_link) %>"><%= display_user_info(@match.shipper, :phone) %></a></p>
+            </div>
+            </div>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <div>
+                <p class="header--inline u-push--none">Driver</p>
+                <%= render FraytElixirWeb.Admin.DriversView, "_driver_rating.html", driver: @match.driver %>
+            </div>
+            <div>
+            <p class="u-push--none" data-test-id="driver-name"><%= display_user_info(@match.driver, :name) %></p>
+            <p class="u-push--none"><a href="<%= display_user_info(@match.driver, :email_link) %>"><%= display_user_info(@match.driver, :email) %></a></p>
+            <p><a href="<%= display_user_info(@match.driver, :phone_link) %>"><%= display_user_info(@match.driver, :phone) %></a></p>
+            <%= if @match.driver do %>
+                <%= for vehicle <- @match.driver.vehicles do %>
+                <p><b><%= vehicle_class(vehicle.vehicle_class) %>:</b> <%= vehicle_name(vehicle) %></p>
+                <% end %>
+            <% end %>
+            </div>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Contract</p>
+            <p data-test-id="service-level">
+                <%= if @match.contract do %>
+                    <%= live_patch to: Routes.contract_path(@socket, :index, @match.contract.id) do %>
+                        <%= @match.contract.name %>
+                    <% end %>
+                <% else %>
+                    -
+                <% end %>
+            </p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Service Level</p>
+            <p data-test-id="service-level"><%= service_level(@match.service_level) %></p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Vehicle Type</p>
+            <p data-test-id="vehicle-class"><%= vehicle_class(@match.vehicle_class) %></p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Unload Method</p>
+            <p><%= MatchUnloadMethod.name(@match.unload_method) || "-" %></p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">P.O. / Job #</p>
+            <p data-test-id="po"><%= @match.po || "-" %></p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Total Distance</p>
+            <p><%= :erlang.float_to_binary(@match.total_distance, decimals: 1) %> mi</p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Total Weight</p>
+            <p><%= @match.total_weight %> lbs</p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Total Volume</p>
+            <p><%= volume_to_cubic_feet(@match.total_volume) %> ft³</p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Timezone</p>
+            <p><%= timezone_abbr_from_full(nil, @match.timezone) %></p>
+        </div>
+    <% end %>
+</div>

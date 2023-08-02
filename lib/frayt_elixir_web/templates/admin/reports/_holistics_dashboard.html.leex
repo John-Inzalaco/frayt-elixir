@@ -1,0 +1,45 @@
+<div id="holistics_dashboard_<%= @dashboard.id %>" class="holistics-dashboard u-push__top--sm <%= @class %>">
+  <%= if @editing do %>
+    <%= f = form_for @changeset, "#", [phx_change: :change_dashboard, phx_submit: :update_dashboard, phx_target: @myself] %>
+      <div class="u-push__bottom--sm">
+        <%= label f, :name, "Name *" %>
+        <%= text_input f, :name %>
+        <span class="error"><%= error_tag f, :name %></span>
+      </div>
+      <div class="u-push__bottom--sm">
+        <%= label f, :embed_code, "Embed Code *" %>
+        <%= text_input f, :embed_code %>
+        <span class="error"><%= error_tag f, :embed_code %></span>
+      </div>
+      <div class="u-push__bottom--sm">
+        <%= label f, :secret_key, "Secret Key *" %>
+        <%= text_input f, :secret_key %>
+        <span class="error"><%= error_tag f, :secret_key %></span>
+      </div>
+      <div class="u-push__bottom--sm">
+        <%= label f, :description, "Description" %>
+        <%= textarea f, :description %>
+        <span class="error"><%= error_tag f, :description %></span>
+      </div>
+      <button type="submit" class="button button--primary">Save Dashboard</button>
+      <button phx-click="cancel_edit_config" phx-target="<%= @myself %>" type="button" class="button">Cancel</button>
+    </form>
+  <% else %>
+    <button phx-click="edit_config" phx-target="<%= @myself %>" class="button u-push__bottom--sm">Edit Config</button>
+
+    <%= if @token do %>
+      <iframe
+        class="holistics-dashboard__frame"
+        src="<%= @token %>"
+        frameborder="0"
+        allowfullscreen
+      ></iframe>
+    <% else %>
+      <h3>Unable to load dashboard</h3>
+      <p class="u-warning">This dashboard is missing configuration. Please contact an Admin to update this.</p>
+      <%= if @error do %>
+        <p class="u-warning">Error: <%= @error %></p>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

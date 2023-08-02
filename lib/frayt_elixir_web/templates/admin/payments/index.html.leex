@@ -1,0 +1,178 @@
+<section>
+  <div class="header header--stacked">
+    <div class="header__title">
+      <h1>Payments</h1>
+      <div>
+        <%= Table.refresh_button(@data_table) %>
+      </div>
+    </div>
+    <p>Next payment run: <%= display_date_time(get_next_payment_run(), @time_zone) %></p>
+    <%= unless @transaction_response == nil do %>
+      <p class="u-warning inverse u-push__bottom--sm" role="alert"><%= @transaction_response %></p>
+    <% end %>
+    <div class="header__actions">
+      <%= form_for @data_table, "#", [class: "header__select"], fn f -> %>
+        <div class="filter-states">
+          <%= select f, :states, [{"All Matches", "all"}, {"Completed Matches", "complete"}, {"Canceled Matches", "canceled"}, ], [class: "states-select", data: [test_id: "filter-states"]] %>
+        </div>
+      <% end %>
+      <%= form_for @data_table, "#", [class: "header__select"], fn f -> %>
+        <div class="filter-types">
+          <%= select f, :types, [{"All Transactions", "all"}, {"Failed Transactions", "failed"}, {"Failed Captures", "captures"}, {"Failed Transfers", "transfers"}, ], [class: "types-select", data: [test_id: "filter-types"]] %>
+        </div>
+      <% end %>
+      <%= form_for @data_table, "#", [class: "header__search", filter_on: :phx_submit], fn f -> %>
+        <div class="search">
+          <%= text_input f, :query, [class: "input", type: "search", placeholder: "Search"]%>
+          <button class="search__submit"><i class="material-icons">search</i></button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+<table class="u-hide--mobile">
+  <thead>
+    <tr class="u-border--none">
+      <%= Table.sort_header(@data_table, "Date", :inserted_at) %>
+      <th>Match</th>
+      <th>Driver</th>
+      <th>Shipper</th>
+      <th>Failed Charge</th>
+      <th>Failed Pay</th>
+      <th>Payment Transactions</th>
+    </tr>
+  </thead>
+  <%= for match <- @matches do %>
+    <section>
+      <div class="width--full u-push__bottom">
+        <tbody  class="hover">
+          <tr>
+            <td data-test-id="match-date">
+              <%= display_date(match.inserted_at, @time_zone) %>
+              <div class="caption">
+                <%= display_time(match.inserted_at, @time_zone) %>
+              </div>
+            </td>
+            <td data-test-id="match-id">
+              <a href="/admin/matches/<%= match.id %>">#<%= match.shortcode %></a><br/>
+              <span data-test-id="po"><%= match.po %></span>
+              <br />
+              <%= title_case(match.state) %>
+            </td>
+            <td data-test-id="driver">
+              <%= if match.driver do %>
+                <%= full_name(match.driver) %><br/>
+                <%= display_phone(match.driver.phone_number) %>
+              <% else %>
+                -
+              <% end %>
+            </td>
+            <td data-test-id="match-shipper">
+              <%= display_user_info(match.shipper, :name) %>
+              <br/>
+              <%= display_phone(match.shipper.phone) %>
+            </td>
+            <td>
+              <% latest_transfer = Payments.get_latest_transfer(match) %>
+              <% latest_capture = Payments.get_latest_capture(match) %>
+              <%= if latest_capture do %>
+                <%= if latest_capture.status == "error" do %>
+                  $<%= display_price(get_charge_amount(match)) %>
+                  <br />
+                  <form phx-submit="retry_capture">
+                    <%= hidden_input :retry_form, :match, value: match.id %>
+                    <%= hidden_input :retry_form, :amount, value: get_transfer_amount(match) %>
+                    <button type="submit" phx-disable-with="Capturing..." phx-value-match="<%= match.id %>" phx-value-amount="<%= get_transfer_amount(match) %>" class="button button--primary hide-during-submission">Retry Capture</a>
+                  </form>
+                <% end %>
+              <% end %>
+            </td>
+            <td>
+              <%= if latest_transfer do %>
+                <%= if latest_transfer.status == "error" do %>
+
+                  $<%= display_price(get_transfer_amount(match)) %>
+                  <br />
+                  <form phx-submit="retry_transfer">
+                    <%= hidden_input :retry_form, :match, value: match.id %>
+                    <%= hidden_input :retry_form, :amount, value: get_transfer_amount(match) %>
+                    <button type="submit" phx-disable-with="Transferring..." phx-value-match="<%= match.id %>" phx-value-amount="<%= get_transfer_amount(match) %>" class="button button--primary hide-during-submission">Retry Transfer</a>
+                  </form>
+                <% end %>
+              <% end %>
+            </td>
+            <td>
+              <% payment_count = Enum.count(get_match_payments(match)) %>
+              <%= payment_count %> Transaction<%= if payment_count > 1, do: "s" %>
+              <br />
+              <a onclick="" tabindex=0 phx-click="show_modal_named" phx-value-liveview="AdminMatchTransactions" phx-value-match="<%= match.id %>" phx-value-title="Match #<%= match.shortcode %> Transactions" phx-value-wide=true>View Log</a>
+            </td>
+          </tr>
+        </tbody>
+      </div>
+    </section>
+  <% end %>
+</table>
+
+<%# mobile view %>
+<table class="u-hide--desktop">
+  <thead>
+    <tr>
+      <%= Table.sort_header(@data_table, "Date", :inserted_at) %>
+      <th>Match ID</th>
+      <th>Charge</th>
+      <th>Pay</th>
+    </tr>
+  </thead>
+  <%= for match <- @matches do %>
+    <tbody>
+      <tr>
+        <td>
+          <%= display_date(match.inserted_at, @time_zone) %>
+          <div class="caption">
+            <%= display_time(match.inserted_at, @time_zone) %>
+          </div>
+        </td>
+        <td>
+          <a href="/admin/matches/<%= match.id %>">#<%= match.shortcode %></a>
+        </td>
+        <td>
+          <% latest_transfer = Payments.get_latest_transfer(match) %>
+          <% latest_capture = Payments.get_latest_capture(match) %>
+          <%= if latest_capture do %>
+            <%= if latest_capture.status == "error" do %>
+              $<%= display_price(get_charge_amount(match)) %>
+              <br />
+              <form phx-submit="retry_capture">
+                <%= hidden_input :retry_form, :match, value: match.id %>
+                <%= hidden_input :retry_form, :amount, value: get_transfer_amount(match) %>
+                <button type="submit" phx-disable-with="Capturing..." phx-value-match="<%= match.id %>" phx-value-amount="<%= get_transfer_amount(match) %>" class="button button--primary hide-during-submission">Retry</a>
+              </form>
+            <% end %>
+          <% end %>
+        </td>
+        <td>
+          <%= if latest_transfer do %>
+            <%= if latest_transfer.status == "error" do %>
+              $<%= display_price(get_transfer_amount(match)) %>
+              <br />
+              <form phx-submit="retry_transfer">
+                <button type="submit" phx-disable-with="Transferring..." phx-value-match="<%= match.id %>" phx-value-amount="<%= get_transfer_amount(match) %>" class="button button--primary hide-during-submission">Retry</a>
+              </form>
+            <% end %>
+          <% end %>
+        </td>
+      </tr>
+    </tbody>
+  <% end %>
+</table>
+<%= Table.pagination_nav(@data_table) %>
+
+<%= if @show_modal, do: live_component @socket, FraytElixirWeb.LiveComponent.ModalLive,
+  live_view: @live_view,
+  child_id: "test-modal",
+  title: @title,
+  match: @match,
+  match_stop_id: nil,
+  wide: false,
+  time_zone: @time_zone %>

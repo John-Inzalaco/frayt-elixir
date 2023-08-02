@@ -1,0 +1,166 @@
+@mixin button-theme($bg-color, $text-color, $border-color: contrast($bg-color, 10%)) {
+  background-color: $bg-color;
+  border-color: $border-color;
+  color: $text-color;
+
+  &:hover, &:active {
+    background-color: contrast($bg-color, 10%);
+    color: $text-color;
+  }
+
+  &.inverse {
+    @include inverse-button-theme($bg-color, $text-color)
+  }
+}
+
+@mixin inverse-button-theme($bg-color, $text-color) {
+  background-color: $text-color;
+  border-color: $bg-color;
+  color: $bg-color;
+
+  &:hover, &:active {
+    background-color: contrast($text-color, 10%)
+  }
+}
+
+@mixin button() {
+  @include button-theme($white, $dark-gray);
+  border-width: 1px;
+  border-style: solid;
+  border-radius: $border-radius;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 0.8rem;
+  letter-spacing: 0.01rem;
+  font-weight: 500;
+  padding: $pad-xxs $pad-xs;
+  box-sizing: border-box;
+  white-space: nowrap;
+
+  &--input {
+    padding-top: .5rem;
+    height: 36px;
+
+    .material-icons {
+      line-height: .75rem;
+      top: 3px;
+    }
+  }
+
+  .material-icons {
+    font-size: 1rem;
+    line-height: 0.8rem;
+    position: relative;   
+    top: .2125rem;
+  }
+}
+
+.button {
+  @include button();
+
+  &--primary {
+    @include button-theme($orange, $white);
+  }
+
+  &--blue {
+    @include button-theme($blue, white);
+  }
+
+  &--danger {
+    @include button-theme($red, $white);
+  }
+
+  &--success {
+    @include button-theme($green, $white);
+  }
+
+  &--disabled, &:disabled {
+    background-color: $light-gray!important;
+    border-color: $light-gray!important;
+    color: $white!important;
+    cursor: not-allowed !important;
+  }
+
+  &__checkbox {
+    input[type=checkbox] {
+      display: none;
+      &:checked {
+        + label {
+          @include button-theme($orange, $white);
+        }
+      }
+
+      &:not(:checked) {
+        + label {
+          @include inverse-button-theme($orange, $white);
+        }
+      }
+
+      + label {
+        @include button();
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+    }
+
+    &--danger {
+      input[type=checkbox] {
+        &:checked + label {
+          @include button-theme($red, $white);
+        }
+  
+        &:not(:checked) + label {
+          @include inverse-button-theme($red, $white);
+        }
+      }
+    }
+  }
+
+  + .button {
+    margin-left: $pad-xxs;
+  }
+}
+
+.icon-button {
+  cursor: pointer;
+  font-size: 1rem;
+  
+   &--danger {
+     color: $red;
+   }
+
+   &:hover, &:focus {
+     opacity: 0.7;
+   }
+}
+
+a:not(.button) {
+  i {
+    color: $dark-gray;
+  }
+}
+
+
+.back {
+  font-size: inherit;
+  margin-bottom: $pad-sm;
+  color: $dark-gray;
+  display: block;
+
+  i {
+    color: $dark-gray;
+  }
+
+  &:hover {
+    color: $dark-gray;
+    cursor: pointer;
+  }
+
+  &:focus {
+    color: $dark-gray;
+  }
+}
+
+button {
+  cursor: pointer;
+}

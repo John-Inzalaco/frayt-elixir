@@ -1,0 +1,8 @@
+Join Frayt
+<%= if @name, do: "Hello #{@name}!" %>
+You've been invited to join the Frayt admin.
+Visit <%= @url %> to join now!
+
+
+Thanks!
+- The Frayt Team

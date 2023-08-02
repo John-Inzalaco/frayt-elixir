@@ -1,0 +1,13 @@
+<section>
+  <h1>Settings</h1>
+</section>
+
+<section>
+  <div class="subnav__tabs u-push__top u-push__bottom">
+    <%= for page <- @pages do %>
+      <a onclick="" data-test-id='<%= page %>-tab' phx-click="change_page:<%= page %>" class="<%= if @page == page, do: 'active' %>"><%= title_case(page) %></a>
+    <% end %>
+  </div>
+</section>
+
+<%= live_render(@socket, @live_view, id: @page, session: %{"current_user" => @current_user, "reset_password" => @reset_password, "params" => @params, "time_zone" => @time_zone}) %>

@@ -1,0 +1,298 @@
+<div class="match-layout__details">
+    <%= if @edit == @stop.id or (@edit == "new" and is_nil(@stop.id)) do %>
+        <%= f = form_for @match_changeset, "#", [phx_change: "change_stop", phx_submit: "update_stop:#{@stop.id}", class: "match-stop--form"] %>
+            <%= address_input_group(f, :destination_address) %>
+            <div class="u-push__bottom--sm">
+                <%= label f, :delivery_notes, "Delivery Notes" %>
+                <%= textarea f, :delivery_notes, "data-test-id": "delivery-notes-input" %>
+                <span class="error"><%= error_tag f, :delivery_notes %></span>
+            </div>
+            <div class="u-push__bottom--sm">
+                <%= label f, :po, "P.O." %>
+                <%= text_input f, :po, "data-test-id": "po-input" %>
+                <span class="error"><%= error_tag f, :po %></span>
+            </div>
+            <div class="width--half">
+                <div>
+                    <label>Requires Load/Unload</label>
+                    <div class="slide u-push__bottom--xs">
+                        <%= checkbox f, :has_load_fee %>
+                        <%= label f, :has_load_fee, "", "data-test-id": "has-load-fee-input" %>
+                    </div>
+                </div>
+                <%= if @match.vehicle_class == 4 do %>
+                    <div>
+                        <label>Requires Pallet Jack</label>
+                        <div class="slide u-push__bottom--xs">
+                            <%= checkbox f, :needs_pallet_jack %>
+                            <%= label f, :needs_pallet_jack, "", "data-test-id": "needs-pallet-jack-input" %>
+                        </div>
+                    </div>
+                <% end %>
+                <div>
+                    <label>Require POD</label>
+                    <div class="slide u-push__bottom--xs">
+                        <%= checkbox f, :destination_photo_required %>
+                        <%= label f, :destination_photo_required, "" %>
+                    </div>
+                </div>
+                <div>
+                    <label>Self Recipient</label>
+                    <div class="slide u-push__bottom--xs">
+                        <%= checkbox f, :self_recipient, "data-test-id": "self-recipent-input" %>
+                        <%= label f, :self_recipient, "" %>
+                    </div>
+                </div>
+            </div>
+            <%= unless is_checked(f, :self_recipient) do %>
+                <%= inputs_for f, :recipient, fn r -> %>
+                    <%= render(FraytElixirWeb.Admin.ContactsView, "_contact_form.html", name: "Recipient", form: r) %>
+                <% end %>
+            <% end %>
+            <h6>Signature</h6>
+            <fieldset class="width--half">
+                <div>
+                    <label>Require Signature</label>
+                    <div class="slide u-push__bottom--xs">
+                        <%= checkbox f, :signature_required, "data-test-id": "signature-required-input" %>
+                        <%= label f, :signature_required, "" %>
+                    </div>
+                    <div class="u-push__bottom--sm">
+                        <%= label f, :signature_name, "Signee" %>
+                        <%= text_input f, :signature_name, "data-test-id": "signature-name-input" %>
+                        <span class="caption">Note: This should be provided by the driver. Only override this if Driver is unable to provide the signee</span>
+                        <span class="error"><%= error_tag f, :signature_instructions %></span>
+                    </div>
+                </div>
+                <div>
+                    <label>Signature Type</label>
+                    <div class="u-push__bottom--sm">
+                        <%= select f, :signature_type,
+                            MatchStopSignatureType.select_options(),
+                            value: input_value(f, :signature_type),
+                            "data-test-id": "signature-type-input"
+                        %>
+                        <span class="error"><%= error_tag f, :signature_type %></span>
+                    </div>
+                    <div class="u-push__bottom--sm">
+                        <%= label f, :signature_instructions, "Signature Instructions" %>
+                        <%= textarea f, :signature_instructions, "data-test-id": "signature-instructions-input" %>
+                        <span class="error"><%= error_tag f, :signature_instructions %></span>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="match-repeater__items">
+                <h6>
+                    Items
+                    <a onclick="" class="match-repeater__add-item-button" tabindex=0 phx-click="repeater_add_items" data-test-id="add-stop-item">
+                        <span class="material-icons">add_circle_outline</span>
+                    </a>
+                </h6>
+                <%= inputs_for f, :items, fn i -> %>
+                    <fieldset class="match-repeater__item">
+                        <a onclick="" class="match-repeater__remove-item-button" tabindex=0 phx-click="repeater_remove_items" phx-value-index="<%= i.index %>" data-test-id="add-stop-item-<%= i.index %>">
+                            <span class="material-icons">delete</span>
+                        </a>
+                        <div class="width--half u-push__bottom--sm">
+                            <div class="u-push__bottom--sm">
+                                <%= label i, :type, "Type" %>
+                                <%= select i, :type, MatchStopItemType.select_options(), value: input_value(i, :type), "data-test-id": "item-type-input" %>
+                                <span class="error"><%= error_tag i, :type %></span>
+                            </div>
+                            <div>
+                                <%= label i, :description, "Description" %>
+                                <%= text_input i, :description, "data-test-id": "item-#{i.index}-description-input" %>
+                                <span class="error"><%= error_tag i, :description %></span>
+                            </div>
+                        </div>
+                        <div class="width--full u-push__bottom--sm">
+                            <div>
+                                <%= label i, :declared_value, "Declared Value" %>
+                                <%= number_input i, :declared_value, value: "#{format_price(input_value(i, :declared_value))}", "data-test-id": "item-#{i.index}-declared_value-input" %>
+                                <span class="error"><%= error_tag i, :declared_value %></span>
+                            </div>
+                        </div>
+                        <div class="width--third u-push__bottom--sm">
+                            <div>
+                                <%= label i, :pieces, "Pieces" %>
+                                <%= number_input i, :pieces, "data-test-id": "item-#{i.index}-pieces-input" %>
+                                <span class="error"><%= error_tag i, :pieces %></span>
+                            </div>
+                            <div>
+                                <%= label i, :weight, "Weight (lbs)" %>
+                                <%= number_input i, :weight, "data-test-id": "item-#{i.index}-weight-input" %>
+                                <span class="error"><%= error_tag i, :weight %></span>
+                            </div>
+                            <div>
+                                <%= label i, :volume, "Volume (ft³)" %>
+                                <%= number_input i, :volume, value: volume_to_cubic_feet(input_value(i, :volume)), "data-test-id": "item-#{i.index}-volume-input" %>
+                                <span class="error"><%= error_tag i, :volume %></span>
+                            </div>
+                        </div>
+                        <div class="width--third u-push__bottom--sm">
+                            <div>
+                                <%= label i, :width, "Width (in)" %>
+                                <%= number_input i, :width, "data-test-id": "item-#{i.index}-width-input" %>
+                                <span class="error"><%= error_tag i, :width %></span>
+                            </div>
+                            <div>
+                                <%= label i, :length, "Length (in)" %>
+                                <%= number_input i, :length, "data-test-id": "item-#{i.index}-length-input" %>
+                                <span class="error"><%= error_tag i, :length %></span>
+                            </div>
+                            <div>
+                                <%= label i, :height, "Height (in)" %>
+                                <%= number_input i, :height, "data-test-id": "item-#{i.index}-height-input" %>
+                                <span class="error"><%= error_tag i, :height %></span>
+                            </div>
+                                <div>
+                                    <label>Require barcode on pickup</label>
+                                    <div class="slide u-push__bottom--xs">
+                                        <%= checkbox i, :barcode_pickup_required, "data-test-id": "self-req-pickup-input" %>
+                                        <%= label i, :barcode_pickup_required, "" %>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label>Require barcode on delivery</label>
+                                    <div class="slide u-push__bottom--xs">
+                                        <%= checkbox i, :barcode_delivery_required, "data-test-id": "self-req-delivery-input" %>
+                                        <%= label i, :barcode_delivery_required, "" %>
+                                    </div>
+                                </div>
+                            <%= if is_checked(i, :barcode_pickup_required) or is_checked(i, :barcode_delivery_required) do %>
+                                <div>
+                                    <%= label i, :barcode, "Barcode (optional)" %>
+                                    <%= number_input i, :barcode, "data-test-id": "item-#{i.index}-barcode-input" %>
+                                    <span class="error"><%= error_tag i, :barcode %></span>
+                                </div>
+                            <% end %>
+                        </div>
+                        <p class="u-text--sm">When volume is left empty, it will be automatically calculated from the width, length, and height</p>
+                    </fieldset>
+                <% end %>
+            </div>
+            <div class="u-push__top">
+                <button class="button button--primary" type="submit" data-test-id="save-stop"><%= if @stop.id, do: "Update", else: "Create" %> Stop</button>
+                <a onclick="" tabindex=0 phx-key="Enter" phx-keyup="cancel_edit" phx-click="cancel_edit" class="button">Cancel</a>
+                <%= if is_multistop(@match) do %>
+                    <%= if @match.delivery_batch_id do %>
+                        <p class="u-push__top--xxs caption">Stops cannot be deleted if they are part of a Batch</p>
+                    <% else %>
+                        <a onclick="" tabindex=0 data-confirm="Are you sure you want to delete this stop? This cannot be undone." phx-click="delete_stop:<%= @stop.id %>" class="button button--danger u-float--right">Delete</a>
+                    <% end %>
+                <% end %>
+            </div>
+        </form>
+    <% else %>
+        <div class="u-float--right">
+            <%= if @match.state == :picked_up do %>
+                <%= dropdown_menu stop_state_options(@stop), [id: @stop.id <> "_state_dropdown", header: "Mark Stop as"], fn -> %>
+                    <button class="label label__state--<%= @stop.state %> large">
+                        <%= display_stage(@stop.state) %> <i class="material-icons">keyboard_arrow_down</i>
+                    </button>
+                <% end %>
+            <% else %>
+                <span class="label label__state--<%= @stop.state %> large"><%= display_stage(@stop.state) %></span>
+            <% end %>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Address</p>
+            <div>
+                <p data-test-id="destination-address-<%= @stop.index %>"><%= @stop.destination_address.formatted_address %></p>
+                <%= if @match.scheduled do %>
+                    <p data-test-id="dropoff-at"><%= scheduled_datetime(@stop.dropoff_by, @time_zone, :dropoff_by, @match.service_level) %></p>
+                <% end %>
+            </div>
+        </div>
+
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Name</p>
+            <div>
+                <p><%= @stop.destination_address.name || "-" %></p>
+            </div>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Distance</p>
+            <div>
+                <p><%= :erlang.float_to_binary(@stop.distance, decimals: 1) %> mi <span class="caption">driving from previous stop</span></p>
+                <p><%= :erlang.float_to_binary(@stop.radial_distance, decimals: 1) %> mi <span class="caption">straight line from pickup</span></p>
+            </div>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">P.O. / Job #</p>
+            <p data-test-id="po-<%= @stop.index %>"><%= @stop.po || "-" %></p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Delivery Notes</p>
+            <p data-test-id="delivery-notes-<%= @stop.index %>"><%= @stop.delivery_notes || "-" %></p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Items</p>
+            <div>
+            <%= for item <- @stop.items do %>
+                <% name = "#{item.pieces} #{item.description || if item.type == :item, do: "Item(s)"} #{if item.type == :pallet, do: "pallet(s)"}" %>
+                <%= if item.length != nil and item.width != nil and item.height != nil do %>
+                <p data-test-id="item-<%= @stop.index %>"><%= "#{name} @ #{item.length}\" x #{item.width}\" x #{item.height}\" and #{item.weight}lbs each." %></p>
+                <% else %>
+                <p data-test-id="item-<%= @stop.index %>"><%= "#{name} @ #{Kernel.round(item.volume / 1728)} ft³ and #{item.weight}lbs each." %></p>
+                <% end %>
+            <% end %>
+            </div>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Declared Value</p>
+            <p data-test-id="declared-value-<%= @stop.index %>">$<%= display_price(calc_declared_value(@stop.items)) %></p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Proof of Delivery</p>
+            <div>
+            <p>
+                <%= if @stop.destination_photo_required, do: "Required", else: "Optional" %>
+                <div>
+                    <%= display_photo_modal_link(:destination_photo, "Photo", @stop.destination_photo, @stop.id) %>
+                </div>
+            </p>
+            </div>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Signature</p>
+            <p>
+                <%= display_photo_modal_link(:signature_photo, "Signature", @stop.signature_photo, @stop.id) %>
+                <%=  @stop.signature_name %>
+            </p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Signature Type</p>
+            <p data-test-id="signature-type-name-<%= @stop.id %>"><%= MatchStopSignatureType.name(@stop.signature_type) %></p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Signature Instructions</p>
+            <p data-test-id="signature-instructions-text-<%= @stop.id %>">
+                <%= @stop.signature_instructions || "-" %>
+            </p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Requires Load/Unload</p>
+            <p data-test-id="load-unload"><%= if @stop.has_load_fee, do: "Yes", else: "No" %></p>
+        </div>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Requires Pallet Jack</p>
+            <p data-test-id="pallet-jack"><%= if @stop.needs_pallet_jack, do: "Yes", else: "No" %></p>
+        </div>
+        <%= if is_editable(@match) && is_multistop(@match) do %>
+            <a onclick="" class="button button--sm u-float--right" tabindex=0 phx-click="edit_stop:<%= @stop.id %>" data-test-id="edit-stop">Edit Stop</a>
+        <% end %>
+        <div class="u-grid__2-column u-grid__2-column--uneven">
+            <p class="header--inline">Recipient Contact</p>
+            <%= if not @stop.self_recipient and @stop.recipient do %>
+                <div>
+                    <div data-test-id="recipient-name-<%= @stop.index %>"><%= @stop.recipient.name %> (Notify: <%= if @stop.recipient.notify do "Yes" else "No" end %>)</div>
+                    <div data-test-id="recipient-phone-<%= @stop.index %>"><a href="<%= phone_link(@stop.recipient.phone_number) %>"><%= display_phone(@stop.recipient.phone_number) %></a></div>
+                    <div data-test-id="recipient-email-<%= @stop.index %>"><a href="<%= email_link(@stop.recipient.email) %>"><%= @stop.recipient.email %></a></div>
+                </div>
+            <% else %>
+                <p data-test-id="no-recipient-<%= @stop.index %>">Same as Shipper</p>
+            <% end %>
+        </div>
+    <% end %>
+</div>

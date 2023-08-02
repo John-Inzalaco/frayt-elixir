@@ -1,0 +1,24 @@
+//SCREEN SIZES
+$screen-mobile: 48em;
+$screen-tablet: 62em;
+$screen-desktop: 75em;
+
+//SPACING
+$pad: 2rem;
+$pad-xxxs: $pad/10;
+$pad-xxs: $pad/6;
+$pad-xs: $pad/2.5;
+$pad-sm: $pad/2;
+$pad-lg: $pad * 2;
+$pad-xlg: $pad * 2.5;
+
+//BORDERS AND SHAPES
+$border-radius: 5px;
+$border: solid 3px;
+$shadow: 0px 0px 30px rgba(146, 146, 146, 0.18);
+
+//ANIMATIONS
+$transition: all 1s ease;
+
+//FONTS
+$font-primary: 'Montserrat', sans-serif;

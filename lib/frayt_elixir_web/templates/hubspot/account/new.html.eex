@@ -1,0 +1,4 @@
+<div class="u-background--white u-pad--sm">
+  <h1 class="u-push__bottom"><%= @title %></h1>
+  <p><%= @message %></p>
+</div>

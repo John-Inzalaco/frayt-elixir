@@ -1,0 +1,55 @@
+name: Release CI
+
+on:
+  push:
+    tags: releases/*
+
+jobs:
+  deploy-production:
+    # for release tags only
+    if: startsWith( github.ref, 'refs/tags/releases/')
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+        # actions/checkout@v2 only checks out the latest commit,
+        # so we need to tell it to check out the entire release branch
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      # configure the gigalixir-actions with our credentials and app name
+      - uses: mhanberg/gigalixir-action@v0.6.1
+        with:
+          GIGALIXIR_USERNAME: ${{ secrets.GIGALIXIR_USERNAME }}
+          GIGALIXIR_PASSWORD: ${{ secrets.GIGALIXIR_PASSWORD }}
+          GIGALIXIR_APP: frayt-prod
+          SSH_PRIVATE_KEY: ${{ secrets.GIGALIXIR_SSH_KEY }}
+      - name: Set Release
+        run: gigalixir config:set APP_REVISION=${{ github.sha }}
+  deploy-sandbox:
+    # for release tags only
+    if: startsWith( github.ref, 'refs/tags/releases/')
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+        # actions/checkout@v2 only checks out the latest commit,
+        # so we need to tell it to check out the entire release branch
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      # configure the gigalixir-actions with our credentials and app name
+      - uses: mhanberg/gigalixir-action@v0.3.0
+        with:
+          GIGALIXIR_USERNAME: ${{ secrets.GIGALIXIR_USERNAME }}
+          GIGALIXIR_PASSWORD: ${{ secrets.GIGALIXIR_PASSWORD }}
+          GIGALIXIR_APP: frayt-sandbox
+          SSH_PRIVATE_KEY: ${{ secrets.GIGALIXIR_SSH_KEY }}
+      - name: Set Release
+        run: gigalixir config:set APP_REVISION=${{ github.sha }}

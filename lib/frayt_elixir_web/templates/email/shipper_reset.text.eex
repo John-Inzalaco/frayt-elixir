@@ -1,0 +1,8 @@
+Reset Frayt Password
+Hello <%= @name %>!
+Please sign into your account and reset your password using the following temporary password:
+<%= @password_reset_code %>
+
+
+Thanks!
+- The Frayt Team

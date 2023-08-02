@@ -1,0 +1,42 @@
+.container {
+  &__invite {
+    display: grid;
+    gap: $pad-sm;
+    width: 75%;
+
+    @media screen and (max-width: $screen-tablet) {
+      width: 100%;
+    }
+
+    &--information {
+      display: grid;
+      gap: $pad-sm;
+      grid-template-columns: 2fr 1fr;
+
+      @media screen and (max-width: $screen-tablet) {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+
+  &__profile {
+    display: grid;
+    gap: $pad-sm;
+
+    &--section {
+      display: grid;
+      grid-template-columns: 20% 50%;
+      gap: 0 $pad;
+
+      @media screen and (max-width: $screen-tablet) {
+        grid-template-columns: 1fr;
+      }
+
+      .name {
+        display: grid;
+        gap: $pad-xs;
+        grid-template-columns: 1fr max-content;
+      }
+    }
+  }
+}

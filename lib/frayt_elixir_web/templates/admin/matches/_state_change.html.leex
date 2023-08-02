@@ -1,0 +1,17 @@
+<tr>
+  <td>
+    <p><%= display_date(@action.inserted_at, @time_zone) %></p>
+    <p><%= display_time(@action.inserted_at, @time_zone) %></p>
+  </td>
+  <td><%= state_transition_title(@action) %></td>
+  <td colspan="2">
+    <div class="u-flex u-flex--wrap u-flex__align--center">
+      <div><%= title_case(@action.from) %></div>
+      <i class="material-icons">arrow_right_alt</i>
+      <div><%= title_case(@action.to) %></div>
+      <%= if not is_nil(@action.notes) do %>
+        <div>Reason: <%= @action.notes %></div>
+      <% end %>
+    </div>
+  </td>
+</tr>

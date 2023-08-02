@@ -1,0 +1,99 @@
+<%= f = form_for @vehicle_changeset, "#", phx_submit: :update_vehicle, phx_change: :change_vehicle %>
+  <section>
+    <div class="width--full">
+      <div class="width--half u-push__top--sm">
+        <div class="u-push__top--sm">
+          <%= label f, :vehicle_class, "Type" %>
+          <%= select f, :vehicle_class, VehicleClass.select_options(), "data-test-id": "vehicle_class-input" %>
+          <span class="error"><%= error_tag f, :vehicle_class %></span>
+        </div>
+        <div class="u-push__top--sm">
+          <%= label f, :make, "Make" %>
+          <%= text_input f, :make, "data-test-id": "make-input" %>
+          <span class="error"><%= error_tag f, :make %></span>
+        </div>
+        <div class="u-push__top--sm">
+          <%= label f, :model, "Model" %>
+          <%= text_input f, :model, "data-test-id": "model-input" %>
+          <span class="error"><%= error_tag f, :model %></span>
+        </div>
+        <div class="u-push__top--sm">
+          <%= label f, :year, "Year" %>
+          <%= text_input f, :year, "data-test-id": "year-input", type: "number", min: "1885", step: "1" %>
+          <span class="error"><%= error_tag f, :year %></span>
+        </div>
+        <div class="width--full width--third">
+          <div class="u-push__top--sm">
+            <%= label f, :cargo_area_length, "Cargo Area Length (in)" %>
+            <%= text_input f, :cargo_area_length, "data-test-id": "cargo_area_length-input", type: "number", min: "0", step: "1" %>
+            <span class="error"><%= error_tag f, :cargo_area_length %></span>
+          </div>
+          <div class="u-push__top--sm">
+            <%= label f, :cargo_area_width, "Cargo Area Width (in)" %>
+            <%= text_input f, :cargo_area_width, "data-test-id": "cargo_area_width-input", type: "number", min: "0", step: "1" %>
+            <span class="error"><%= error_tag f, :cargo_area_width %></span>
+          </div>
+          <div class="u-push__top--sm">
+            <%= label f, :cargo_area_height, "Cargo Area Height (in)" %>
+            <%= text_input f, :cargo_area_height, "data-test-id": "cargo_area_height-input", type: "number", min: "0", step: "1" %>
+            <span class="error"><%= error_tag f, :cargo_area_height %></span>
+          </div>
+        </div>
+        <div class="width--full width--third">
+          <div class="u-push__top--sm">
+            <%= label f, :max_cargo_weight, "Max Cargo Weight (lbs)" %>
+            <%= text_input f, :max_cargo_weight, "data-test-id": "max_cargo_weight-input", type: "number", min: "0", step: "1" %>
+            <span class="error"><%= error_tag f, :max_cargo_weight %></span>
+          </div>
+          <div class="u-push__top--sm">
+            <%= label f, :door_width, "Door Width (in)" %>
+            <%= text_input f, :door_width, "data-test-id": "door_width-input", type: "number", min: "0", step: "1" %>
+            <span class="error"><%= error_tag f, :door_width %></span>
+          </div>
+          <div class="u-push__top--sm">
+            <%= label f, :door_height, "Door Height (in)" %>
+            <%= text_input f, :door_height, "data-test-id": "door_height-input", type: "number", min: "0", step: "1" %>
+            <span class="error"><%= error_tag f, :door_height %></span>
+          </div>
+        </div>
+        <div class="u-push__top--sm">
+          <%= label f, :wheel_well_width, "Wheel Well Width" %>
+          <%= text_input f, :wheel_well_width, "data-test-id": "wheel_well_width-input", type: "number", min: "0", step: "1" %>
+          <span class="error"><%= error_tag f, :wheel_well_width %></span>
+        </div>
+        <div class="u-push__top--sm">
+          <%= label f, :license_plate, "License Plate" %>
+          <%= text_input f, :license_plate, "data-test-id": "license_plate-input" %>
+          <span class="error"><%= error_tag f, :license_plate %></span>
+        </div>
+        <div class="u-push__top--sm">
+          <%= label f, :vin, "VIN #" %>
+          <%= text_input f, :vin, "data-test-id": "vin-input" %>
+          <span class="error"><%= error_tag f, :vin %></span>
+        </div>
+        <div class="width--half">
+          <div>
+            <label>Has a Pallet Jack</label>
+            <div class="slide u-push__bottom--xs">
+                <%= checkbox f, :pallet_jack %>
+                <%= label f, :pallet_jack, "" %>
+            </div>
+            <span class="error"><%= error_tag f, :pallet_jack %></span>
+          </div>
+          <div>
+            <label>Has Lift Gate</label>
+            <div class="slide u-push__bottom--xs">
+                <%= checkbox f, :lift_gate %>
+                <%= label f, :lift_gate, "" %>
+            </div>
+            <span class="error"><%= error_tag f, :lift_gate %></span>
+          </div>
+        </div>
+      </div>
+      <div class= "u-push__top--sm">
+        <button class="button button--primary">Update Vehicle</button>
+        <a onclick="" class="button" phx-keyup="toggle_edit" phx-key="Enter" tabindex=0 phx-click="toggle_edit">Cancel</a>
+      </div>
+    </div>
+  </section>
+</form>

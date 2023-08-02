@@ -1,0 +1,135 @@
+<section class="u-pad__left--xxs">
+  <h4>Invite Users</h4>
+  <%= if @invite do %>
+    <%= f = form_for @invite, "#", [phx_change: :change_invites, phx_submit: :invite_admin, class: "container__invite u-push__top--sm", 'data-test-id': "invite-form"] %>
+      <div class="u-grid__4-column">
+        <div>
+          <%= label f, :name, "Name" %>
+          <%= text_input f, :name %>
+          <span class="error"><%= error_tag f, :name %></span>
+        </div>
+        <div>
+          <%= inputs_for f, :user, fn u -> %>
+            <%= label u, :email, "Email" %>
+            <%= text_input u, :email %>
+            <span class="error"><%= error_tag u, :email %></span>
+          <% end %>
+        </div>
+        <div>
+          <%= label f, :phone_number, "Phone Number" %>
+          <%= text_input f, :phone_number %>
+          <p class="caption">Example: +10123456789</p>
+          <span class="error"><%= error_tag f, :phone_number %></span>
+        </div>
+        <div>
+          <%= label f, :role, "Role" %>
+          <%= select f, :role, AdminRole.options() %>
+          <span class="error"><%= error_tag f, :email %></span>
+        </div>
+      </div>
+      <div class="u-push__top--sm">
+        <button class="button button--primary">Invite</button>
+        <a onclick="" class="button" phx-click="cancel_invite" data-test-id="cancel-invite">Cancel</a>
+      </div>
+    </form>
+  <% end %>
+</section>
+
+<section class="u-push__top--lg">
+  <div class="header header--users">
+    <div class="header__title">
+      <h4>Users</h4>
+      <%= Table.refresh_button(@data_table) %>
+    </div>
+    <div class="header__actions">
+      <%= form_for @data_table, "#", [style: "display: inline-block"], fn f -> %>
+        <div class="slider">
+          <div class="slide slide--left">
+            <%= checkbox f, :show_disabled %>
+            <%= label f, :show_disabled, class: "caption" do %><% end %>
+          </div>
+          <div class="caption">Show Disabled</div>
+        </div>
+      <% end %>
+      <%= form_for @data_table, "#", [class: "header__select"], fn f -> %>
+        <%= select f, :role, AdminRole.select_options(none_label: "All Roles", allow_none: true) %>
+      <% end %>
+      <%= form_for @data_table, "#", [class: "header__search", filter_on: :phx_submit], fn f -> %>
+        <div class="search">
+          <%= text_input f, :query, [class: "input", type: "search", placeholder: "Search"] %>
+          <button class="search__submit"><i class="material-icons">search</i></button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <%= Table.pagination_nav(@data_table, id: "top", class: "u-push__top--sm") %>
+  <table class="u-push--none">
+    <thead>
+      <tr class="u-border--none">
+        <%= Table.sort_header(@data_table, "Name", :name) %>
+        <th>Phone Number</th>
+        <th>Role</th>
+        <th class="width--edit"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= for {user, i} <- Enum.with_index(@users, 1) do %>
+        <tr data-test-id="admin-user">
+          <%= if @editing_admin && @editing_admin.id == user.id do %>
+            <td colspan=4>
+              <%= form_for @admin_changeset, "#", [phx_change: :change_admin, phx_submit: :save_admin], fn f -> %>
+                <div class="inline-edit--settings">
+                  <div>
+                    <%= label f, :name, "Name" %>
+                    <%= text_input f, :name %>
+                    <span class="error"><%= error_tag f, :name %></span>
+                  </div>
+                  <div>
+                    <%= inputs_for f, :user, fn u -> %>
+                      <%= label u, :email, "Email" %>
+                      <%= text_input u, :email %>
+                      <span class="error"><%= error_tag u, :email %></span>
+                    <% end %>
+                  </div>
+                  <div>
+                    <%= label f, :phone_number, "Phone Number" %>
+                    <%= text_input f, :phone_number %>
+                    <span class="error"><%= error_tag f, :phone_number %></span>
+                    <p class="caption">Example: +10123456789</p>
+                  </div>
+                  <div>
+                    <%= label f, :role, "Role" %>
+                    <%= select f, :role, AdminRole.options(), [class: "select u-push__bottom--xs"] %>
+                    <span class="error"><%= error_tag f, :role %></span>
+                  </div>
+                  <%= if input_value(f, :role) in [:sales_rep, "sales_rep"] do %>
+                    <div>
+                      <%= label f, :name, "Sales Goal" %>
+                      <div class="input__with-icon input__with-icon--left">
+                        <i class="material-icons">attach_money</i>
+                        <%= text_input f, :sales_goal, [type: "number", value: display_price(input_value(f, :sales_goal)), min: "0", step: ".01"] %>
+                        <span class="error"><%= error_tag f, :sales_goal %></span>
+                      </div>
+                    </div>
+                  <% else %>
+                    <%= hidden_input f, :sales_goal, [value: nil] %>
+                  <% end %>
+                  <div class="inline-edit__buttons">
+                    <button class="button button--primary">Save Edits</button>
+                    <a onclick="" tabindex="0" phx-click="cancel_edit" class="button">Cancel</a>
+                  </div>
+                </div>
+              <% end %>
+            </td>
+          <% else %>
+            <td><%= if user.name, do: user.name, else: "User #{i}" %> <span class="caption"><%= user.user.email %></span><%= if user.disabled do %> <span class="u-warning">(Disabled)</span><% end %></td>
+            <td><%= format_phone(user.phone_number) %> </td>
+            <td><%= title_case(user.role) %><%= if user.role == :sales_rep do %> <span class="caption">Goal: $<%= display_revenue(user.sales_goal) %></span><% end %></td>
+            <td onclick="" phx-click="edit_admin" phx-value-admin_id="<%= user.id %>" class="u-text--right p--gray"><i class="material-icons u-align__vertical u-pointer">create</i></td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <%= Table.pagination_nav(@data_table, id: "bottom", class: "u-push__top--sm") %>
+</section>

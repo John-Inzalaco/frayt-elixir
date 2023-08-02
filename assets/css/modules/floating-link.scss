@@ -1,0 +1,9 @@
+.floating-link {
+  background-color: $white;
+  background-color: white;
+  display: inline-block;
+  padding: 0 $pad-xxs;
+  position: relative;
+  top: -10px;
+  left: $pad;
+}

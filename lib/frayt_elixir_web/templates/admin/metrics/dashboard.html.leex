@@ -1,0 +1,249 @@
+<section class="metrics__container">
+  <div onclick="" class="metrics metrics--orange<%= if @metrics_open == "revenue", do: " metrics--open" %>">
+    <div class="metrics__title metrics__title--split" phx-click="toggle_metrics_revenue">
+      <div>
+        <h4>Revenue <i class="material-icons u-push__left--xxs">paid</i></h4>
+        <p class="metrics__date">As of <%= @metrics_last_run %></p>
+      </div>
+    </div>
+
+
+    <div class="metrics__actions">
+      <button class="metrics__action" phx-click="edit_metric_settings_revenue"><i class="material-icons">settings</i></button>
+    </div>
+
+    <%= if @metrics_edit == "revenue" do %>
+      <form phx-submit="update_metric_settings">
+        <div class="u-push__bottom--sm">
+          <%= label :metric_settings_form, :monthly_revenue_goal, "Monthly Revenue Goal" %>
+          <%= number_input :metric_settings_form, :monthly_revenue_goal, [class: "input", step: "0.01", value: :erlang.float_to_binary(@revenue.goal / 100, decimals: 2)] %>
+        </div>
+        <button class="button" type="submit">Save</button>
+        <button class="button" phx-click="cancel_edit">Cancel</button>
+      </form>
+    <% else %>
+        <div class="metrics__details metrics__details--split">
+            <div>
+                <b><%= @last_month %> Revenue</b>
+                <div class="metrics__data-point">
+                $<%= @revenue.last_month |> display_revenue() %>
+                </div>
+            </div>
+            <div>
+                <b><%= @this_month %> Revenue</b>
+                <div class="metrics__data-point">
+                $<%= @revenue.this_month |> display_revenue() %>
+                </div>
+            </div>
+            <div>
+                <b><%= @this_month %> Goal</b>
+                <div class="metrics__data-point">
+                $<%= @revenue.goal |> display_revenue() %>
+                </div>
+            </div>
+
+            <div>
+                <b><%= @this_month %> Progress</b>
+                <div class="metrics__data-point">
+                <%= display_progress(@revenue.this_month, @revenue.goal) %>
+                </div>
+            </div>
+        </div>
+    <% end %>
+  </div>
+
+  <div onclick="" class="metrics<%= if @metrics_open == "sales", do: " metrics--open" %>">
+    <div class="metrics__title" phx-click="toggle_metrics_sales">
+      <h4>Sales <i class="material-icons u-push__left--xxs">people</i></h4>
+      <p class="metrics__date">As of <%= @metrics_last_run %></p>
+    </div>
+    <div class="metrics__actions">
+      <label class="metrics__actions-header">Month</label>
+      <a tabindex=0 phx-click="sales_month_last" class="<%= if @filters.sales.month == :last, do: "active"%>">Last</a> | <a tabindex=0 phx-click="sales_month_current" class="<%= if @filters.sales.month == :current, do: "active"%>">Current</a>
+    </div>
+    <div class="metrics__details" data-test-id="metrics-sales">
+      <table class="metrics__sales-reps">
+        <thead>
+          <tr class="u-border--none">
+            <th>Salesperson</th>
+            <th class="sort" tabindex=0 phx-click="sales_reps_order_by_goal">Goal<span class="sort__arrow"><i class="u-align__vertical--middle <%= display_arrows(:goal, @filters.sales.order_by, @filters.sales.order) %>"></i></span></th>
+            <th class="sort" tabindex=0 phx-click="sales_reps_order_by_progress">Actual<span class="sort__arrow"><i class="u-align__vertical--middle <%= display_arrows(:progress, @filters.sales.order_by, @filters.sales.order) %>"></i></span></th>
+          </tr>
+        </thead>
+        <%= for rep <- @sales.current |> Enum.slice(0..4) do %>
+          <%= render(FraytElixirWeb.Admin.MetricsView, "_leaderboard_sales_rep.html", rep: rep, prev_rep: find_rep(@sales.last, rep.id), month: @filters.sales.month) %>
+        <% end %>
+      </table>
+    </div>
+
+    <div class="metrics__footer drop-down">
+      <label class="drop-down__trigger" for="sales-goals">More <i class="material-icons">keyboard_arrow_down</i></label>
+      <input type="checkbox" id="sales-goals">
+      <div class="drop-down__content">
+        <div class="metrics__sales-goals ">
+          <table class="metrics__sales-reps">
+            <%= for rep <- @sales.current |> Enum.slice(5..length(@sales.current)) do %>
+              <%= render(FraytElixirWeb.Admin.MetricsView, "_leaderboard_sales_rep.html", rep: rep, prev_rep: find_rep(@sales.last, rep.id), month: @filters.sales.month) %>
+            <% end %>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div onclick="" class="metrics metrics--green<%= if @metrics_open == "fulfillment", do: " metrics--open" %>">
+    <div class="metrics__title" phx-click="toggle_metrics_fulfillment">
+      <h4>Fulfillment <i class="material-icons u-push__left--xxs">assignment_turned_in</i></h4>
+      <p class="metrics__date">As of <%= @metrics_last_run %></p>
+    </div>
+
+    <p class="metrics__date"><%= display_filters(@filters.fulfillment) %></p>
+
+    <div class="metrics__actions">
+      <button class="metrics__action" phx-click="edit_metric_filters_fulfillment"><i class="material-icons">filter_alt</i></button>
+      <button class="metrics__action" phx-click="edit_metric_settings_fulfillment"><i class="material-icons">settings</i></button>
+    </div>
+
+    <%= if @metrics_edit == "fulfillment" do %>
+      <form phx-submit="update_metric_settings">
+        <div class="u-push__bottom--sm">
+          <%= label :metric_settings_form, :fulfillment_goal, "Fulfillment Goal" %>
+          <%= number_input :metric_settings_form, :fulfillment_goal, [class: "input", value: @fulfillment.goal] %>
+        </div>
+        <button class="button" type="submit">Save</button>
+        <button class="button" phx-click="cancel_edit">Cancel</button>
+      </form>
+    <% else %>
+      <%= if @filters_edit == "fulfillment" do %>
+        <%= f = form_for :metric_filters, "#", [phx_submit: :update_metric_filters] %>
+          <div class="u-push__bottom--sm">
+            <%= label f, :company_id, "Customer" %>
+            <%= select f, :company_id, company_options(@enterprise_companies), [class: "customer-select", data: [test_id: "filter-customer"], selected: @filters.fulfillment.company_id] %>
+          </div>
+          <div class="slider u-push__bottom--sm">
+            <div class="slide">
+              <%= checkbox f, :exclude_company, checked: @filters.fulfillment.exclude_company %>
+              <%= label f, :exclude_company, "" %>
+            </div>
+            <div class="caption">Exclude Selected Company</div>
+          </div>
+          <button class="button" type="submit">Save</button>
+          <button class="button" phx-click="cancel_edit">Cancel</button>
+        </form>
+      <% else %>
+        <div class="metrics__details metrics__details--split">
+          <div>
+            <b>Today's Goal</b>
+            <div class="metrics__data-point">
+              <%= @fulfillment.goal %>%
+            </div>
+          </div>
+          <div>
+            <b>Today's Progress</b>
+            <div class="metrics__data-point">
+              <%= @fulfillment.today.percent %>% <span class="metrics__sub-data-point">of <span><%= @fulfillment.today.total %></span> Matches</span>
+              <div class="metrics__sub-data-point">
+                <span title="Completed Matches" class="metrics__fulfillment-label"><span><%= @fulfillment.today.completed %></span> <span class="material-icons">check_circle_outline</span> </span>
+                <span title="Attempted Matches" class="metrics__fulfillment-label"><span><%= @fulfillment.today.attempted %></span> <span class="material-icons">block</span> </span>
+                <span title="Canceled Matches" class="metrics__fulfillment-label"><span><%= @fulfillment.today.canceled %></span> <span class="material-icons">highlight_off</span></span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <b><%= @this_month %> Goal</b>
+            <div class="metrics__data-point">
+              <%= @fulfillment.goal %>%
+            </div>
+          </div>
+          <div>
+            <b><%= @this_month %> Progress</b>
+            <div class="metrics__data-point">
+              <%= @fulfillment.this_month.percent %>% <span class="metrics__sub-data-point">of <span><%= @fulfillment.this_month.total %></span> Matches</span>
+              <div class="metrics__sub-data-point">
+                <span title="Completed Matches" class="metrics__fulfillment-label"><span><%= @fulfillment.this_month.completed %></span> <span class="material-icons">check_circle_outline</span> </span>
+                <span title="Attempted Matches" class="metrics__fulfillment-label"><span><%= @fulfillment.this_month.attempted %></span> <span class="material-icons">block</span> </span>
+                <span title="Canceled Matches" class="metrics__fulfillment-label"><span><%= @fulfillment.this_month.canceled %></span> <span class="material-icons">highlight_off</span></span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <b>In Progress</b>
+            <div class="metrics__data-point">
+              <%= @matches_in_progress %>
+            </div>
+          </div>
+          <div>
+            <b>Unassigned</b>
+            <div class="metrics__data-point">
+              <%= @matches_unassigned %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div onclick="" class="metrics metrics--blue<%= if @metrics_open == "sla", do: " metrics--open" %>">
+    <div class="metrics__title" phx-click="toggle_metrics_sla">
+      <h4>SLA <i class="material-icons u-push__left--xxs">access_alarm</i></h4>
+      <p class="metrics__date">As of <%= @metrics_last_run %></p>
+    </div>
+    <div class="metrics__actions">
+      <a tabindex=0 phx-click="sla_range_month" data-test-id="sla-range-month" class="<%= if @filters.sla.range == :month, do: "active"%>">Month</a> | <a tabindex=0 phx-click="sla_range_today" data-test-id="sla-range-today" class="<%= if @filters.sla.range == :today, do: "active"%>">Today</a>
+      <button class="metrics__action" phx-click="edit_metric_filters_sla" data-test-id="edit-metric-filters-sla"><i class="material-icons">filter_alt</i></button>
+      <button class="metrics__action" phx-click="edit_metric_settings_sla" data-test-id="edit-metric-settings-sla"><i class="material-icons">settings</i></button>
+    </div>
+
+    <%= if @metrics_edit == "sla" do %>
+    <form phx-submit="update_metric_settings">
+      <div class="u-push__bottom--sm">
+        <%= label :metric_settings_form, :sla_goal, "SLA Goal" %>
+        <%= number_input :metric_settings_form, :sla_goal, [class: "input", value: @sla.goal, max: 100, min: 0] %>
+      </div>
+      <button class="button" type="submit" data-test-id="save-sla-goal">Save</button>
+      <button class="button" phx-click="cancel_edit">Cancel</button>
+    </form>
+    <% else %>
+      <%= if @filters_edit == "sla" do %>
+        <%= f = form_for :metric_filters, "#", [phx_submit: :update_metric_filters] %>
+        <div class="u-push__bottom--sm">
+          <%= label f, :state, "State" %>
+          <%= select f, :state, match_states(@states), [class: "state-select", data: [test_id: "filter-state"], selected: @filters.sla.state] %>
+        </div>
+        <button class="button" type="submit" data-test-id="save-sla-filter">Save</button>
+        <button class="button" phx-click="cancel_edit">Cancel</button>
+        </form>
+      <% else %>
+        <div class="metrics__details metrics__details--split">
+        <table class="metrics__sales-reps">
+          <thead>
+            <tr class="u-border--none">
+              <th>Company</th>
+              <th tabindex=0>
+                Goal
+              </th>
+              <th class="sort" tabindex=0 phx-click="sla_order_by_value">
+                Actual<span class="sort__arrow"><i class="u-align__vertical--middle <%= display_arrows(:value, @filters.sla.order_by, @filters.sla.order) %>"></i></span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for rating <- @sla.ratings  do %>
+            <tr data-test-id="sla-rating-for-<%= rating.company %>">
+              <th><%= rating.company %></th>
+              <th><%= @sla.goal %>%</th>
+              <th><%= Float.round(rating.value*100.00, 2) %>%</th>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="u-hide--mobile"></div><div class="u-hide--mobile"></div><div class="u-hide--mobile"></div>
+  <div class="width--full u-flex u-flex__align--center u-flex__justify--end  u-text--right caption u-pointer" onclick="" phx-click="refresh_metrics" phx-keyup="refresh_metrics" phx-key="Enter" tabindex="0">
+    <span>Refresh Metrics </span><i class="material-icons">sync</i>
+  </div>
+</section>

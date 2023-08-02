@@ -1,0 +1,15 @@
+<h4 class="u-push__bottom--xs">SLA</h4>
+<%= f = form_for @changeset, "#", [phx_change: :change_contract, phx_submit: :update_contract, data_test_id: "contract-sla-form"] %>
+    <%= hidden_inputs_for(f) %>
+    <div class="u-grid__3-column u-grid--wrap-mobile">
+        <%= for {type, i} <- inputs_for_slas(f) do %>
+          <%= live_component(FraytElixirWeb.LiveComponent.ContractSLAForm, id: "contract_sla_#{type}", type: type, root_form: f, form: i, changeset: @changeset) %>
+        <% end %>
+    </div>
+    <div class="u-push__top">
+      <button data-test-id="update-contract-slas" class="button button--primary" type="submit">
+          Update SLA
+      </button>
+      <a onclick="" tabindex=0 phx-click="edit_contract" class="button">Cancel</a>
+    </div>
+</form>

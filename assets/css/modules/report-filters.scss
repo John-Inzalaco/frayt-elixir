@@ -1,0 +1,19 @@
+.report-filters {
+  display: flex;
+    gap: $pad-sm;
+    flex-wrap: wrap;
+    align-items: flex-end;
+
+    @media screen and (max-width: $screen-mobile) {
+      gap: $pad-xs;
+
+      * {
+        width: 100%;
+      }
+
+      button {
+        margin-top: $pad-xs;
+        text-align: center;
+      }
+    }
+}

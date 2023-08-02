@@ -1,0 +1,5 @@
+<div>
+  <h1 class="u-white u-push__bottom">You have been logged out</h1>
+  <p class="u-white u-push__bottom--xs">Click the button below to log back in</p>
+  <a class="button button--primary inverse" href="<%= Routes.session_path(@conn, :new, redirect_url: Map.get(@conn.query_params, "redirect_url")) %>">Go to Log In</a>
+</div>

@@ -1,0 +1,22 @@
+<div>
+  <h1 class="u-white u-push__bottom">Login</h1>
+  <%= form_for @conn, Routes.session_path(@conn, :create, redirect_url: Map.get(@conn.query_params, "redirect_url")), [as: :session], fn f -> %>
+    <section>
+      <div class="width--full">
+        <%= label f, :email, class: "inverse" %>
+        <%= email_input f, :email, class: "session__email", autofocus: true %>
+      </div>
+
+      <div class="width--full">
+        <%= label f, :password, class: "inverse" %>
+        <%= password_input f, :password, class: "session__password" %>
+      </div>
+
+      <div class="u-push__top width--full">
+        <%= submit "Log In", class: "button button--primary inverse session__submit" %>
+        <a class="u-white u-push__left--xs" href="/reset-password">Forgot Password?</a>
+      </div>
+    </section>
+
+  <% end %>
+</div>

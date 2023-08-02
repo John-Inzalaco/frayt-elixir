@@ -1,0 +1,13 @@
+$contrast: light;
+//COLORS
+$white: #fcfcfc;
+$dark-gray: #383838;
+$light-gray: lighten($dark-gray, 55%);
+$gray-bg: lighten($light-gray, 20%);
+$orange: #ff9900;
+$blue: #0066ff;
+$green: #00c751;
+$red: #ff4444;
+
+@import "../node_modules/prismjs/themes/prism.min.css";
+@import "app.scss";

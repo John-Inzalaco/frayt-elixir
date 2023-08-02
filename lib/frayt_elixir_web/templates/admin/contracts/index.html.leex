@@ -1,0 +1,65 @@
+<section>
+  <div class="header">
+    <div class="header__title">
+      <h1>Contracts</h1>
+      <div>
+        <%= if user_has_role(@current_user, [:admin, :sales_rep]) do %>
+          <%= live_patch to: Routes.contract_path(@socket, :index, "new"), replace: false do %>
+            <i class="material-icons icon">add_circle_outline</i>
+          <% end %>
+        <% end %>
+        <%= Table.refresh_button(@data_table) %>
+      </div>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSduKOYD1UnXpLEA2g-shQVXBBrIgBh6HbLkkT5Gi0crC1FrSw/viewform" class="button" target="_blank">Custom Pricing Request</a>
+    </div>
+    <div class="header__actions">
+      <%= f = form_for @data_table, "#", [class: "header__select"] %>
+        <%= record_select f, :company_id, Company %>
+      </form>
+      <%= form_for @data_table, "#", [class: "header__search", filter_on: :phx_submit], fn f -> %>
+        <div class="search">
+          <%= text_input f, :query, [class: "input", type: "search", placeholder: "Search"] %>
+          <button class="search__submit"><i class="material-icons">search</i></button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+<section>
+  <%= if length(@contracts) > 0 do %>
+    <%= Table.pagination_nav(@data_table, id: "top") %>
+    <table>
+      <thead>
+        <tr class="u-border--none">
+          <%= Table.sort_header(@data_table, "Name", :name) %>
+          <th>Company</th>
+          <%= Table.sort_header(@data_table, "Contract Key", :contract_key, class: "u-hide--mobile") %>
+          <%= Table.sort_header(@data_table, "Pricing Contract", :pricing_contract, class: "u-hide--mobile") %>
+          <%= Table.sort_header(@data_table, "Updated At", :updated_at, class: "u-hide--mobile") %>
+        </tr>
+      </thead>
+      <%= for contract <- @contracts do %>
+        <tbody>
+          <tr>
+            <td class="u-pad__top--sm u-pad__bottom--sm">
+              <%= contract.name %>
+              <%= if contract.disabled do %>
+                <span class="error">(Disabled)</span>
+              <% end %>
+            </td>
+            <td class="u-pad__top--sm u-pad__bottom--sm"><%= contract.company.name %></td>
+            <td class="u-hide--mobile u-pad__top--sm u-pad__bottom--sm"><code><%= contract.contract_key %></code></td>
+            <td class="u-hide--mobile u-pad__top--sm u-pad__bottom--sm"><%= CustomContracts.name(contract.pricing_contract) %></td>
+            <td class="u-hide--mobile u-pad__top--sm u-pad__bottom--sm"><%= display_date_time(contract.updated_at, @time_zone) %></td>
+            <td class="u-pad__top--sm u-pad__bottom--sm">
+              <%= live_patch "View Contract", to: Routes.contract_path(@socket, :index, contract.id), replace: false, class: "button" %>
+            </td>
+          </tr>
+        </tbody>
+      <% end %>
+    </table>
+    <%= Table.pagination_nav(@data_table, id: "bottom") %>
+  <% else %>
+    <h3 class="u-text--center">No Results Found<h3/>
+  <% end %>
+</section>

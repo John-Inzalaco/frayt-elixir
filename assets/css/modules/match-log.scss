@@ -1,0 +1,8 @@
+.match-log {
+  &__changes {
+    display: grid;
+    grid-template-columns: 2fr 4fr;
+    gap: $pad-xxs;
+  font-size: .8rem;
+  }
+}

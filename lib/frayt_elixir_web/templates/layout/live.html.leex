@@ -1,0 +1,14 @@
+<link rel="stylesheet" href="<%= Routes.static_path(@socket, "/css/#{@current_user.admin.site_theme}.css") %>"/>
+<div class="slider slider--icon-caption theme-slider">
+    <div class="caption"><i class="material-icons">nights_stay</i></div>
+        <div class="slide">
+            <input type="checkbox" id="dark_mode" name="dark_mode" phx-click="toggle_dark_mode" <%= if is_dark_theme(@current_user), do: "checked" %>>
+            <label for="dark_mode"></label>
+        </div>
+    <div class="caption"><i class="material-icons">light_mode</i></div>
+</div>
+<main role="main" class="container" phx-hook="TimeZoneHook" id="tz_hook">
+    <p class="alert alert-info" role="alert"><%= live_flash(@flash, :info) %></p>
+    <p class="alert alert-danger error" role="alert"><%= live_flash(@flash, :error) %></p>
+    <%= @inner_content %>
+</main>

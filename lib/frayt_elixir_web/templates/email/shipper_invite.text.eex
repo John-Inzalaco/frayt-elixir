@@ -1,0 +1,17 @@
+Get Access to Your FRAYT Business Account
+
+Hi <%= @name %>,
+
+We’re excited to get you set up with your FRAYT business account.
+
+You’re just one step away from scheduling deliveries. 
+
+Please sign into your account and enter the temporary password, (you can copy & then paste) <%= @password_reset_code %>, here (https://www.frayt.app). 
+
+From there, you’ll create a new password that’s unique to you.
+
+Then you’re all set to start scheduling deliveries. 
+
+Thanks,
+ 
+ - The FRAYT Team

@@ -1,0 +1,27 @@
+
+
+<section class="header">
+  <div class="header__title">
+    <h2>Upload Batch</h2>
+  </div>
+    <p class="error">
+        <%= @errors %>
+    </p>
+</section>
+
+<%= f = form_for :batch, "/admin/matches/batch", [multipart: true] %>
+    <div class="u-push__top--sm">
+    <%= label f, "csv", title_case("CSV of Orders") %>
+    <%= file_input f, "csv" %>
+    </div>
+
+
+    <%= select f, :api_account, api_accounts() |> Enum.map(&{&1.company.name, &1.id}) %>
+
+
+    <div class="u-pad__top u-text--center width--full">
+        <div class="u-pad__bottom--sm caption">Note: File must be a csv with a header row</div>
+        <button class="button button--primary" type="submit">Upload</button>
+    </div>
+
+</form>
